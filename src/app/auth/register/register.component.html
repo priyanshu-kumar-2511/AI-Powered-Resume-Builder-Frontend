@@ -1,0 +1,152 @@
+<div class="auth-wrapper">
+  <div class="auth-container">
+    <div class="auth-card glass-panel">
+      <!-- Header Area -->
+      <div class="auth-header">
+        <div class="logo-circle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="var(--accent-glow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Create Account</h2>
+        <p>Join AI Resume Builder and land your dream job</p>
+      </div>
+
+      <!-- Error Message Box -->
+      @if (errorMessage) {
+        <div class="error-alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Register Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+        
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input 
+            type="text" 
+            id="fullName" 
+            formControlName="fullName" 
+            class="input-glass" 
+            placeholder="John Doe"
+          >
+          @if (registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid) {
+            <span class="validation-error">Full name is required.</span>
+          }
+        </div>
+
+        <div style="display: flex; gap: 16px;">
+          <div class="form-group" style="flex: 1;">
+            <label for="age">Age</label>
+            <input 
+              type="number" 
+              id="age" 
+              formControlName="age" 
+              class="input-glass" 
+              placeholder="e.g. 24"
+            >
+            @if (registerForm.get('age')?.touched && registerForm.get('age')?.invalid) {
+              <span class="validation-error">Must be 18 or older.</span>
+            }
+          </div>
+
+          <div class="form-group" style="flex: 2;">
+            <label for="mobileNumber">Mobile Number</label>
+            <input 
+              type="tel" 
+              id="mobileNumber" 
+              formControlName="mobileNumber" 
+              class="input-glass" 
+              placeholder="+91XXXXXXXXXX"
+            >
+            @if (registerForm.get('mobileNumber')?.touched && registerForm.get('mobileNumber')?.invalid) {
+              <span class="validation-error">Valid 10-digit req.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            formControlName="username" 
+            class="input-glass" 
+            placeholder="Unique handle"
+          >
+          @if (registerForm.get('username')?.touched && registerForm.get('username')?.invalid) {
+            <span class="validation-error">Username is required.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="input-glass" 
+            placeholder="you@example.com"
+          >
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+            <span class="validation-error">Please enter a valid email.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            [type]="showPassword ? 'text' : 'password'"
+            id="password" 
+            formControlName="password" 
+            class="input-glass" 
+            placeholder="Min 8 chars, A-Z, a-z, 0-9, @$!"
+          >
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+            <span class="validation-error">Min 8 chars: uppercase, lowercase, number &amp; special char (e.g. Priyanshu&#64;123)</span>
+          }
+          <div class="show-password-toggle">
+            <input type="checkbox" id="showPwd" (change)="showPassword = !showPassword">
+            <label for="showPwd">Show Password</label>
+          </div>
+        </div>
+
+        <!-- Terms and Conditions Checkbox -->
+        <div class="checkbox-group">
+          <input type="checkbox" id="terms" formControlName="terms" class="custom-checkbox">
+          <label for="terms">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        @if (registerForm.get('terms')?.touched && registerForm.get('terms')?.invalid) {
+          <span class="validation-error terms-error">You must accept the terms.</span>
+        }
+
+        <button type="submit" class="primary-btn submit-btn" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span> Creating Account...
+          } @else {
+            Sign Up
+          }
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Social Login -->
+      <button type="button" class="social-btn glass-btn" (click)="loginWithGoogle()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="google-icon">
+        Sign up with Google
+      </button>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        Already have an account? <a routerLink="/login">Log in here</a>
+      </div>
+    </div>
+  </div>
+</div>

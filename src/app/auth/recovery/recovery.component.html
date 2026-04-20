@@ -1,0 +1,215 @@
+<div class="auth-wrapper">
+  <div class="auth-container">
+    <div class="auth-card glass-panel">
+
+      <!-- Header -->
+      <div class="auth-header">
+        <div class="logo-circle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="var(--accent-glow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Account Recovery</h2>
+        <p>
+          @if (step === 'request' && mode === 'password') { Enter your username &amp; email to get an OTP }
+          @if (step === 'request' && mode === 'username') { Verify identity to recover your username }
+          @if (step === 'verify') { Enter the 6-digit OTP sent to your email }
+          @if (step === 'done')   { Recovery complete! }
+        </p>
+      </div>
+
+      <!-- Mode Tabs (only visible on request step) -->
+      @if (step === 'request') {
+        <div class="mode-tabs">
+          <button type="button"
+            class="tab-btn"
+            [class.active]="mode === 'password'"
+            (click)="switchMode('password')">
+            🔑 Forgot Password
+          </button>
+          <button type="button"
+            class="tab-btn"
+            [class.active]="mode === 'username'"
+            (click)="switchMode('username')">
+            👤 Forgot Username
+          </button>
+        </div>
+      }
+
+      <!-- Messages -->
+      @if (errorMessage) {
+        <div class="error-alert">{{ errorMessage }}</div>
+      }
+      @if (successMessage) {
+        <div class="success-alert">{{ successMessage }}</div>
+      }
+
+      <!-- ════════════════════════════════════════
+           FORGOT PASSWORD
+      ════════════════════════════════════════ -->
+      @if (mode === 'password') {
+
+        <!-- Step 1: Request OTP -->
+        @if (step === 'request') {
+          <form [formGroup]="pwRequestForm" (ngSubmit)="onPwRequestOtp()" class="auth-form">
+
+            <div class="form-group">
+              <label for="pw-username">Username</label>
+              <input type="text" id="pw-username" formControlName="username"
+                     class="input-glass" placeholder="Your account username">
+              @if (pwRequestForm.get('username')?.touched && pwRequestForm.get('username')?.invalid) {
+                <span class="validation-error">Username must be at least 4 characters.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="pw-email">Registered Email</label>
+              <input type="email" id="pw-email" formControlName="email"
+                     class="input-glass" placeholder="Email linked to your account">
+              @if (pwRequestForm.get('email')?.touched && pwRequestForm.get('email')?.invalid) {
+                <span class="validation-error">Please enter a valid email address.</span>
+              }
+            </div>
+
+            <button type="submit" class="primary-btn submit-btn" [disabled]="isLoading">
+              @if (isLoading) { <span class="spinner"></span> Sending OTP… }
+              @else { Send OTP }
+            </button>
+          </form>
+        }
+
+        <!-- Step 2: Verify OTP + New Password -->
+        @if (step === 'verify') {
+          <form [formGroup]="pwVerifyForm" (ngSubmit)="onPwVerifyOtp()" class="auth-form">
+
+            <div class="form-group">
+              <label for="pw-otp">One-Time Password (OTP)</label>
+              <input type="text" id="pw-otp" formControlName="otp"
+                     class="input-glass text-center letter-spacing-lg"
+                     placeholder="000000" maxlength="6" inputmode="numeric">
+              @if (pwVerifyForm.get('otp')?.touched && pwVerifyForm.get('otp')?.invalid) {
+                <span class="validation-error">Enter a valid 6-digit OTP.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="pw-new">New Password</label>
+              <input type="password" id="pw-new" formControlName="newPassword"
+                     class="input-glass" placeholder="Min 8 chars, A-Z, a-z, 0-9, special char">
+              @if (pwVerifyForm.get('newPassword')?.touched && pwVerifyForm.get('newPassword')?.errors?.['complexity']) {
+                <span class="validation-error">
+                  Must be 8+ chars with uppercase, lowercase, number &amp; special char (&#64;$!%*?&amp;).
+                </span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="pw-confirm">Confirm Password</label>
+              <input type="password" id="pw-confirm" formControlName="confirmPassword"
+                     class="input-glass" placeholder="Re-enter password">
+              @if (pwVerifyForm.errors?.['mismatch'] && pwVerifyForm.get('confirmPassword')?.touched) {
+                <span class="validation-error">Passwords do not match.</span>
+              }
+            </div>
+
+            <button type="submit" class="primary-btn submit-btn"
+                    [disabled]="isLoading || pwVerifyForm.invalid">
+              @if (isLoading) { <span class="spinner"></span> Resetting… }
+              @else { Reset Password }
+            </button>
+          </form>
+        }
+
+        <!-- Done -->
+        @if (step === 'done') {
+          <div class="done-state">
+            <div class="done-icon">✅</div>
+            <p>Your password has been reset successfully.<br>Redirecting to login…</p>
+          </div>
+        }
+      }
+
+      <!-- ════════════════════════════════════════
+           FORGOT USERNAME
+      ════════════════════════════════════════ -->
+      @if (mode === 'username') {
+
+        <!-- Step 1: Request OTP -->
+        @if (step === 'request') {
+          <form [formGroup]="unRequestForm" (ngSubmit)="onUnRequestOtp()" class="auth-form">
+
+            <div class="form-group">
+              <label for="un-email">Registered Email</label>
+              <input type="email" id="un-email" formControlName="email"
+                     class="input-glass" placeholder="Email linked to your account">
+              @if (unRequestForm.get('email')?.touched && unRequestForm.get('email')?.invalid) {
+                <span class="validation-error">Please enter a valid email address.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="un-password">Current Password</label>
+              <input type="password" id="un-password" formControlName="password"
+                     class="input-glass" placeholder="Your account password">
+              @if (unRequestForm.get('password')?.touched && unRequestForm.get('password')?.invalid) {
+                <span class="validation-error">Password is required.</span>
+              }
+            </div>
+
+            <button type="submit" class="primary-btn submit-btn" [disabled]="isLoading">
+              @if (isLoading) { <span class="spinner"></span> Sending OTP… }
+              @else { Send OTP }
+            </button>
+          </form>
+        }
+
+        <!-- Step 2: Verify OTP -->
+        @if (step === 'verify') {
+          <form [formGroup]="unVerifyForm" (ngSubmit)="onUnVerifyOtp()" class="auth-form">
+
+            <div class="form-group">
+              <label for="un-otp">One-Time Password (OTP)</label>
+              <input type="text" id="un-otp" formControlName="otp"
+                     class="input-glass text-center letter-spacing-lg"
+                     placeholder="000000" maxlength="6" inputmode="numeric">
+              @if (unVerifyForm.get('otp')?.touched && unVerifyForm.get('otp')?.invalid) {
+                <span class="validation-error">Enter a valid 6-digit OTP.</span>
+              }
+            </div>
+
+            <button type="submit" class="primary-btn submit-btn"
+                    [disabled]="isLoading || unVerifyForm.invalid">
+              @if (isLoading) { <span class="spinner"></span> Verifying… }
+              @else { Verify OTP }
+            </button>
+          </form>
+        }
+
+        <!-- Done -->
+        @if (step === 'done') {
+          <div class="done-state">
+            <div class="done-icon">📧</div>
+            <p>Your username has been sent to your registered email address.<br>Please check your inbox.</p>
+          </div>
+        }
+      }
+
+      <!-- Step indicator -->
+      @if (step !== 'done') {
+        <div class="step-indicator">
+          <span class="step-dot" [class.active]="step === 'request'"></span>
+          <span class="step-line"></span>
+          <span class="step-dot" [class.active]="step === 'verify'"></span>
+        </div>
+      }
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        Remembered your credentials? <a routerLink="/login">Log in here</a>
+      </div>
+
+    </div>
+  </div>
+</div>

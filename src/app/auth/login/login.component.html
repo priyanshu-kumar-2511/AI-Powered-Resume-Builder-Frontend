@@ -1,0 +1,84 @@
+<div class="auth-wrapper">
+  <div class="auth-container">
+    <div class="auth-card glass-panel">
+      <!-- Header Area -->
+      <div class="auth-header">
+        <div class="logo-circle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="var(--accent-glow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Resume AI</h2>
+        <p>Welcome back! Sign in to continue your journey.</p>
+      </div>
+
+      <!-- Error Message Box -->
+      @if (errorMessage) {
+        <div class="error-alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            formControlName="username" 
+            class="input-glass" 
+            placeholder="Unique username"
+          >
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.invalid) {
+            <span class="validation-error">Please enter a valid username.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <div class="password-header">
+            <label for="password">Password</label>
+            <div class="forgot-links"><a [routerLink]="['/recovery']" [queryParams]="{mode: 'password'}" class="forgot-link">Forgot Password?</a><span class="forgot-sep"> · </span><a [routerLink]="['/recovery']" [queryParams]="{mode: 'username'}" class="forgot-link">Forgot Username?</a></div>
+          </div>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password" 
+            class="input-glass" 
+            placeholder="••••••••"
+          >
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <span class="validation-error">Password must be at least 6 characters.</span>
+          }
+        </div>
+
+        <button type="submit" class="primary-btn submit-btn" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span> Logging in...
+          } @else {
+            Sign In
+          }
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Social Login -->
+      <button type="button" class="social-btn glass-btn" (click)="loginWithGoogle()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" class="google-icon">
+        Continue with Google
+      </button>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        Don't have an account? <a routerLink="/register">Sign up now</a>
+      </div>
+    </div>
+  </div>
+</div>
