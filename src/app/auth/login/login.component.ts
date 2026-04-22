@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -14,6 +14,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
 
@@ -32,6 +33,13 @@ export class LoginComponent implements OnInit {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    if (this.route.snapshot.queryParamMap.get('oauthError') === 'true') {
+      const reason = this.route.snapshot.queryParamMap.get('reason');
+      this.errorMessage = reason
+        ? `LinkedIn login failed: ${reason}`
+        : 'LinkedIn login failed. Please verify the LinkedIn app redirect URL and try again.';
+    }
   }
 
   onSubmit(): void {
@@ -76,5 +84,9 @@ export class LoginComponent implements OnInit {
    */
   loginWithGoogle(): void {
     this.authService.loginWithGoogle();
+  }
+
+  loginWithLinkedIn(): void {
+    this.authService.loginWithLinkedIn();
   }
 }

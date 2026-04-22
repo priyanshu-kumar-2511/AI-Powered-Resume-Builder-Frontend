@@ -1,34 +1,66 @@
 <div class="dashboard-wrapper">
   
-  <div class="dashboard-header glass-panel">
-    <div>
-      <h1 class="welcome-text">Welcome to Resume AI</h1>
-      <p class="subtitle">Your authentication was successful.</p>
+  <!-- Navigation Header -->
+  <header class="dashboard-header glass-panel">
+    <div class="brand">
+      <h1 class="logo-text">Resume<span>AI</span></h1>
+      <p class="subtitle">🚀 Platform Dashboard</p>
     </div>
     
-    <button class="logout-btn primary-btn" (click)="onLogout()">
-      Logout
-    </button>
-  </div>
+    <div class="header-actions">
+      <button class="primary-btn pulse-glow" id="create-resume-btn" (click)="onCreateNew()">
+        <span class="icon">+</span> New Resume
+      </button>
+      <button class="icon-btn admin-btn" id="admin-btn" title="System Administration" *ngIf="isAdmin" (click)="onAdmin()">
+        🛡️
+      </button>
+      <button class="icon-btn settings-btn" id="settings-btn" title="Account Settings" (click)="onSettings()">
+        ⚙️
+      </button>
+      <button class="logout-btn secondary-btn" id="logout-btn" (click)="onLogout()">
+        Logout
+      </button>
+    </div>
+  </header>
 
-  <div class="dashboard-content">
-    <div class="glass-panel stat-card">
-      <h3>Active Resumes</h3>
-      <div class="stat-value">0</div>
-      <p>Create your first layout to start.</p>
+  <main class="dashboard-content">
+    
+    <!-- Loading State -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Fetching your professional profiles...</p>
     </div>
 
-    <div class="glass-panel stat-card">
-      <h3>Profile Completeness</h3>
-      <div class="stat-value">25%</div>
-      <p>Add your experiences to improve.</p>
+    <!-- Stats Bar -->
+    <div class="stats-bar glass-panel" *ngIf="!isLoading">
+      <div class="stat-item">
+        <span class="stat-number">{{ resumes.length }}</span>
+        <span class="stat-label">Total Resumes</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number">{{ publishedCount }}</span>
+        <span class="stat-label">Published</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-number free-tag">FREE</span>
+        <span class="stat-label">Subscription Plan</span>
+      </div>
     </div>
 
-    <div class="glass-panel stat-card">
-      <h3>AI Generations</h3>
-      <div class="stat-value">0</div>
-      <p>Let AI optimize your next skills set.</p>
+    <!-- Resumes Grid (HIDDEN FOR RE-IMPLEMENTATION) -->
+    <!-- <div class="resume-grid" *ngIf="!isLoading && resumes.length > 0">
+         ... Code Removed ...
+    </div> -->
+
+    <!-- Empty State -->
+    <div class="empty-state glass-panel" *ngIf="!isLoading && resumes.length === 0">
+      <div class="empty-icon">📂</div>
+      <h2>No Resumes Found</h2>
+      <p>You haven't created any resumes yet. Start your career journey with AI optimization.</p>
+      <button class="primary-btn" (click)="onCreateNew()">Create My First Resume</button>
     </div>
-  </div>
+  </main>
 
 </div>

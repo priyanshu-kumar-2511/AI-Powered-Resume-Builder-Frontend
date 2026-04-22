@@ -1,9 +1,9 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC1-Auth-UI`
+**Current Branch:** `feature/UC2-Auth-UI`
 
 ## 📌 Project Overview / Introduction
 
-**ResumeAI** is a full-stack AI-Powered Resume Builder platform designed to empower job seekers to create, optimize, and export professional resumes with the help of cutting-edge AI language models.
+**ResumeAI** is a full-stack AI-Powered Resume Builder platform designed to empower job seekers to create, optimize, and export professional resumes with the help of cutting-edge AI language models. 
 
 The platform utilizes a robust dual-AI strategy with cross-model failover to ensure 100% uptime and optimal quality:
 *   **Free Tier:** **Google Gemini (1.5 Flash)** is the primary model. If Gemini is unavailable, the system automatically fails over to **Anthropic Claude**.
@@ -20,38 +20,46 @@ This repository holds the **premium Angular 17+ frontend application** that prov
 
 ---
 
-## 🏗 Phase 1: Project Foundation & Authentication (Current)
+## 🏗 Phase 1: Project Foundation & Design System
 
-Currently, the **feature/UC1-Auth-UI** branch of this repository represents **Phase 1** of the frontend architecture. This phase focuses on the core structural foundation, design system, and the complete user identity lifecycle.
+Phase 1 focuses on the core structural foundation, design system, and global state management.
 
-### Core Infrastructure & UI Components
+### Core UI Components
 - **Angular 17+ Architecture:** Standalone components for modularity and performance.
 - **Glassmorphism Design System:** Futuristic UI using CSS Custom Properties for frosted-glass effects and neon accents.
 - **Dynamic Theming:** Instant switching between Dark Mode (Default) and Light Mode with state persistence.
-- **Security Layer:** Implementation of `jwtInterceptor` and `AuthService` for secure microservices communication.
+
+---
+
+## 🚀 Phase 2: Authentication & Identity
+
+This phase implements the complete user identity lifecycle.
 
 ### Authentication Features
 | Module | Description |
 | :--- | :--- |
-| **`Login/Register`** | Robust forms with real-time validation and error feedback. |
+| **`Login/Register`** | Robust forms with real-time validation and glassmorphism styling. |
 | **`Google OAuth`** | Integrated "Continue with Google" social login flow. |
 | **`Identity Recovery`** | UI flows for Forgot Password and Forgot Username via OTP validation. |
 
----
-
 ## 🛠 Required Environment & Dev Configuration
 
-To link the frontend with the microservices backend, ensure the following is set:
-
 ### 1. Backend Service Connection
-The application currently connects directly to the **Auth Service** to ensure stability during local development:
-- **Auth Endpoint:** `http://localhost:8081/api/v1/auth`
-- **Google Auth Initiation:** `http://localhost:8081/oauth2/authorization/google`
+The application connects to the backend services through the **API Gateway** for centralized routing and security:
+- **Gateway Base URL:** `http://localhost:8080`
+- **Auth Endpoint:** `http://localhost:8080/api/v1/auth`
+- **OAuth Initiation:** `http://localhost:8080/oauth2/authorization/{provider}` (google or linkedin)
 
-### 2. Google Cloud Console Requirements
-To avoid `redirect_uri_mismatch`, your Google Cloud Project must have:
+### 2. Social Login Configuration (Google & LinkedIn)
+To ensure successful authentication, update your developer consoles with the following:
+
+**Google Cloud Console:**
 - **Authorized JavaScript origins:** `http://localhost:4200`
-- **Authorized redirect URIs:** `http://localhost:8081/login/oauth2/code/google`
+- **Authorized redirect URIs:** `http://localhost:8080/login/oauth2/code/google`
+
+**LinkedIn Developer Portal:**
+- **Authorized redirect URIs:** `http://localhost:8080/login/oauth2/code/linkedin`
+- **Note:** Ensure "Sign In with LinkedIn using OpenID Connect" is enabled in your LinkedIn app products.
 
 ---
 
@@ -67,5 +75,3 @@ To avoid `redirect_uri_mismatch`, your Google Cloud Project must have:
    npm start
    ```
    Access the UI at [http://localhost:4200](http://localhost:4200).
-
----

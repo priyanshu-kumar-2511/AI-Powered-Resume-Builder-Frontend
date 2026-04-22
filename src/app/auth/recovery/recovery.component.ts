@@ -127,12 +127,12 @@ export class RecoveryComponent implements OnInit {
     this.cachedIdentifier = username;
 
     this.auth.initiatePasswordReset({ username, email }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading = false;
         this.successMessage = res.message || 'OTP sent to your registered email.';
         this.step = 'verify';
       },
-      error: (err) => this.handleError(err)
+      error: (err: any) => this.handleError(err)
     });
   }
 
@@ -148,14 +148,14 @@ export class RecoveryComponent implements OnInit {
       otp,
       newPassword
     }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading = false;
         this.successMessage = res.message || 'Password reset successfully!';
         this.step = 'done';
         this.snackBar.open('Password updated! Redirecting to login…', 'Close', { duration: 3000 });
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
-      error: (err) => this.handleError(err)
+      error: (err: any) => this.handleError(err)
     });
   }
 
@@ -172,12 +172,12 @@ export class RecoveryComponent implements OnInit {
     this.cachedIdentifier = email;
 
     this.auth.initiateUsernameRecovery({ email, password }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading = false;
         this.successMessage = res.message || 'OTP sent to your registered email.';
         this.step = 'verify';
       },
-      error: (err) => this.handleError(err)
+      error: (err: any) => this.handleError(err)
     });
   }
 
@@ -192,12 +192,12 @@ export class RecoveryComponent implements OnInit {
       identifier: this.cachedIdentifier,
       otp
     }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isLoading = false;
         this.successMessage = res.message || 'Your username has been sent to your registered email.';
         this.step = 'done';
       },
-      error: (err) => this.handleError(err)
+      error: (err: any) => this.handleError(err)
     });
   }
 }

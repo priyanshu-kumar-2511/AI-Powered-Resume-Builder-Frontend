@@ -167,6 +167,16 @@
 }
 
 /* Social Login */
+.social-wrapper {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.social-wrapper .social-btn {
+  flex: 1;
+}
+
 .glass-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-glass);
@@ -189,9 +199,10 @@
   transform: translateY(-2px);
 }
 
-.glass-btn .google-icon {
-  width: 20px;
-  height: 20px;
+.social-icon {
+  width: 20px !important;
+  height: 20px !important;
+  object-fit: contain;
 }
 
 /* Footer */

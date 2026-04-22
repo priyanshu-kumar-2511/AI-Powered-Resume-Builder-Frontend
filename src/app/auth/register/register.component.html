@@ -138,10 +138,16 @@
       </div>
 
       <!-- Social Login -->
-      <button type="button" class="social-btn glass-btn" (click)="loginWithGoogle()">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="google-icon">
-        Sign up with Google
-      </button>
+      <div class="social-wrapper">
+        <button type="button" class="social-btn glass-btn" (click)="loginWithGoogle()">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="social-icon">
+          Google
+        </button>
+        <button type="button" class="social-btn glass-btn" (click)="loginWithLinkedIn()">
+          <img src="https://www.svgrepo.com/show/448234/linkedin.svg" alt="LinkedIn" class="social-icon">
+          LinkedIn
+        </button>
+      </div>
 
       <!-- Footer -->
       <div class="auth-footer">
