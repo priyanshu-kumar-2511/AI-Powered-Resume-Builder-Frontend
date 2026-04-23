@@ -1,26 +1,44 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './auth/guards/auth.guard';
-import { adminGuard } from './auth/guards/admin.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { 
-    path: 'dashboard', 
-    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
-    canActivate: [authGuard]
+  {
+    path: '',
+    loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
-  { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
-  { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
-  { path: 'recovery', loadComponent: () => import('./auth/recovery/recovery.component').then(m => m.RecoveryComponent) },
-  { path: 'login-success', loadComponent: () => import('./auth/login-success/login-success.component').then(m => m.LoginSuccessComponent) },
-  { 
-    path: 'settings', 
-    loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
-    canActivate: [authGuard]
+  {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
   },
-  { 
-    path: 'admin', 
-    loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent),
-    canActivate: [authGuard, adminGuard]
+  {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'forgot-username',
+    loadComponent: () => import('./features/auth/forgot-username/forgot-username.component').then(m => m.ForgotUsernameComponent)
+  },
+  {
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+  },
+  {
+    path: 'templates',
+    loadComponent: () => import('./features/templates/template-list/template-list.component').then(m => m.TemplateListComponent)
+  },
+  {
+    path: 'templates/:id',
+    loadComponent: () => import('./features/templates/template-detail/template-detail.component').then(m => m.TemplateDetailComponent)
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/auth/profile/profile.component').then(m => m.ProfileComponent)
+  },
+  { path: '**', redirectTo: '' }
 ];

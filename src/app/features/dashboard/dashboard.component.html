@@ -1,0 +1,323 @@
+<app-navbar />
+
+<div class="dashboard page-enter">
+  <div class="container" style="padding-top:48px;padding-bottom:80px">
+
+    <!-- Welcome banner -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        @if (!loadingProfile && profile) {
+          <h1>{{ greeting }}, <em>{{ firstName }}</em> 👋</h1>
+          <p>
+            You're on the
+            <span class="plan-highlight" [class.premium]="profile.subscriptionPlan === 'PREMIUM'">
+              {{ profile.subscriptionPlan }}
+            </span>
+            plan. Let's build something great today.
+          </p>
+        } @else {
+          <h1>{{ greeting }} 👋</h1>
+          <p>Welcome to your ResumeAI dashboard.</p>
+        }
+      </div>
+      <div class="welcome-actions">
+        <a routerLink="/templates" class="btn btn-primary">Browse Templates</a>
+        <a routerLink="/profile" class="btn btn-ghost">Edit Profile</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      @for (stat of stats; track stat.label) {
+        <div class="stat-card">
+          <div class="stat-icon" [style.background]="stat.color + '1a'">
+            <span>{{ stat.icon }}</span>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" [style.color]="stat.color">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Services grid -->
+    <section style="margin-top:48px">
+      <div class="section-heading">
+        <h2>Your Toolkit</h2>
+        <p>All the tools you need to land your next role</p>
+      </div>
+
+      <div class="grid-3">
+        @for (svc of services; track svc.title) {
+          <a [routerLink]="svc.route" class="service-card" [class.coming-soon]="svc.badge === 'Coming Soon'">
+            <div class="svc-top">
+              <div class="svc-icon" [style.background]="svc.color + '1a'">{{ svc.icon }}</div>
+              <span class="svc-badge" [class.available]="svc.badge === 'Available'">{{ svc.badge }}</span>
+            </div>
+            <h3>{{ svc.title }}</h3>
+            <p>{{ svc.desc }}</p>
+            @if (svc.badge === 'Available') {
+              <div class="svc-arrow">→</div>
+            }
+          </a>
+        }
+      </div>
+    </section>
+
+    <!-- Popular Templates -->
+    <section style="margin-top:56px">
+      <div class="section-heading">
+        <h2>Popular Templates</h2>
+        <a routerLink="/templates" class="see-all">See all →</a>
+      </div>
+
+      @if (loadingTemplates) {
+        <div class="template-row">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="mini-template-skeleton skeleton"></div>
+          }
+        </div>
+      } @else if (popular.length) {
+        <div class="template-row">
+          @for (t of popular; track t.templateId) {
+            <a [routerLink]="['/templates', t.templateId]" class="mini-template-card">
+              <div class="mini-thumb">
+                @if (t.thumbnailUrl) {
+                  <img [src]="t.thumbnailUrl" [alt]="t.name" loading="lazy">
+                } @else {
+                  <div class="mini-placeholder">{{ t.name[0] }}</div>
+                }
+                <span class="badge mini-badge" [class]="t.tier === 'PREMIUM' ? 'badge-premium' : 'badge-free'">
+                  {{ t.tier }}
+                </span>
+              </div>
+              <div class="mini-info">
+                <h4>{{ t.name }}</h4>
+                <span class="badge badge-teal" style="font-size:0.65rem">{{ formatCategory(t.category) }}</span>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Profile snapshot -->
+    @if (profile) {
+      <section style="margin-top:56px">
+        <div class="section-heading">
+          <h2>Account Details</h2>
+          <a routerLink="/profile" class="see-all">Edit profile →</a>
+        </div>
+
+        <div class="profile-snapshot">
+          <div class="snap-avatar">{{ firstName[0].toUpperCase() }}</div>
+          <div class="snap-details">
+            <div class="snap-row"><span>Full Name</span><strong>{{ profile.fullName }}</strong></div>
+            <div class="snap-row"><span>Email</span><strong>{{ profile.email }}</strong></div>
+            <div class="snap-row"><span>Username</span><strong>&#64;{{ profile.username }}</strong></div>
+            <div class="snap-row">
+              <span>Plan</span>
+              <span class="badge" [class]="profile.subscriptionPlan === 'PREMIUM' ? 'badge-gold' : 'badge-teal'">
+                {{ profile.subscriptionPlan }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+  </div>
+</div>
+
+<style>
+/* Welcome */
+.welcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px 36px;
+  margin-bottom: 32px;
+  gap: 24px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -60px; top: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,212,180,0.1) 0%, transparent 60%);
+  }
+}
+
+.welcome-text h1 {
+  font-size: 1.9rem;
+  margin-bottom: 6px;
+  em { color: var(--teal); font-style: italic; }
+}
+.welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
+.plan-highlight {
+  font-weight: 600;
+  color: var(--teal);
+  &.premium { color: var(--gold); }
+}
+.welcome-actions { display: flex; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+
+/* Stats */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
+}
+
+/* Section heading */
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-family: var(--font-display);
+  }
+}
+.see-all { font-size: 0.85rem; color: var(--teal); }
+
+/* Services */
+.service-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-decoration: none;
+  transition: var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &:hover:not(.coming-soon) {
+    border-color: var(--border-teal);
+    box-shadow: var(--shadow-teal);
+    transform: translateY(-2px);
+  }
+
+  &.coming-soon { opacity: 0.6; cursor: default; }
+
+  h3 { font-size: 1.05rem; font-weight: 600; font-family: var(--font-body); }
+  p  { font-size: 0.82rem; color: var(--text-muted); line-height: 1.55; }
+}
+
+.svc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.svc-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.svc-badge {
+  font-size: 0.68rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  text-transform: uppercase; letter-spacing: 0.06em;
+
+  &.available { background: var(--teal-subtle); color: var(--teal); border-color: var(--border-teal); }
+}
+
+.svc-arrow {
+  color: var(--teal);
+  font-size: 1rem;
+  margin-top: 4px;
+  transition: transform 0.2s;
+}
+.service-card:hover .svc-arrow { transform: translateX(4px); }
+
+/* Mini templates */
+.template-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.mini-template-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  transition: var(--transition);
+
+  &:hover { border-color: var(--border-teal); transform: translateY(-3px); }
+}
+
+.mini-thumb {
+  position: relative;
+  height: 140px;
+  background: var(--bg-surface);
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.mini-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 3rem; font-weight: 700;
+  color: var(--teal); opacity: 0.2;
+}
+
+.mini-badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  font-size: 0.62rem !important;
+}
+
+.mini-info {
+  padding: 12px;
+  h4 { font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+}
+
+.mini-template-skeleton { height: 200px; border-radius: var(--radius-lg); }
+
+/* Profile snapshot */
+.profile-snapshot {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.snap-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--teal); color: #000;
+  font-size: 1.5rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+}
+
+.snap-details { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.snap-row {
+  display: flex; align-items: center; gap: 16px;
+  font-size: 0.875rem;
+  span { color: var(--text-muted); width: 90px; flex-shrink: 0; }
+  strong { color: var(--text-primary); }
+}
+</style>

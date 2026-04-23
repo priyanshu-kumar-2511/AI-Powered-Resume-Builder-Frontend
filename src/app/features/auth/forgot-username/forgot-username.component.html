@@ -1,0 +1,124 @@
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-form-container page-enter">
+
+      <div class="auth-logo">
+        <div class="logo-mark">R</div>
+        <span class="logo-text">Resume<span>AI</span></span>
+      </div>
+
+      <h1 class="auth-title">Recover username</h1>
+      <p class="auth-subtitle">
+        @if (step === 1) { Enter your registered email and password to receive a recovery OTP. }
+        @else { Enter the OTP sent to <strong>{{ emailForm.value.email }}</strong>. }
+      </p>
+
+      @if (error) {
+        <div class="alert alert-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ error }}
+        </div>
+      }
+      @if (success) {
+        <div class="alert alert-success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ success }}
+        </div>
+      }
+
+      @if (step === 1) {
+        <!-- FIX: Added password field - backend requires email + password to initiate recovery -->
+        <form [formGroup]="emailForm" (ngSubmit)="initiateRecovery()">
+          <div class="form-group">
+            <label class="form-label">Registered Email</label>
+            <input formControlName="email" type="email" class="form-control" placeholder="you@example.com">
+            @if (emailCtrl.invalid && emailCtrl.touched) {
+              <span class="form-error">Please enter a valid email</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <div class="input-wrapper">
+              <input formControlName="password"
+                [type]="showPwd ? 'text' : 'password'"
+                class="form-control" placeholder="Your account password">
+              <button type="button" class="eye-btn" (click)="showPwd = !showPwd" aria-label="Toggle password">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            @if (passwordCtrl.invalid && passwordCtrl.touched) {
+              <span class="form-error">Password is required to verify your identity</span>
+            }
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" [disabled]="loading">
+            @if (loading) { <span class="spinner"></span> Sending... }
+            @else { Send Recovery OTP }
+          </button>
+        </form>
+      }
+
+      @if (step === 2) {
+        <form [formGroup]="otpForm" (ngSubmit)="verifyRecovery()">
+          <div class="form-group">
+            <label class="form-label">6-Digit OTP</label>
+            <input formControlName="otp" type="text" class="form-control otp-single"
+              placeholder="123456" maxlength="6" inputmode="numeric">
+            @if (otpCtrl.invalid && otpCtrl.touched) {
+              <span class="form-error">OTP must be 6 digits</span>
+            }
+          </div>
+          <div class="step2-actions">
+            <button type="button" class="btn btn-ghost" (click)="step = 1">← Back</button>
+            <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center" [disabled]="loading">
+              @if (loading) { <span class="spinner"></span> Verifying... }
+              @else { Verify & Recover }
+            </button>
+          </div>
+        </form>
+      }
+
+      <div class="auth-footer">
+        <a routerLink="/login">← Back to Sign In</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="auth-visual">
+    <div class="visual-glow"></div>
+    <div class="visual-content">
+      <div class="recover-illustration">
+        <div class="recover-icon">👤</div>
+        <h3>Username Recovery</h3>
+        <p>Enter your email and current password to verify your identity. We'll send a one-time code to reveal your username.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.otp-single { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.3em; text-align: center; }
+.step2-actions { display: flex; gap: 12px; }
+.input-wrapper { position: relative; }
+.eye-btn {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  display: flex; align-items: center;
+}
+.input-wrapper .form-control { padding-right: 44px; }
+.visual-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0,212,180,0.1) 0%, transparent 65%);
+}
+.visual-content {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; padding: 60px 48px;
+}
+.recover-illustration { text-align: center; max-width: 320px; }
+.recover-icon { font-size: 4rem; margin-bottom: 24px; }
+.recover-illustration h3 { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 12px; }
+.recover-illustration p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; }
+</style>

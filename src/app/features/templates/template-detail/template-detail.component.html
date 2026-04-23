@@ -1,0 +1,255 @@
+<app-navbar />
+
+<div class="detail-page page-enter">
+
+  @if (loading) {
+    <div class="detail-loading">
+      <div class="spinner spinner-light" style="width:32px;height:32px;border-width:3px"></div>
+      <p>Loading template...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="container" style="padding-top:80px;text-align:center">
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>{{ error }}</h3>
+        <a routerLink="/templates" class="btn btn-outline">← Back to Templates</a>
+      </div>
+    </div>
+  }
+
+  @if (!loading && template) {
+    <div class="detail-layout container">
+
+      <!-- Sidebar: Info & actions -->
+      <aside class="detail-sidebar">
+        <a routerLink="/templates" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          All Templates
+        </a>
+
+        <div class="detail-meta-card">
+          <div class="detail-badges">
+            <span class="badge" [class]="template.tier === 'PREMIUM' ? 'badge-premium' : 'badge-free'">
+              {{ template.tier === 'PREMIUM' ? '★ PREMIUM' : 'FREE' }}
+            </span>
+            <span class="badge badge-teal">{{ formatCategory(template.category) }}</span>
+          </div>
+
+          <h1 class="detail-title">{{ template.name }}</h1>
+          <p class="detail-desc">{{ template.description || 'A professionally designed resume template.' }}</p>
+
+          <div class="detail-stats">
+            <div class="d-stat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span><strong>{{ template.usageCount | number }}</strong> uses</span>
+            </div>
+            @if (template.createdAt) {
+              <div class="d-stat">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Added {{ template.createdAt | date:'MMM yyyy' }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Premium gate -->
+          @if (template.tier === 'PREMIUM' && !auth.isLoggedIn()) {
+            <div class="premium-gate">
+              <span class="gate-icon">★</span>
+              <p>This is a premium template. Sign up to use it.</p>
+            </div>
+          }
+
+          <button class="btn btn-primary btn-full" (click)="useTemplate()">
+            @if (!auth.isLoggedIn()) { Sign Up & Use This Template }
+            @else { Use This Template }
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+
+          @if (!auth.isLoggedIn()) {
+            <p class="login-note">Already have an account? <a routerLink="/login">Sign in</a></p>
+          }
+        </div>
+
+        <!-- What's included -->
+        <div class="included-card">
+          <h4>What's included</h4>
+          <ul>
+            <li><span class="check">✓</span> ATS-optimised layout</li>
+            <li><span class="check">✓</span> Fully customisable sections</li>
+            <li><span class="check">✓</span> AI content suggestions</li>
+            <li><span class="check">✓</span> One-click PDF export</li>
+            @if (template.tier === 'PREMIUM') {
+              <li><span class="check gold">★</span> Priority support</li>
+              <li><span class="check gold">★</span> Job match analysis</li>
+            }
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Preview -->
+      <main class="detail-preview">
+        <div class="preview-header">
+          <h3>Live Preview</h3>
+          <span class="preview-note">This is how your resume will look</span>
+        </div>
+
+        <div class="preview-frame-wrapper">
+          @if (safeHtml) {
+            <div class="preview-frame" [innerHTML]="safeHtml"></div>
+          } @else if (template.thumbnailUrl) {
+            <div class="preview-img-wrapper">
+              <img [src]="template.thumbnailUrl" [alt]="template.name" class="preview-img">
+            </div>
+          } @else {
+            <div class="preview-placeholder">
+              <div class="pp-content">
+                <div class="pp-letter">{{ template.name[0] }}</div>
+                <p>Preview not available</p>
+                <span>Fill in your details to see the final result</span>
+              </div>
+            </div>
+          }
+        </div>
+      </main>
+
+    </div>
+  }
+
+</div>
+
+<style>
+.detail-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 16px; min-height: 70vh;
+  color: var(--text-muted);
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  padding-top: 40px;
+  padding-bottom: 80px;
+  align-items: start;
+
+  @media (max-width: 1000px) { grid-template-columns: 1fr; }
+}
+
+.detail-sidebar {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s;
+  &:hover { color: var(--teal); }
+}
+
+.detail-meta-card, .included-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.detail-badges { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+
+.detail-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.detail-desc { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin-bottom: 20px; }
+
+.detail-stats { display: flex; gap: 20px; margin-bottom: 24px; }
+.d-stat {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; color: var(--text-muted);
+  strong { color: var(--text-primary); }
+}
+
+.premium-gate {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 16px;
+  .gate-icon { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; }
+  p { font-size: 0.82rem; color: var(--text-secondary); }
+}
+
+.login-note {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+  a { color: var(--teal); }
+}
+
+.included-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.included-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.included-card li { display: flex; align-items: center; gap: 10px; font-size: 0.875rem; color: var(--text-secondary); }
+.check { color: var(--teal); font-weight: 700; font-size: 0.8rem; &.gold { color: var(--gold); } }
+
+/* Preview */
+.detail-preview { display: flex; flex-direction: column; gap: 16px; }
+.preview-header { display: flex; align-items: center; justify-content: space-between; }
+.preview-header h3 { font-size: 1rem; font-weight: 600; }
+.preview-note { font-size: 0.78rem; color: var(--text-muted); }
+
+.preview-frame-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-height: 700px;
+}
+
+.preview-frame {
+  width: 100%;
+  min-height: 700px;
+  background: white;
+  color: #333;
+  padding: 40px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.preview-img-wrapper { padding: 24px; }
+.preview-img { width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
+
+.preview-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 600px;
+}
+
+.pp-content {
+  text-align: center;
+  .pp-letter {
+    font-family: var(--font-display);
+    font-size: 8rem;
+    font-weight: 700;
+    color: var(--teal);
+    opacity: 0.15;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 8px; }
+  span { font-size: 0.85rem; color: var(--text-muted); }
+}
+</style>

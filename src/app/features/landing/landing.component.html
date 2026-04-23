@@ -1,0 +1,482 @@
+<app-navbar />
+
+<main class="landing-page">
+
+  <!-- ── Hero ────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+
+    <div class="container">
+      <div class="hero-badge">
+        <span class="badge badge-teal">✦ Powered by Generative AI</span>
+      </div>
+
+      <h1 class="hero-title">
+        Build Resumes That<br>
+        <em>Open Doors</em>
+      </h1>
+
+      <p class="hero-subtitle">
+        ResumeAI blends cutting-edge artificial intelligence with elegant design templates
+        to craft resumes that pass ATS filters and impress hiring managers.
+      </p>
+
+      <div class="hero-actions">
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/dashboard" class="btn btn-primary btn-lg">
+            Go to Dashboard
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        } @else {
+          <a routerLink="/register" class="btn btn-primary btn-lg">
+            Start for Free
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a routerLink="/templates" class="btn btn-outline btn-lg">Browse Templates</a>
+        }
+      </div>
+
+      <!-- Stats bar -->
+      <div class="hero-stats">
+        @for (stat of stats; track stat.label) {
+          <div class="hero-stat">
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Floating resume card mockup -->
+    <div class="hero-card-wrapper">
+      <div class="resume-card">
+        <div class="rc-header">
+          <div class="rc-avatar skeleton"></div>
+          <div>
+            <div class="rc-line wide skeleton"></div>
+            <div class="rc-line medium skeleton" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="rc-section">
+          <div class="rc-section-title"></div>
+          <div class="rc-line wide skeleton"></div>
+          <div class="rc-line medium skeleton"></div>
+          <div class="rc-line narrow skeleton"></div>
+        </div>
+        <div class="rc-section">
+          <div class="rc-section-title"></div>
+          <div class="rc-line wide skeleton"></div>
+          <div class="rc-line wide skeleton"></div>
+          <div class="rc-line medium skeleton"></div>
+        </div>
+        <div class="rc-skills">
+          <div class="rc-skill skeleton"></div>
+          <div class="rc-skill skeleton"></div>
+          <div class="rc-skill skeleton"></div>
+          <div class="rc-skill skeleton"></div>
+        </div>
+        <div class="ai-badge">
+          <span>✦</span> AI Generating...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────────────── -->
+  <section class="section features-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-teal" style="margin-bottom:16px">Everything you need</span>
+        <h2 class="section-title">Built for the Modern<br><span>Job Seeker</span></h2>
+        <p class="section-subtitle">
+          From AI-written content to one-click export, every feature is designed to maximise your chances.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        @for (f of features; track f.title) {
+          <div class="feature-card">
+            <div class="feature-icon">{{ f.icon }}</div>
+            <h3>{{ f.title }}</h3>
+            <p>{{ f.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────────────────────── -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-box">
+        <div class="cta-glow"></div>
+        <span class="badge badge-gold" style="margin-bottom:20px">Start Today — It's Free</span>
+        <h2>Your Dream Job is One<br><em>Great Resume</em> Away</h2>
+        <p>Join thousands of professionals who landed interviews faster with ResumeAI.</p>
+        <div class="cta-actions">
+          @if (!auth.isLoggedIn()) {
+            <a routerLink="/register" class="btn btn-primary btn-lg">Create Your Resume</a>
+            <a routerLink="/templates" class="btn btn-ghost btn-lg">Explore Templates</a>
+          } @else {
+            <a routerLink="/dashboard" class="btn btn-primary btn-lg">Go to Dashboard</a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <div class="logo-mark">R</div>
+          <span class="logo-text">Resume<span>AI</span></span>
+        </div>
+        <p>Crafting careers, one resume at a time.</p>
+      </div>
+      <div class="footer-links">
+        <a routerLink="/templates">Templates</a>
+        <a routerLink="/login">Sign In</a>
+        <a routerLink="/register">Register</a>
+      </div>
+      <p class="footer-copy">© 2025 ResumeAI. All rights reserved.</p>
+    </div>
+  </footer>
+
+</main>
+
+<style>
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 100px 24px 80px;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(ellipse at center, rgba(0,212,180,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.hero-badge { margin-bottom: 24px; }
+
+.hero-title {
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1.08;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+
+  em {
+    font-style: italic;
+    color: var(--teal);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--teal);
+      opacity: 0.4;
+    }
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto 40px;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 64px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* Resume card mockup */
+.hero-card-wrapper {
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%) rotate(3deg);
+  opacity: 0.35;
+  pointer-events: none;
+
+  @media (max-width: 900px) { display: none; }
+}
+
+.resume-card {
+  width: 280px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.rc-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rc-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rc-line {
+  height: 10px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  &.wide { width: 100%; }
+  &.medium { width: 65%; }
+  &.narrow { width: 40%; }
+}
+
+.rc-section { margin-bottom: 20px; }
+.rc-section-title {
+  width: 80px;
+  height: 8px;
+  background: var(--teal);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.rc-skills { display: flex; gap: 8px; flex-wrap: wrap; }
+.rc-skill {
+  height: 24px;
+  width: 60px;
+  border-radius: 99px;
+}
+
+.ai-badge {
+  margin-top: 16px;
+  background: var(--teal-subtle);
+  border: 1px solid var(--border-teal);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  color: var(--teal);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Features */
+.features-section {
+  border-top: 1px solid var(--border);
+  background: linear-gradient(to bottom, var(--bg-surface), var(--bg-primary));
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: var(--transition);
+  animation: fadeSlideUp 0.5s ease forwards;
+
+  &:hover {
+    border-color: var(--border-teal);
+    box-shadow: var(--shadow-teal);
+    transform: translateY(-4px);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+}
+
+/* CTA */
+.cta-section {
+  padding: 80px 0;
+}
+
+.cta-box {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 80px 48px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cta-glow {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(201,168,76,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-box h2 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin-bottom: 16px;
+  em { color: var(--gold); font-style: italic; }
+}
+
+.cta-box p {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  margin-bottom: 36px;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 0;
+  background: var(--bg-surface);
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+}
+
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 28px;
+
+  a {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    &:hover { color: var(--text-primary); }
+  }
+}
+
+.footer-copy {
+  width: 100%;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+
+  .logo-mark {
+    width: 28px; height: 28px;
+    background: var(--teal);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700; color: #000; font-size: 0.9rem;
+  }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    span { color: var(--teal); }
+  }
+}
+</style>

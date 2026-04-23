@@ -1,0 +1,310 @@
+<div class="auth-page">
+
+  <div class="auth-panel">
+    <div class="auth-form-container page-enter">
+
+      <div class="auth-logo">
+        <div class="logo-mark">R</div>
+        <span class="logo-text">Resume<span>AI</span></span>
+      </div>
+
+      <h1 class="auth-title">Create account</h1>
+      <p class="auth-subtitle">Join 50,000+ professionals building better resumes.</p>
+
+      <!-- Step indicator -->
+      <div class="steps">
+        <div class="step" [class.active]="step === 1" [class.done]="step > 1">
+          <div class="step-dot">{{ step > 1 ? '✓' : '1' }}</div>
+          <span>Personal Info</span>
+        </div>
+        <div class="step-line" [class.done]="step > 1"></div>
+        <div class="step" [class.active]="step === 2">
+          <div class="step-dot">2</div>
+          <span>Credentials</span>
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="alert alert-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ error }}
+        </div>
+      }
+      @if (success) {
+        <div class="alert alert-success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ success }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <!-- Step 1: Personal Info -->
+        @if (step === 1) {
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input formControlName="fullName" type="text" class="form-control" placeholder="Priya Sharma">
+            @if (fullName.invalid && fullName.touched) {
+              <span class="form-error">Full name required (2–100 characters)</span>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <input formControlName="age" type="number" class="form-control" placeholder="25" min="18" max="120">
+              @if (age.invalid && age.touched) {
+                <span class="form-error">Age must be 18–120</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mobile Number</label>
+              <input formControlName="mobileNumber" type="tel" class="form-control" placeholder="+917654321098">
+              @if (mobileNumber.invalid && mobileNumber.touched) {
+                <span class="form-error">Format: +91 followed by 10 digits</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input formControlName="email" type="email" class="form-control" placeholder="priya@example.com">
+            @if (email.invalid && email.touched) {
+              <span class="form-error">Please enter a valid email</span>
+            }
+          </div>
+
+          <button type="button" class="btn btn-primary btn-full" (click)="nextStep()">
+            Continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        }
+
+        <!-- Step 2: Credentials -->
+        @if (step === 2) {
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input formControlName="username" type="text" class="form-control" placeholder="priya_sharma" autocomplete="username">
+            @if (username.invalid && username.touched) {
+              <span class="form-error">4–50 characters required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrapper">
+              <input formControlName="password"
+                [type]="showPwd ? 'text' : 'password'"
+                class="form-control" placeholder="Create a strong password" autocomplete="new-password">
+              <button type="button" class="eye-btn" (click)="showPwd = !showPwd">
+                @if (showPwd) {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                } @else {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
+              </button>
+            </div>
+
+            <!-- Strength meter -->
+            @if (password.value) {
+              <div class="password-strength" style="margin-top:8px">
+                @for (i of [1,2,3,4]; track i) {
+                  <div class="bar" [class]="i <= passwordStrength ? 'active-' + strengthClass : ''"></div>
+                }
+              </div>
+              <span class="strength-label" [class]="'strength-' + strengthClass">
+                {{ strengthLabel }}
+              </span>
+            }
+
+            @if (password.invalid && password.touched) {
+              <span class="form-error">
+                Min 8 chars with uppercase, lowercase, number & special character
+              </span>
+            }
+          </div>
+
+          <p class="pwd-hint">Use letters, numbers and symbols like &#64;$!%*?&amp;</p>
+
+          <div class="step2-actions">
+            <button type="button" class="btn btn-ghost" (click)="step = 1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Back
+            </button>
+            <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center" [disabled]="loading">
+              @if (loading) { <span class="spinner"></span> Creating... }
+              @else { Create Account }
+            </button>
+          </div>
+        }
+
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right visual -->
+  <div class="auth-visual">
+    <div class="visual-glow"></div>
+    <div class="visual-content">
+      <div class="perks-card">
+        <h3>What you get with ResumeAI</h3>
+        <ul class="perk-list">
+          <li><span class="perk-icon">✓</span> Free templates — no credit card needed</li>
+          <li><span class="perk-icon">✓</span> AI-generated resume content</li>
+          <li><span class="perk-icon">✓</span> Job description match scoring</li>
+          <li><span class="perk-icon">✓</span> Export to PDF in one click</li>
+          <li><span class="perk-icon">✓</span> ATS optimisation checker</li>
+          <li><span class="perk-icon">✓</span> Multiple resume versions</li>
+        </ul>
+        <div class="plan-pills">
+          <div class="plan-pill free">
+            <strong>FREE</strong>
+            <span>3 resumes, free templates</span>
+          </div>
+          <div class="plan-pill premium">
+            <strong>PREMIUM</strong>
+            <span>Unlimited, all features</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Steps */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+.step.active .step-dot {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #000;
+}
+.step.done .step-dot {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #000;
+}
+.step span { font-size: 0.82rem; color: var(--text-muted); }
+.step.active span { color: var(--text-primary); }
+.step-line {
+  flex: 1; height: 2px;
+  background: var(--border);
+  margin: 0 12px;
+  transition: background 0.3s;
+  &.done { background: var(--teal); }
+}
+
+.input-wrapper { position: relative; }
+.eye-btn {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); display: flex; align-items: center;
+}
+.input-wrapper .form-control { padding-right: 44px; }
+
+.strength-label {
+  font-size: 0.75rem; font-weight: 600;
+  &.strength-weak { color: #e05252; }
+  &.strength-medium { color: var(--gold); }
+  &.strength-strong { color: var(--teal); }
+}
+
+.pwd-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; margin-top: -12px; }
+
+.step2-actions { display: flex; gap: 12px; }
+
+/* Visual panel */
+.visual-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 40%, rgba(201,168,76,0.1) 0%, transparent 60%);
+}
+.visual-content {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; padding: 60px 48px;
+}
+.perks-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  max-width: 380px;
+}
+.perks-card h3 {
+  font-size: 1.4rem;
+  font-family: var(--font-display);
+  margin-bottom: 24px;
+}
+.perk-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 28px;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+}
+.perk-icon {
+  width: 22px; height: 22px;
+  background: var(--teal-subtle);
+  border: 1px solid var(--border-teal);
+  border-radius: 50%;
+  color: var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.plan-pills { display: flex; gap: 12px; }
+.plan-pill {
+  flex: 1;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  &.free {
+    background: var(--teal-subtle);
+    border: 1px solid var(--border-teal);
+    strong { color: var(--teal); }
+  }
+  &.premium {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    strong { color: var(--gold); }
+  }
+  strong { display: block; font-size: 0.75rem; letter-spacing: 0.06em; margin-bottom: 4px; }
+  span { font-size: 0.78rem; color: var(--text-muted); }
+}
+</style>
