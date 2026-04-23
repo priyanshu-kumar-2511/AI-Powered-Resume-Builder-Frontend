@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC2-Auth-UI`
+**Current Branch:** `feature/UC1-Auth-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -31,7 +31,7 @@ Phase 1 focuses on the core structural foundation, design system, and global sta
 
 ---
 
-## 🚀 Phase 2: Authentication & Identity
+## 🚀 Phase 1: Authentication & Identity
 
 This phase implements the complete user identity lifecycle.
 
