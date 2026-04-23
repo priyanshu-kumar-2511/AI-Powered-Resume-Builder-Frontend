@@ -10,6 +10,7 @@ import {
 
 const API = 'http://localhost:8080/api/v1/auth';
 const TOKEN_KEY = 'resumeai_token';
+const RESUME_ID_KEY = 'resumeai_resume_user_id';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -32,6 +33,50 @@ export class AuthService {
     localStorage.removeItem(TOKEN_KEY);
     this.isLoggedIn.set(false);
     this.currentUser.set(null);
+  }
+
+  getCurrentPlan(): 'FREE' | 'PREMIUM' {
+    return this.currentUser()?.subscriptionPlan ?? 'FREE';
+  }
+
+  getCurrentUserId(): number | null {
+    const profileUserId = this.currentUser()?.userId;
+    if (typeof profileUserId === 'number' && Number.isFinite(profileUserId)) {
+      return profileUserId;
+    }
+
+    const tokenClaims = this.getTokenClaims();
+    const tokenUserId = this.getNumericClaim(tokenClaims, 'userId')
+      ?? this.getNumericClaim(tokenClaims, 'user_id')
+      ?? this.getNumericClaim(tokenClaims, 'id');
+
+    if (tokenUserId !== null) {
+      return tokenUserId;
+    }
+
+    const identityKey = this.currentUser()?.username
+      ?? this.currentUser()?.email
+      ?? this.getStringClaim(tokenClaims, 'sub')
+      ?? this.getStringClaim(tokenClaims, 'username')
+      ?? this.getStringClaim(tokenClaims, 'email');
+
+    if (!identityKey) {
+      return null;
+    }
+
+    const storageKey = `${RESUME_ID_KEY}:${identityKey}`;
+    const cached = localStorage.getItem(storageKey);
+    if (cached) {
+      const parsed = Number(cached);
+      if (Number.isInteger(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+
+    // Temporary fallback for the current backend contract until auth exposes a numeric userId.
+    const derivedId = this.deriveStableUserId(identityKey);
+    localStorage.setItem(storageKey, String(derivedId));
+    return derivedId;
   }
 
   // ── Auth endpoints ───────────────────────────────────────────────────────────
@@ -112,5 +157,58 @@ export class AuthService {
 
   loginWithLinkedIn(): void {
     window.location.href = 'http://localhost:8080/oauth2/authorization/linkedin';
+  }
+
+  private getTokenClaims(): Record<string, unknown> | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    const segments = token.split('.');
+    if (segments.length < 2) {
+      return null;
+    }
+
+    try {
+      const normalized = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+      const decoded = atob(padded);
+      return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }
+
+  private getNumericClaim(claims: Record<string, unknown> | null, key: string): number | null {
+    const value = claims?.[key];
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }
+
+  private getStringClaim(claims: Record<string, unknown> | null, key: string): string | null {
+    const value = claims?.[key];
+    return typeof value === 'string' && value.trim() ? value : null;
+  }
+
+  private deriveStableUserId(identityKey: string): number {
+    let hash = 0;
+
+    for (let index = 0; index < identityKey.length; index += 1) {
+      hash = ((hash << 5) - hash) + identityKey.charCodeAt(index);
+      hash |= 0;
+    }
+
+    return Math.abs(hash) + 1000;
   }
 }

@@ -1,0 +1,219 @@
+<app-navbar />
+
+<div class="builder-page page-enter">
+  <div class="container builder-layout">
+    <div class="builder-sidebar">
+      <a routerLink="/resumes" class="builder-back">← Back to my resumes</a>
+      <app-resume-settings
+        [resumeId]="resumeId"
+        (resumeLoaded)="handleResumeLoaded($event)"
+        (resumeChange)="handleResumeLoaded($event)" />
+    </div>
+
+    <section class="builder-main">
+      <div class="builder-hero">
+        <div>
+          <span class="badge badge-teal">Resume Builder</span>
+          <h1>{{ resume?.title || 'Loading resume...' }}</h1>
+          <p>
+            {{ resume?.targetJobTitle || 'Refine your resume metadata, template choice, and status here.' }}
+          </p>
+        </div>
+        @if (resume) {
+          <div class="builder-summary">
+            <div><span>Status</span><strong>{{ resume.status }}</strong></div>
+            <div><span>Language</span><strong>{{ resume.language | uppercase }}</strong></div>
+            <div><span>ATS Score</span><strong>{{ resume.atsScore }}/100</strong></div>
+          </div>
+        }
+      </div>
+
+      <div class="builder-preview-card">
+        <div class="preview-top">
+          <div>
+            <h2>Template preview</h2>
+            <p>{{ template?.name || 'Selected template details will appear here.' }}</p>
+          </div>
+          @if (template) {
+            <a [routerLink]="['/templates', template.templateId]" class="btn btn-ghost btn-sm">Open Template</a>
+          }
+        </div>
+
+        @if (loadingTemplate) {
+          <div class="preview-loading">
+            <div class="spinner spinner-light"></div>
+            <span>Loading template preview...</span>
+          </div>
+        } @else if (safePreview) {
+          <div class="preview-frame" [innerHTML]="safePreview"></div>
+        } @else if (template?.thumbnailUrl) {
+          <div class="preview-image-wrap">
+            <img [src]="template?.thumbnailUrl" [alt]="template?.name || 'Template preview'">
+          </div>
+        } @else {
+          <div class="preview-empty">
+            <div class="preview-mark">{{ resume?.title?.charAt(0) || 'R' }}</div>
+            <h3>Your builder is ready</h3>
+            <p>Once a template is attached, its preview and metadata will show up here.</p>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+.builder-page {
+  padding: 40px 0 80px;
+}
+
+.builder-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 1040px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.builder-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 88px;
+}
+
+.builder-back {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.builder-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.builder-hero,
+.builder-preview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+}
+
+.builder-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 2rem;
+    margin: 10px 0 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    max-width: 620px;
+  }
+}
+
+.builder-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 14px;
+
+  div {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 212, 180, 0.05);
+    border: 1px solid rgba(0, 212, 180, 0.12);
+  }
+
+  span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  strong {
+    font-size: 1rem;
+  }
+}
+
+.preview-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  h2 {
+    font-size: 1.45rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.preview-loading,
+.preview-empty {
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.preview-empty {
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.preview-mark {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 212, 180, 0.08);
+  border: 1px solid rgba(0, 212, 180, 0.16);
+  color: var(--teal);
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.preview-frame {
+  min-height: 720px;
+  background: #fff;
+  color: #111827;
+  border-radius: var(--radius-lg);
+  overflow: auto;
+  padding: 36px;
+}
+
+.preview-image-wrap {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+
+  img {
+    width: 100%;
+    border-radius: var(--radius-md);
+    display: block;
+  }
+}
+</style>

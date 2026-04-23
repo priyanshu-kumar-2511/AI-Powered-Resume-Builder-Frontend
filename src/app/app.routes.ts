@@ -28,6 +28,25 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
+    path: 'resumes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/resume/dashboard/resume-dashboard.component').then(m => m.ResumeDashboardComponent)
+  },
+  {
+    path: 'resumes/new',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/resume/create/create-resume.component').then(m => m.CreateResumeComponent)
+  },
+  {
+    path: 'resumes/public',
+    loadComponent: () => import('./features/resume/public-gallery/public-gallery.component').then(m => m.PublicGalleryComponent)
+  },
+  {
+    path: 'builder/:resumeId',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/resume/builder/resume-builder.component').then(m => m.ResumeBuilderComponent)
+  },
+  {
     path: 'templates',
     loadComponent: () => import('./features/templates/template-list/template-list.component').then(m => m.TemplateListComponent)
   },

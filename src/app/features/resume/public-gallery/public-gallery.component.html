@@ -1,0 +1,245 @@
+<app-navbar />
+
+<div class="public-gallery page-enter">
+  <div class="gallery-hero">
+    <div class="container">
+      <span class="badge badge-gold">Public Resume Gallery</span>
+      <h1>Explore published resumes with real view momentum.</h1>
+      <p>Search by role, inspect popular resume directions, and borrow inspiration from what is already live.</p>
+    </div>
+  </div>
+
+  <div class="container gallery-shell">
+    <div class="gallery-toolbar">
+      <div class="toolbar-copy">
+        <h2>{{ filteredResumes.length }} published resumes</h2>
+        <p>Results update instantly as you search by job title or resume title.</p>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by job title">
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="grid-3">
+        @for (index of [1, 2, 3, 4, 5, 6]; track index) {
+          <div class="skeleton gallery-skeleton"></div>
+        }
+      </div>
+    } @else if (error) {
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Gallery unavailable</h3>
+        <p>{{ error }}</p>
+      </div>
+    } @else if (!filteredResumes.length) {
+      <div class="empty-state">
+        <div class="empty-icon">🔎</div>
+        <h3>No public resumes matched</h3>
+        <p>Try a broader search term to explore more published examples.</p>
+      </div>
+    } @else {
+      <div class="grid-3">
+        @for (resume of paginatedResumes; track resume.resumeId) {
+          <app-resume-card
+            [resume]="resume"
+            [template]="templateFor(resume.templateId)"
+            [showPublicMeta]="true"
+            [disableActions]="viewingResumeId === resume.resumeId"
+            (open)="openResume($event)" />
+        }
+      </div>
+
+      @if (totalPages > 1) {
+        <div class="pagination">
+          @for (pageNumber of pageNumbers; track pageNumber) {
+            <button type="button" class="chip" [class.active]="page === pageNumber" (click)="goToPage(pageNumber)">
+              {{ pageNumber }}
+            </button>
+          }
+        </div>
+      }
+
+      @if (selectedResume) {
+        <section class="spotlight-card">
+          <div class="spotlight-copy">
+            <span class="badge badge-teal">Resume Spotlight</span>
+            <h2>{{ selectedResume.title }}</h2>
+            <p>{{ selectedResume.targetJobTitle || 'Published resume in the public gallery.' }}</p>
+
+            <div class="spotlight-meta">
+              <div><span>Views</span><strong>{{ selectedResume.viewCount }}</strong></div>
+              <div><span>ATS Score</span><strong>{{ selectedResume.atsScore }}</strong></div>
+              <div><span>Status</span><strong>{{ selectedResume.status }}</strong></div>
+            </div>
+
+            @if (selectedResume.templateId) {
+              <a [routerLink]="['/templates', selectedResume.templateId]" class="btn btn-primary">
+                View Template
+              </a>
+            }
+          </div>
+
+          <div class="spotlight-preview">
+            @if (templateFor(selectedResume.templateId)?.thumbnailUrl) {
+              <img
+                [src]="templateFor(selectedResume.templateId)?.thumbnailUrl || ''"
+                [alt]="selectedResume.title"
+                loading="lazy">
+            } @else {
+              <div class="spotlight-placeholder">{{ selectedResume.title.charAt(0) }}</div>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+</div>
+
+<style>
+.gallery-hero {
+  padding: 72px 0 54px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(201, 168, 76, 0.12), transparent 28%),
+    linear-gradient(180deg, var(--bg-surface), var(--bg-primary));
+
+  h1 {
+    font-size: 2.5rem;
+    margin: 14px 0 10px;
+    max-width: 760px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    max-width: 680px;
+  }
+}
+
+.gallery-shell {
+  padding-top: 32px;
+  padding-bottom: 80px;
+}
+
+.gallery-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.toolbar-copy {
+  h2 {
+    font-size: 1.55rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.search-box {
+  width: min(360px, 100%);
+}
+
+.gallery-skeleton {
+  height: 420px;
+  border-radius: var(--radius-xl);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.spotlight-card {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spotlight-copy {
+  h2 {
+    font-size: 2rem;
+    margin: 12px 0 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.spotlight-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  div {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 212, 180, 0.05);
+    border: 1px solid rgba(0, 212, 180, 0.12);
+  }
+
+  span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+.spotlight-preview {
+  min-height: 320px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  overflow: hidden;
+
+  img,
+  .spotlight-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.spotlight-placeholder {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 4rem;
+  color: rgba(245, 240, 232, 0.55);
+}
+</style>

@@ -20,6 +20,7 @@ export interface LoginResponse {
 }
 
 export interface UserProfileResponse {
+  userId?: number;
   username: string;
   fullName: string;
   email: string;
@@ -90,6 +91,40 @@ export interface Template extends TemplateResponseDTO {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// Resume Models
+
+export type ResumeStatus = 'DRAFT' | 'COMPLETE';
+
+export interface Resume {
+  resumeId: number;
+  userId: number;
+  title: string;
+  targetJobTitle: string;
+  templateId: number | null;
+  atsScore: number;
+  status: ResumeStatus;
+  language: string;
+  isPublic: boolean;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateResumeRequest {
+  userId: number;
+  title: string;
+  templateId?: number | null;
+  targetJobTitle?: string;
+  language?: string;
+}
+
+export interface UpdateResumeRequest {
+  title?: string;
+  targetJobTitle?: string;
+  language?: string;
+  status?: ResumeStatus;
 }
 
 // ── Misc ──────────────────────────────────────────────────────────────────────

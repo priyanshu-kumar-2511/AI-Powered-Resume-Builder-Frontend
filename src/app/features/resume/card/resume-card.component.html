@@ -1,0 +1,257 @@
+<article class="resume-card" [class.public-card]="showPublicMeta">
+  <button
+    type="button"
+    class="resume-preview"
+    [class.clickable]="showPublicMeta"
+    (click)="handleOpen()">
+    @if (template?.thumbnailUrl) {
+      <img [src]="template?.thumbnailUrl" [alt]="template?.name || resume.title" loading="lazy">
+    } @else {
+      <div class="preview-placeholder">
+        <span>{{ resume.title.charAt(0) || 'R' }}</span>
+      </div>
+    }
+
+    <div class="preview-overlay">
+      <span class="badge" [class]="resume.isPublic ? 'badge-gold' : 'badge-teal'">
+        {{ resume.isPublic ? 'Public' : 'Private' }}
+      </span>
+      @if (showPublicMeta) {
+        <span class="view-pill">{{ resume.viewCount | number }} views</span>
+      }
+    </div>
+  </button>
+
+  <div class="resume-body">
+    <div class="resume-head">
+      <div>
+        <h3>{{ resume.title }}</h3>
+        <p>{{ resume.targetJobTitle || 'No target role yet' }}</p>
+      </div>
+
+      <div class="ats-badge" [style.background]="atsRingStyle">
+        <div class="ats-inner">
+          <strong>{{ atsScore }}</strong>
+          <span>ATS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="resume-meta">
+      <span class="status-pill" [class]="statusClass">{{ resume.status }}</span>
+      <span>{{ lastUpdatedLabel }}</span>
+      @if (template?.name) {
+        <span>{{ template?.name }}</span>
+      }
+    </div>
+
+    @if (showPublicMeta) {
+      <div class="public-footer">
+        <span class="public-copy">Tap to register a gallery view and inspect the resume details.</span>
+        <button type="button" class="btn btn-outline btn-sm" (click)="open.emit(resume)">View Resume</button>
+      </div>
+    } @else {
+      <div class="resume-actions">
+        <button type="button" class="btn btn-primary btn-sm" [disabled]="disableActions" (click)="edit.emit(resume)">Edit</button>
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="disableActions" (click)="duplicate.emit(resume)">Duplicate</button>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          [disabled]="disableActions"
+          (click)="resume.isPublic ? unpublish.emit(resume) : publish.emit(resume)">
+          {{ resume.isPublic ? 'Unpublish' : 'Publish' }}
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm danger-btn" [disabled]="disableActions" (click)="delete.emit(resume)">Delete</button>
+      </div>
+    }
+  </div>
+</article>
+
+<style>
+.resume-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: var(--transition);
+
+  &:hover {
+    border-color: var(--border-teal);
+    box-shadow: var(--shadow-teal);
+    transform: translateY(-2px);
+  }
+}
+
+.resume-preview {
+  position: relative;
+  height: 220px;
+  border: none;
+  padding: 0;
+  background: var(--bg-surface);
+  cursor: default;
+  overflow: hidden;
+
+  &.clickable {
+    cursor: pointer;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+}
+
+.resume-card:hover .resume-preview img {
+  transform: scale(1.03);
+}
+
+.preview-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 212, 180, 0.12), rgba(17, 24, 39, 0.95));
+
+  span {
+    font-family: var(--font-display);
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: rgba(245, 240, 232, 0.65);
+  }
+}
+
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(8, 11, 18, 0.2) 0%, rgba(8, 11, 18, 0.65) 100%);
+}
+
+.view-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(8, 11, 18, 0.72);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.resume-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.resume-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  h3 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+}
+
+.ats-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ats-inner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  strong {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  span {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+}
+
+.resume-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  &.status-complete {
+    background: rgba(201, 168, 76, 0.12);
+    color: var(--gold);
+    border: 1px solid rgba(201, 168, 76, 0.28);
+  }
+
+  &.status-draft {
+    background: var(--teal-subtle);
+    color: var(--teal);
+    border: 1px solid var(--border-teal);
+  }
+}
+
+.resume-actions,
+.public-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.resume-actions {
+  padding-top: 4px;
+}
+
+.public-copy {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.danger-btn {
+  color: #fca5a5;
+}
+</style>

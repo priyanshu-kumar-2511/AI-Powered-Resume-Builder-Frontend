@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC2-Dashboad-Template-UI`
+**Current Branch:** `feature/UC3-Resume-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -38,7 +38,7 @@ Phase 1 focuses on the core structural foundation, global design system, and rou
 
 ---
 
-## 🚀 Phase 1: Authentication & Identity
+## 🚀 Phase 2: Authentication & Identity
 
 This phase implements the complete user identity lifecycle and connects to the `auth-service` backend.
 
@@ -70,7 +70,7 @@ This phase implements the complete user identity lifecycle and connects to the `
 
 ---
 
-## 🎨 Phase 2: Dashboard & Templates
+## 🎨 Phase 3: Dashboard & Templates
 
 This phase delivers the main application experience after login.
 
@@ -85,6 +85,21 @@ This phase delivers the main application experience after login.
 
 ---
 
+## 📄 Phase 4: Resume Creation & Management
+
+This phase focuses on the end-to-end workflow of building and managing resumes.
+
+### Resume Features
+
+| Module | Route | Description |
+| :--- | :--- | :--- |
+| **Resume List** | `/resumes` | View all created resumes with status (DRAFT/COMPLETE) and ATS scores. |
+| **Resume Builder** | `/resumes/new` | Interactive builder to create a resume from a selected template. |
+| **Public Gallery** | `/gallery` | Showcase of public resumes from the community. |
+| **Resume Service (`resume.service.ts`)** | — | Connects to `resume-service` backend via API Gateway at `/api/v1/resumes`. |
+
+---
+
 ## 🛠 Required Environment & Dev Configuration
 
 ### 1. Backend Service Connection
@@ -95,6 +110,7 @@ The application connects to backend services through the **API Gateway** at `htt
 | :--- | :--- |
 | **Auth APIs** | `http://localhost:8080/api/v1/auth` |
 | **Template APIs** | `http://localhost:8080/api/v1/templates` |
+| **Resume APIs** | `http://localhost:8080/api/v1/resumes` |
 | **Google OAuth** | `http://localhost:8080/oauth2/authorization/google` |
 | **LinkedIn OAuth** | `http://localhost:8080/oauth2/authorization/linkedin` |
 
@@ -152,6 +168,15 @@ src/
 │       ├── components/
 │       │   └── navbar/      # Global navigation bar
 │       └── models/          # TypeScript interfaces (models.ts)
-├── styles.scss              # Global design system & CSS tokens
+├── styles.scss              # Global design system & CSS tokens (Updated: Premium Button Hover Visibility)
 └── index.html
 ```
+
+---
+
+## ✨ Recent UI & UX Improvements
+
+- **Premium Button Hover:** Refined global button hover states (`btn-primary`, `btn-outline`) for maximum readability. Excessive glows and brightness issues have been resolved to match professional high-contrast standards.
+- **Template Asset Seeding:** Automated asset folder (`src/assets/templates/`) includes AI-generated realistic thumbnails for all pre-seeded resume templates.
+- **Dynamic Routing:** Integrated `resume-service` and `template-service` with the dashboard for a seamless resume-building workflow.
+

@@ -42,7 +42,7 @@ export class TemplateDetailComponent implements OnInit {
     if (!this.auth.isLoggedIn()) { this.router.navigate(['/register']); return; }
     if (!this.template) return;
     this.templateSvc.incrementUsage(this.template.templateId).subscribe();
-    this.router.navigate(['/dashboard']); // navigate to resume builder
+    this.router.navigate(['/resumes/new'], { queryParams: { templateId: this.template.templateId } });
   }
 
   formatCategory(cat: string): string {

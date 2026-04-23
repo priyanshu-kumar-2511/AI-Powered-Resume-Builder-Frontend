@@ -1,0 +1,123 @@
+<aside class="settings-card">
+  <div class="settings-header">
+    <div>
+      <span class="badge badge-teal">Builder Settings</span>
+      <h2>Resume metadata</h2>
+      <p>Updates save automatically as you type.</p>
+    </div>
+    <div class="save-indicator" [class.error]="saveState === 'error'">
+      {{ saveLabel }}
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="settings-loading">
+      <div class="spinner spinner-light"></div>
+      <span>Loading resume settings...</span>
+    </div>
+  } @else {
+    @if (error) {
+      <div class="alert alert-error">{{ error }}</div>
+    }
+
+    <form [formGroup]="form" class="settings-form">
+      <div class="form-group">
+        <label class="form-label" for="resume-title">Resume Title</label>
+        <input id="resume-title" type="text" class="form-control" formControlName="title" placeholder="e.g. Senior Frontend Engineer">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="resume-job-title">Target Job Title</label>
+        <input id="resume-job-title" type="text" class="form-control" formControlName="targetJobTitle" placeholder="e.g. Angular Developer">
+      </div>
+
+      <div class="settings-grid">
+        <div class="form-group">
+          <label class="form-label" for="resume-language">Language</label>
+          <select id="resume-language" class="form-control" formControlName="language">
+            @for (language of languages; track language.value) {
+              <option [value]="language.value">{{ language.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="resume-status">Status</label>
+          <select id="resume-status" class="form-control" formControlName="status">
+            <option value="DRAFT">Draft</option>
+            <option value="COMPLETE">Complete</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  }
+</aside>
+
+<style>
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h2 {
+    font-size: 1.45rem;
+    margin: 10px 0 6px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+}
+
+.save-indicator {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0, 212, 180, 0.08);
+  border: 1px solid rgba(0, 212, 180, 0.2);
+  color: var(--teal);
+  font-size: 0.76rem;
+  white-space: nowrap;
+
+  &.error {
+    background: rgba(224, 82, 82, 0.12);
+    border-color: rgba(224, 82, 82, 0.2);
+    color: #f87171;
+  }
+}
+
+.settings-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

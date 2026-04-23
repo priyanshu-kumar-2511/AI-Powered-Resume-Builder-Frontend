@@ -1,0 +1,157 @@
+<app-navbar />
+
+<div class="resume-dashboard page-enter">
+  <div class="container resume-shell">
+    <section class="resume-hero">
+      <div class="hero-copy">
+        <span class="badge" [class]="isFreePlan ? 'badge-teal' : 'badge-gold'">
+          {{ isFreePlan ? 'Free Plan' : 'Premium Plan' }}
+        </span>
+        <h1>Manage every resume in one place.</h1>
+        <p>
+          Create tailored versions, track ATS strength, and publish standout resumes to the public gallery.
+        </p>
+      </div>
+
+      <div class="hero-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="freePlanLimitReached"
+          [title]="freePlanLimitReached ? 'Free plan limit reached. Upgrade to create more than 3 resumes.' : 'Create a new resume'"
+          (click)="createNewResume()">
+          New Resume
+        </button>
+        <a routerLink="/resumes/public" class="btn btn-ghost">Public Gallery</a>
+      </div>
+    </section>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(0,212,180,0.08)">📄</div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: var(--teal)">{{ resumes.length }}</div>
+          <div class="stat-label">Total Resumes</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(201,168,76,0.08)">🌍</div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: var(--gold)">{{ publishedCount }}</div>
+          <div class="stat-label">Published</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(0,212,180,0.08)">🎯</div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: var(--teal)">{{ averageAtsScore }}</div>
+          <div class="stat-label">Avg ATS Score</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(201,168,76,0.08)">✅</div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: var(--gold)">{{ completeCount }}</div>
+          <div class="stat-label">Complete</div>
+        </div>
+      </div>
+    </div>
+
+    @if (freePlanLimitReached) {
+      <div class="alert alert-info">
+        Free users can keep up to 3 resumes. Upgrade to unlock more versions and unlimited duplication.
+      </div>
+    }
+
+    @if (actionMessage) {
+      <div class="alert" [class]="actionMessage.includes('wrong') || actionMessage.includes('failed') ? 'alert-error' : 'alert-success'">
+        {{ actionMessage }}
+      </div>
+    }
+
+    @if (loading) {
+      <div class="grid-3">
+        @for (index of [1, 2, 3]; track index) {
+          <div class="skeleton resume-card-skeleton"></div>
+        }
+      </div>
+    } @else if (error) {
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Unable to load your resumes</h3>
+        <p>{{ error }}</p>
+      </div>
+    } @else if (!resumes.length) {
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>Your resume workspace is empty</h3>
+        <p>Start with a template, set your target role, and build a tailored version for every opportunity.</p>
+        <button type="button" class="btn btn-primary" (click)="createNewResume()">Create your first resume</button>
+      </div>
+    } @else {
+      <div class="grid-3">
+        @for (resume of resumes; track resume.resumeId) {
+          <app-resume-card
+            [resume]="resume"
+            [template]="templateFor(resume.templateId)"
+            [disableActions]="busyResumeId === resume.resumeId"
+            (edit)="editResume($event)"
+            (duplicate)="duplicateResume($event)"
+            (publish)="togglePublish($event)"
+            (unpublish)="togglePublish($event)"
+            (delete)="deleteResume($event)" />
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<style>
+.resume-shell {
+  padding-top: 40px;
+  padding-bottom: 80px;
+}
+
+.resume-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(0, 212, 180, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(8, 11, 18, 0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.hero-copy {
+  max-width: 660px;
+
+  h1 {
+    font-size: 2.4rem;
+    margin: 14px 0 10px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.resume-card-skeleton {
+  height: 420px;
+  border-radius: var(--radius-xl);
+}
+</style>

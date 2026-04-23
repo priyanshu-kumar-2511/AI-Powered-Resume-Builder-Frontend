@@ -1,0 +1,436 @@
+<app-navbar />
+
+<div class="create-resume page-enter">
+  <div class="container create-shell">
+    <div class="create-header">
+      <div>
+        <span class="badge badge-teal">Create Resume</span>
+        <h1>Set up a resume in three quick steps.</h1>
+        <p>Pick a template, define your target role, and jump straight into the builder.</p>
+      </div>
+      <a routerLink="/resumes" class="btn btn-ghost">Back to Dashboard</a>
+    </div>
+
+    <div class="stepper">
+      @for (stepNumber of [1, 2, 3]; track stepNumber) {
+        <div class="step-item" [class.active]="step >= stepNumber" [class.current]="step === stepNumber">
+          <div class="step-index">{{ stepNumber }}</div>
+          <div class="step-copy">
+            <strong>
+              {{ stepNumber === 1 ? 'Choose Template' : stepNumber === 2 ? 'Target Role' : 'Resume Title' }}
+            </strong>
+            <span>
+              {{ stepNumber === 1 ? 'Pick a design' : stepNumber === 2 ? 'Job title and language' : 'Name this version' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (error) {
+      <div class="alert alert-error">{{ error }}</div>
+    }
+
+    <div class="create-card">
+      @if (loading) {
+        <div class="create-loading">
+          <div class="spinner spinner-light"></div>
+          <span>Loading templates...</span>
+        </div>
+      } @else {
+        @if (step === 1) {
+          <section class="step-panel">
+            <div class="step-heading">
+              <h2>Select a template</h2>
+              <p>Free templates are available to everyone. Premium templates are unlocked on premium plans.</p>
+            </div>
+
+            <div class="template-stack">
+              @for (group of [{ title: 'Free Templates', templates: freeTemplates }, { title: 'Premium Templates', templates: premiumTemplates }]; track group.title) {
+                @if (group.templates.length) {
+                  <div class="template-group">
+                    <div class="group-head">
+                      <h3>{{ group.title }}</h3>
+                    </div>
+
+                    <div class="grid-3">
+                      @for (template of group.templates; track template.templateId) {
+                        <button
+                          type="button"
+                          class="template-choice"
+                          [class.selected]="selectedTemplateId === template.templateId"
+                          [class.locked]="isTemplateLocked(template)"
+                          (click)="chooseTemplate(template)">
+                          <div class="choice-thumb">
+                            @if (template.thumbnailUrl) {
+                              <img [src]="template.thumbnailUrl" [alt]="template.name" loading="lazy">
+                            } @else {
+                              <div class="choice-placeholder">{{ template.name.charAt(0) }}</div>
+                            }
+                            <span class="badge" [class]="template.tier === 'PREMIUM' ? 'badge-premium' : 'badge-free'">
+                              {{ template.tier }}
+                            </span>
+                          </div>
+
+                          <div class="choice-copy">
+                            <div>
+                              <h4>{{ template.name }}</h4>
+                              <p>{{ template.description || 'Professional template ready for resume building.' }}</p>
+                            </div>
+                            @if (isTemplateLocked(template)) {
+                              <span class="lock-label">Upgrade required</span>
+                            } @else if (selectedTemplateId === template.templateId) {
+                              <span class="selected-label">Selected</span>
+                            }
+                          </div>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </section>
+        }
+
+        @if (step === 2) {
+          <section class="step-panel">
+            <div class="step-heading">
+              <h2>Target your next role</h2>
+              <p>These details help tailor ATS scoring and builder defaults from the start.</p>
+            </div>
+
+            <form [formGroup]="form" class="step-form">
+              <div class="form-group">
+                <label class="form-label" for="target-role">Target Job Title</label>
+                <input id="target-role" type="text" class="form-control" formControlName="targetJobTitle" placeholder="e.g. Product Designer">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="resume-language-create">Language</label>
+                <select id="resume-language-create" class="form-control" formControlName="language">
+                  @for (language of languages; track language.value) {
+                    <option [value]="language.value">{{ language.label }}</option>
+                  }
+                </select>
+              </div>
+            </form>
+          </section>
+        }
+
+        @if (step === 3) {
+          <section class="step-panel">
+            <div class="step-heading">
+              <h2>Name this resume</h2>
+              <p>Use something clear so it is easy to duplicate and manage later.</p>
+            </div>
+
+            <form [formGroup]="form" class="step-form">
+              <div class="form-group">
+                <label class="form-label" for="resume-title-create">Resume Title</label>
+                <input id="resume-title-create" type="text" class="form-control" formControlName="title" placeholder="e.g. Product Designer - Growth Teams">
+              </div>
+            </form>
+
+            <div class="summary-card">
+              <h3>Ready to create</h3>
+              <div class="summary-grid">
+                <div><span>Template</span><strong>{{ selectedTemplate?.name || 'Not selected' }}</strong></div>
+                <div><span>Target Role</span><strong>{{ form.controls.targetJobTitle.value || 'Not set' }}</strong></div>
+                <div><span>Language</span><strong>{{ form.controls.language.value | uppercase }}</strong></div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <div class="create-actions">
+          <button type="button" class="btn btn-ghost" [disabled]="step === 1" (click)="previousStep()">Back</button>
+
+          @if (step < 3) {
+            <button type="button" class="btn btn-primary" (click)="nextStep()">Continue</button>
+          } @else {
+            <button type="button" class="btn btn-primary" [disabled]="creating" (click)="createResume()">
+              @if (creating) {
+                <span class="spinner"></span>
+              }
+              Create Resume
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+.create-shell {
+  padding-top: 40px;
+  padding-bottom: 80px;
+}
+
+.create-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+
+  h1 {
+    font-size: 2.3rem;
+    margin: 12px 0 10px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    max-width: 620px;
+  }
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+
+  @media (max-width: 840px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  opacity: 0.65;
+
+  &.active {
+    opacity: 1;
+  }
+
+  &.current {
+    border-color: var(--border-teal);
+    box-shadow: var(--shadow-teal);
+  }
+}
+
+.step-index {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 212, 180, 0.08);
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 0.92rem;
+  }
+
+  span {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+}
+
+.create-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+}
+
+.step-heading {
+  margin-bottom: 24px;
+
+  h2 {
+    font-size: 1.55rem;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+.create-loading {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-secondary);
+}
+
+.template-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.template-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.group-head h3 {
+  font-size: 1.1rem;
+}
+
+.template-choice {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  color: inherit;
+
+  &:hover:not(.locked) {
+    border-color: var(--border-teal);
+    transform: translateY(-2px);
+  }
+
+  &.selected {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0, 212, 180, 0.12);
+  }
+
+  &.locked {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+}
+
+.choice-thumb {
+  position: relative;
+  height: 180px;
+  background: rgba(0, 212, 180, 0.04);
+
+  img,
+  .choice-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    object-fit: cover;
+  }
+
+  .choice-placeholder {
+    display: grid;
+    place-items: center;
+    color: rgba(245, 240, 232, 0.55);
+    font-family: var(--font-display);
+    font-size: 3.6rem;
+    font-weight: 700;
+  }
+
+  .badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+}
+
+.choice-copy {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h4 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+}
+
+.lock-label,
+.selected-label {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.lock-label {
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold);
+}
+
+.selected-label {
+  background: var(--teal-subtle);
+  color: var(--teal);
+}
+
+.step-form {
+  max-width: 560px;
+}
+
+.summary-card {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: rgba(0, 212, 180, 0.05);
+  border: 1px solid rgba(0, 212, 180, 0.12);
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+
+  div {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(17, 24, 39, 0.6);
+  }
+
+  span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+.create-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+</style>
