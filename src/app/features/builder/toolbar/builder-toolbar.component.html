@@ -1,0 +1,120 @@
+<div class="builder-toolbar">
+  <div class="toolbar-left">
+    <span class="resume-title">{{ resume?.title || 'Resume Builder' }}</span>
+    <span class="save-status" [class.saving]="(autoSave.saveStatus$ | async) === 'saving'"
+          [class.error]="(autoSave.saveStatus$ | async) === 'error'">
+      {{ autoSave.statusLabel }}
+    </span>
+  </div>
+
+  <div class="toolbar-right">
+    @if (resume) {
+      <div class="ats-badge" title="ATS Score">
+        <div class="ats-ring" [style.background]="atsRing">
+          <span class="ats-value">{{ resume.atsScore }}</span>
+        </div>
+        <span class="ats-label">ATS</span>
+      </div>
+    }
+
+    <span class="status-chip" [class.complete]="resume?.status === 'COMPLETE'">
+      {{ resume?.status || 'DRAFT' }}
+    </span>
+
+    <a routerLink="/resumes" class="btn btn-ghost btn-sm">← Exit</a>
+  </div>
+</div>
+
+<style>
+.builder-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.resume-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.save-status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.save-status.saving { color: var(--teal); }
+.save-status.error  { color: #ef4444; }
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ats-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+.ats-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.ats-value {
+  background: var(--bg-card);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.ats-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-chip {
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.status-chip.complete {
+  background: rgba(0,212,180,0.1);
+  border-color: rgba(0,212,180,0.3);
+  color: var(--teal);
+}
+</style>

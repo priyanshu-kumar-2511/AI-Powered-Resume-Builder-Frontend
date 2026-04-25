@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC3-Resume-UI`
+**Current Branch:** `feature/UC4-Section-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -161,6 +161,7 @@ src/
 │   │   │   ├── profile/
 │   │   │   ├── forgot-password/
 │   │   │   └── forgot-username/
+│   │   ├── builder/         # Canva-style resume editor
 │   │   ├── dashboard/       # Main dashboard
 │   │   ├── landing/         # Public landing page
 │   │   └── templates/       # Template list & detail
@@ -168,15 +169,13 @@ src/
 │       ├── components/
 │       │   └── navbar/      # Global navigation bar
 │       └── models/          # TypeScript interfaces (models.ts)
-├── styles.scss              # Global design system & CSS tokens (Updated: Premium Button Hover Visibility)
+├── styles.scss              # Global design system & CSS tokens
 └── index.html
 ```
 
 ---
 
-## ✨ Recent UI & UX Improvements
+## ✨ Recent UI & UX Extensions
 
-- **Premium Button Hover:** Refined global button hover states (`btn-primary`, `btn-outline`) for maximum readability. Excessive glows and brightness issues have been resolved to match professional high-contrast standards.
-- **Template Asset Seeding:** Automated asset folder (`src/assets/templates/`) includes AI-generated realistic thumbnails for all pre-seeded resume templates.
-- **Dynamic Routing:** Integrated `resume-service` and `template-service` with the dashboard for a seamless resume-building workflow.
-
+- **Interactive Resume Builder:** Implemented a Canva-inspired real-time editor for seamless resume customization.
+- **Tech Stack Overview:** Built with Angular 17 (Standalone Components), SCSS Glassmorphism design, and Angular Signals for optimized performance.

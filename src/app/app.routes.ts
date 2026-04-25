@@ -44,7 +44,7 @@ export const routes: Routes = [
   {
     path: 'builder/:resumeId',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/resume/builder/resume-builder.component').then(m => m.ResumeBuilderComponent)
+    loadComponent: () => import('./features/builder/layout/builder-layout.component').then(m => m.BuilderLayoutComponent)
   },
   {
     path: 'templates',

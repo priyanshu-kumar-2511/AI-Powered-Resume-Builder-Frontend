@@ -25,8 +25,17 @@ export class ResumeCardComponent {
     return Math.max(0, Math.min(100, this.resume.atsScore ?? 0));
   }
 
-  get atsRingStyle(): string {
-    return `conic-gradient(var(--teal) ${this.atsScore * 3.6}deg, rgba(255,255,255,0.08) 0deg)`;
+  /** SVG ring: 2 * PI * r = 2 * 3.14159 * 18 ≈ 113.1 */
+  readonly atsCircumference = 113.1;
+
+  get atsOffset(): number {
+    return this.atsCircumference - (this.atsScore / 100) * this.atsCircumference;
+  }
+
+  get atsColor(): string {
+    if (this.atsScore >= 80) return '#00d4b4';
+    if (this.atsScore >= 50) return '#c9a84c';
+    return '#f87171';
   }
 
   get lastUpdatedLabel(): string {

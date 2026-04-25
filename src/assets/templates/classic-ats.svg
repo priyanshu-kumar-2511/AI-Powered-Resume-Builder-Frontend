@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#ffffff"/>
+  <!-- Name -->
+  <text x="150" y="32" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#111" text-anchor="middle">PRIYANSHU KUMAR</text>
+  <!-- Contact bar -->
+  <line x1="20" y1="40" x2="280" y2="40" stroke="#111" stroke-width="1.2"/>
+  <text x="150" y="53" font-family="Arial,sans-serif" font-size="7" fill="#444" text-anchor="middle">📞 +91-620-739-4439  ✉ email@gmail.com  🔗 LinkedIn  💻 GitHub</text>
+  <line x1="20" y1="57" x2="280" y2="57" stroke="#111" stroke-width="1.2"/>
+  <!-- Section: Career Objective -->
+  <text x="20" y="72" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">CAREER OBJECTIVE</text>
+  <line x1="20" y1="75" x2="280" y2="75" stroke="#111" stroke-width="0.8"/>
+  <rect x="20" y="79" width="260" height="5" rx="2" fill="#ddd"/>
+  <rect x="20" y="86" width="230" height="5" rx="2" fill="#ddd"/>
+  <!-- Section: Education -->
+  <text x="20" y="102" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">EDUCATION</text>
+  <line x1="20" y1="105" x2="280" y2="105" stroke="#111" stroke-width="0.8"/>
+  <text x="20" y="116" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">B.Tech in Data Science | 2022-Present</text>
+  <text x="260" y="116" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">CGPA: 7.23</text>
+  <text x="20" y="125" font-family="Arial,sans-serif" font-size="6.5" fill="#555">Technocrats Institute of Technology, Bhopal</text>
+  <text x="20" y="135" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Senior Secondary | 2021-2022</text>
+  <text x="260" y="135" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">69%</text>
+  <!-- 2-col Skills -->
+  <text x="20" y="152" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">TECHNICAL SKILLS</text>
+  <line x1="20" y1="155" x2="148" y2="155" stroke="#111" stroke-width="0.8"/>
+  <text x="155" y="152" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">SOFT SKILLS</text>
+  <line x1="155" y1="155" x2="280" y2="155" stroke="#111" stroke-width="0.8"/>
+  <text x="26" y="165" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Java, Python</text>
+  <text x="26" y="174" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• HTML, CSS, JavaScript</text>
+  <text x="26" y="183" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• MySQL, JDBC</text>
+  <text x="161" y="165" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Problem Solving</text>
+  <text x="161" y="174" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Analytical Thinking</text>
+  <text x="161" y="183" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Team Collaboration</text>
+  <!-- Experience -->
+  <text x="20" y="200" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">EXPERIENCE</text>
+  <line x1="20" y1="203" x2="280" y2="203" stroke="#111" stroke-width="0.8"/>
+  <text x="20" y="214" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Inspire Leap</text>
+  <text x="260" y="214" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">July 2025 – Aug 2025</text>
+  <text x="26" y="224" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Built Java backend modules using OOP principles</text>
+  <text x="26" y="232" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• MySQL CRUD operations using JDBC</text>
+  <text x="26" y="240" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Used Git/GitHub for version control</text>
+  <!-- Projects -->
+  <text x="20" y="256" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">PROJECTS</text>
+  <line x1="20" y1="259" x2="280" y2="259" stroke="#111" stroke-width="0.8"/>
+  <text x="20" y="270" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Ambulance Booking System</text>
+  <text x="260" y="270" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">Nov 2025 – Present</text>
+  <text x="26" y="279" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Java-based emergency ambulance booking with MySQL</text>
+  <text x="26" y="287" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Distance-based matching using location coordinates</text>
+  <!-- Certifications -->
+  <text x="20" y="303" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#111" letter-spacing="1">CERTIFICATIONS</text>
+  <line x1="20" y1="306" x2="280" y2="306" stroke="#111" stroke-width="0.8"/>
+  <text x="20" y="317" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Microsoft Certified: Azure Fundamentals (AZ 900)</text>
+  <text x="260" y="317" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">March 2025</text>
+  <text x="20" y="326" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Code Chef Certified: Java Problem Solving</text>
+  <text x="260" y="326" font-family="Arial,sans-serif" font-size="6.5" fill="#555" text-anchor="end">April 2025</text>
+  <!-- FREE badge -->
+  <rect x="240" y="378" width="48" height="16" rx="8" fill="#00D4B4"/>
+  <text x="264" y="390" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000" text-anchor="middle">FREE</text>
+</svg>

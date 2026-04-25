@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <!-- Header centered -->
+  <text x="150" y="26" font-family="Helvetica,sans-serif" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle" letter-spacing="3">ANAISHA PARVATI</text>
+  <text x="150" y="38" font-family="Helvetica,sans-serif" font-size="6.5" fill="#64748b" text-anchor="middle" letter-spacing="2">HEAD MANAGER</text>
+  <line x1="40" y1="44" x2="260" y2="44" stroke="#0f172a" stroke-width="1.5"/>
+  <text x="60" y="53" font-family="Helvetica,sans-serif" font-size="6" fill="#475569">📞 +123-456-7890</text>
+  <text x="150" y="53" font-family="Helvetica,sans-serif" font-size="6" fill="#475569" text-anchor="middle">📍 Any City</text>
+  <text x="240" y="53" font-family="Helvetica,sans-serif" font-size="6" fill="#475569" text-anchor="end">✉ hello@email.com</text>
+  <!-- About Me -->
+  <text x="20" y="67" font-family="Helvetica,sans-serif" font-size="7.5" font-weight="700" fill="#0f172a" letter-spacing="1">ABOUT ME</text>
+  <line x1="20" y1="70" x2="280" y2="70" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="20" y="74" width="260" height="5" rx="2" fill="#e2e8f0"/>
+  <rect x="20" y="81" width="240" height="5" rx="2" fill="#e2e8f0"/>
+  <rect x="20" y="88" width="250" height="5" rx="2" fill="#e2e8f0"/>
+  <!-- Education - Timeline -->
+  <text x="20" y="105" font-family="Helvetica,sans-serif" font-size="7.5" font-weight="700" fill="#0f172a" letter-spacing="1">EDUCATION</text>
+  <line x1="20" y1="108" x2="280" y2="108" stroke="#cbd5e1" stroke-width="1"/>
+  <!-- Timeline row 1 -->
+  <text x="20" y="121" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">2020 – 2023</text>
+  <text x="20" y="129" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">Wardiere University</text>
+  <text x="175" y="121" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Master of Business Mgmt</text>
+  <rect x="175" y="124" width="105" height="4" rx="2" fill="#e2e8f0"/>
+  <rect x="175" y="130" width="90" height="4" rx="2" fill="#e2e8f0"/>
+  <!-- Timeline row 2 -->
+  <text x="20" y="148" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">2016 – 2020</text>
+  <text x="20" y="156" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">Borcelle University</text>
+  <text x="175" y="148" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Bachelor of Business Mgmt</text>
+  <rect x="175" y="151" width="105" height="4" rx="2" fill="#e2e8f0"/>
+  <rect x="175" y="157" width="90" height="4" rx="2" fill="#e2e8f0"/>
+  <!-- Experience - Timeline -->
+  <text x="20" y="175" font-family="Helvetica,sans-serif" font-size="7.5" font-weight="700" fill="#0f172a" letter-spacing="1">EXPERIENCE</text>
+  <line x1="20" y1="178" x2="280" y2="178" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="20" y="191" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">2023 – NOW</text>
+  <text x="20" y="199" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">Borcelle Studio</text>
+  <text x="175" y="191" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Head Manager</text>
+  <rect x="175" y="194" width="105" height="4" rx="2" fill="#e2e8f0"/>
+  <rect x="175" y="200" width="90" height="4" rx="2" fill="#e2e8f0"/>
+  <text x="20" y="218" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">2022 – 2023</text>
+  <text x="20" y="226" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">Liceria &amp; Co.</text>
+  <text x="175" y="218" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">General Manager</text>
+  <rect x="175" y="221" width="105" height="4" rx="2" fill="#e2e8f0"/>
+  <rect x="175" y="227" width="90" height="4" rx="2" fill="#e2e8f0"/>
+  <!-- Skills -->
+  <text x="20" y="246" font-family="Helvetica,sans-serif" font-size="7.5" font-weight="700" fill="#0f172a" letter-spacing="1">SKILLS</text>
+  <line x1="20" y1="249" x2="280" y2="249" stroke="#cbd5e1" stroke-width="1"/>
+  <rect x="20" y="255" width="55" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="47" y="265" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Leadership</text>
+  <rect x="82" y="255" width="52" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="108" y="265" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Analytics</text>
+  <rect x="141" y="255" width="68" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="175" y="265" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Digital Marketing</text>
+  <rect x="216" y="255" width="50" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="241" y="265" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Teamwork</text>
+  <rect x="20" y="273" width="72" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="56" y="283" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Communication</text>
+  <rect x="99" y="273" width="72" height="13" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+  <text x="135" y="283" font-family="Helvetica,sans-serif" font-size="6.5" fill="#334155" text-anchor="middle">Problem Solving</text>
+  <!-- References -->
+  <text x="20" y="303" font-family="Helvetica,sans-serif" font-size="7.5" font-weight="700" fill="#0f172a" letter-spacing="1">REFERENCES</text>
+  <line x1="20" y1="306" x2="280" y2="306" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="20" y="318" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Aarya Agarwal</text>
+  <text x="155" y="318" font-family="Helvetica,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Sharin Varma</text>
+  <text x="20" y="327" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">CEO of Borcelle Company</text>
+  <text x="155" y="327" font-family="Helvetica,sans-serif" font-size="6" fill="#64748b">HRD of Borcelle Company</text>
+  <text x="20" y="335" font-family="Helvetica,sans-serif" font-size="6" fill="#475569">📞 123-456-7890</text>
+  <text x="155" y="335" font-family="Helvetica,sans-serif" font-size="6" fill="#475569">📞 123-456-7890</text>
+  <!-- PREMIUM badge -->
+  <rect x="226" y="378" width="62" height="16" rx="8" fill="#c9a84c"/>
+  <text x="257" y="390" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000" text-anchor="middle">★ PREMIUM</text>
+</svg>

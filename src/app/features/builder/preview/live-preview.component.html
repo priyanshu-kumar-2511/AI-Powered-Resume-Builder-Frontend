@@ -1,0 +1,171 @@
+<div class="preview-panel">
+  <!-- Canva-style top bar -->
+  <div class="preview-topbar">
+    <div class="topbar-left">
+      <div class="preview-dot dot-red"></div>
+      <div class="preview-dot dot-amber"></div>
+      <div class="preview-dot dot-green"></div>
+      <span class="preview-label">Live Preview</span>
+    </div>
+    <span class="section-count">{{ visibleSections.length }}/{{ sections.length }} sections</span>
+  </div>
+
+  <!-- Canvas area -->
+  <div class="canvas-area">
+    <!-- Loading overlay -->
+    <div class="canvas-overlay" [style.display]="loading ? 'flex' : 'none'">
+      <div class="spinner spinner-light"></div>
+      <span>Generating preview…</span>
+    </div>
+
+    <!-- A4 paper frame — always visible (shows template with sample data if no sections) -->
+    <div class="paper-stage">
+      <div class="a4-paper">
+        <iframe
+          #previewFrame
+          class="preview-iframe"
+          title="Resume live preview"
+          sandbox="allow-same-origin">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zoom hint -->
+  <div class="zoom-bar">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Scaled to fit · Template preview
+  </div>
+
+
+<style>
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #161b25;
+}
+
+/* Top bar */
+.preview-topbar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #0e1219;
+  flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 8px; }
+.preview-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.dot-red    { background: #ff5f57; }
+.dot-amber  { background: #febc2e; }
+.dot-green  { background: #28c840; }
+
+.preview-label {
+  font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+.section-count {
+  font-size: 0.7rem; color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 2px 8px; border-radius: 999px;
+}
+
+/* Canvas area */
+.canvas-area {
+  flex: 1; overflow: auto;
+  display: flex; align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at 30% 70%, rgba(0,212,180,0.03) 0%, transparent 50%),
+    repeating-linear-gradient(
+      0deg,
+      transparent, transparent 24px,
+      rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent, transparent 24px,
+      rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px
+    ),
+    #161b25;
+}
+
+/* Loading/empty overlays */
+.canvas-overlay, .canvas-empty {
+  flex: 1; display: flex;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px;
+  color: var(--text-muted);
+  font-size: 0.85rem; text-align: center;
+  min-height: 60vh; width: 100%;
+}
+
+/* A4 Paper */
+.paper-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100%;
+}
+
+.a4-paper {
+  /* A4 = 794 × 1123px but we scale down to fit the 420px panel */
+  width: 100%;
+  max-width: 380px;
+  /* A4 ratio = 1:1.414 */
+  aspect-ratio: 1 / 1.414;
+  background: #ffffff;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.3),
+    0 8px 32px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.04);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Page curl effect */
+.a4-paper::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 0 18px 18px;
+  border-color: transparent transparent rgba(0,0,0,0.15) rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+.preview-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 210%; /* Force iframe to render at ~800px width */
+  height: 210%;
+  transform-origin: top left;
+  transform: scale(0.47619); /* Scale down to fit the container */
+  border: none;
+  display: block;
+  background: transparent;
+}
+
+/* Zoom bar */
+.zoom-bar {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.68rem; color: var(--text-muted);
+  background: #0e1219;
+  flex-shrink: 0;
+}
+</style>

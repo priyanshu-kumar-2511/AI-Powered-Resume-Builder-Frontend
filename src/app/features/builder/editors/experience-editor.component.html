@@ -1,0 +1,170 @@
+<div class="exp-editor">
+  <div class="editor-top-row">
+    <span class="save-hint" [class.saving]="saving" [class.error]="saveError">
+      {{ saving ? 'Saving...' : saveError ? 'Save failed' : 'Autosave on' }}
+    </span>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="addEntry()">+ Add Entry</button>
+  </div>
+
+  @if (!entries.length) {
+    <div class="empty-hint">No entries yet. Click "+ Add Entry" to start.</div>
+  }
+
+  @for (entryCtrl of form.controls; track i; let i = $index) {
+    <div class="exp-entry-card" [formGroup]="asFormGroup(entryCtrl)">
+      <div class="entry-header">
+        <span class="entry-num">Entry {{ i + 1 }}</span>
+        <button type="button" class="remove-btn" (click)="removeEntry(i)">Remove</button>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Company *</label>
+          <input class="field-input" formControlName="company" placeholder="e.g. Google" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Role / Title *</label>
+          <input class="field-input" formControlName="role" placeholder="e.g. Software Engineer" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Start Date</label>
+          <input class="field-input" formControlName="startDate" placeholder="e.g. Jan 2022" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">End Date</label>
+          <input class="field-input" formControlName="endDate" placeholder="e.g. Dec 2023"
+                 [class.disabled-input]="asFormGroup(entryCtrl).get('isCurrent')?.value"
+                 [attr.disabled]="asFormGroup(entryCtrl).get('isCurrent')?.value ? true : null" />
+        </div>
+      </div>
+
+      <label class="current-toggle">
+        <input type="checkbox" formControlName="isCurrent" />
+        Currently working here
+      </label>
+
+      <div class="bullets-section">
+        <div class="bullets-header">
+          <label class="field-label">Bullet Points</label>
+          <button type="button" class="btn btn-ghost btn-xs" (click)="addBullet(asFormGroup(entryCtrl))">+ Bullet</button>
+        </div>
+        @for (bulletCtrl of getBullets(asFormGroup(entryCtrl)).controls; track bi; let bi = $index) {
+          <div class="bullet-row">
+            <span class="bullet-dot">•</span>
+            <input class="field-input bullet-input" [formControl]="$any(bulletCtrl)" placeholder="Describe an accomplishment..." />
+            <button type="button" class="remove-bullet-btn"
+                    (click)="removeBullet(asFormGroup(entryCtrl), bi)"
+                    [disabled]="getBullets(asFormGroup(entryCtrl)).length <= 1">✕</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<style>
+.exp-editor { display: flex; flex-direction: column; gap: 16px; }
+
+.editor-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.save-hint { font-size: 0.75rem; color: var(--text-muted); }
+.save-hint.saving { color: var(--teal); }
+.save-hint.error  { color: #ef4444; }
+
+.empty-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 32px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.exp-entry-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-surface);
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entry-num { font-size: 0.8rem; font-weight: 600; color: var(--teal); }
+
+.remove-btn {
+  font-size: 0.75rem;
+  color: #ef4444;
+  background: none;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 0.78rem; font-weight: 500; color: var(--text-secondary); }
+
+.field-input {
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.field-input:focus { border-color: var(--teal); outline: none; }
+.disabled-input { opacity: 0.4; pointer-events: none; }
+
+.current-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.bullets-section { display: flex; flex-direction: column; gap: 8px; }
+.bullets-header { display: flex; justify-content: space-between; align-items: center; }
+.btn-xs { padding: 3px 8px; font-size: 0.72rem; }
+
+.bullet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bullet-dot { color: var(--teal); flex-shrink: 0; }
+.bullet-input { flex: 1; }
+
+.remove-bullet-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.remove-bullet-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>

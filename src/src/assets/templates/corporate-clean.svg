@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#ffffff"/>
+  <!-- Header -->
+  <text x="150" y="28" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#111" text-anchor="middle" letter-spacing="2">OLIVIA SANCHEZ</text>
+  <text x="150" y="40" font-family="Arial,sans-serif" font-size="8" fill="#555" text-anchor="middle" letter-spacing="1">ADMINISTRATIVE MANAGER</text>
+  <line x1="20" y1="46" x2="280" y2="46" stroke="#111" stroke-width="1.5"/>
+  <text x="150" y="56" font-family="Arial,sans-serif" font-size="6.5" fill="#666" text-anchor="middle">hello@email.com | 123-456-7890 | 123 Anywhere St.</text>
+  <!-- Summary section with grey bar -->
+  <rect x="20" y="64" width="260" height="13" rx="1" fill="#e8e8e8"/>
+  <text x="26" y="74" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#111" letter-spacing="1">SUMMARY</text>
+  <rect x="20" y="79" width="260" height="5" rx="2" fill="#ddd"/>
+  <rect x="20" y="86" width="240" height="5" rx="2" fill="#ddd"/>
+  <rect x="20" y="93" width="250" height="5" rx="2" fill="#ddd"/>
+  <!-- Work Experience -->
+  <rect x="20" y="106" width="260" height="13" rx="1" fill="#e8e8e8"/>
+  <text x="26" y="116" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#111" letter-spacing="1">WORK EXPERIENCE</text>
+  <text x="20" y="130" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Administrative Assistant, Arowwai Industries</text>
+  <text x="260" y="130" font-family="Arial,sans-serif" font-size="6" fill="#555" text-anchor="end">Oct 2023 – Present</text>
+  <text x="26" y="139" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Managed executive calendars and travel arrangements</text>
+  <text x="26" y="147" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Maintained office supplies and optimized cost efficiency</text>
+  <text x="20" y="160" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Office Coordinator, Borcelle</text>
+  <text x="260" y="160" font-family="Arial,sans-serif" font-size="6" fill="#555" text-anchor="end">Jan 2022 – Sept 2023</text>
+  <text x="26" y="169" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Provided admin support to 20+ employees</text>
+  <text x="26" y="177" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Acted as liaison between departments</text>
+  <text x="20" y="190" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Internship, Salford &amp; Co Corporation</text>
+  <text x="260" y="190" font-family="Arial,sans-serif" font-size="6" fill="#555" text-anchor="end">Apr 2021 – Dec 2021</text>
+  <text x="26" y="199" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Supported executives with admin and scheduling tasks</text>
+  <!-- Education -->
+  <rect x="20" y="210" width="260" height="13" rx="1" fill="#e8e8e8"/>
+  <text x="26" y="220" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#111" letter-spacing="1">EDUCATION</text>
+  <text x="20" y="233" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Bachelor of Business Administration</text>
+  <text x="260" y="233" font-family="Arial,sans-serif" font-size="6" fill="#555" text-anchor="end">Jan 2019 – Feb 2021</text>
+  <text x="20" y="241" font-family="Arial,sans-serif" font-size="6.5" fill="#555">University of Business Excellence · CGPA: 3.90</text>
+  <text x="20" y="253" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#222">Foundation in Business Administration</text>
+  <text x="260" y="253" font-family="Arial,sans-serif" font-size="6" fill="#555" text-anchor="end">Jan 2018 – Dec 2018</text>
+  <text x="20" y="261" font-family="Arial,sans-serif" font-size="6.5" fill="#555">Borcelle University · CGPA: 3.80</text>
+  <!-- Skills -->
+  <rect x="20" y="272" width="260" height="13" rx="1" fill="#e8e8e8"/>
+  <text x="26" y="282" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#111" letter-spacing="1">KEY SKILLS</text>
+  <text x="26" y="297" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Client Acquisition</text>
+  <text x="106" y="297" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Negotiation Skills</text>
+  <text x="196" y="297" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Relationship Mgmt</text>
+  <text x="26" y="307" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• B2B Sales</text>
+  <text x="106" y="307" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Problem-Solving</text>
+  <text x="196" y="307" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Market Analysis</text>
+  <text x="26" y="317" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Negotiation</text>
+  <text x="106" y="317" font-family="Arial,sans-serif" font-size="6.5" fill="#333">• Time Management</text>
+  <!-- FREE badge -->
+  <rect x="240" y="378" width="48" height="16" rx="8" fill="#00D4B4"/>
+  <text x="264" y="390" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000" text-anchor="middle">FREE</text>
+</svg>

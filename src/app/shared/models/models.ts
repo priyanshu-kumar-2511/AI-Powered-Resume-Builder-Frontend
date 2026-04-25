@@ -133,3 +133,79 @@ export interface ApiError {
   message: string;
   status?: number;
 }
+
+// ── Builder / Section Models ──────────────────────────────────────────────────
+
+export type SectionType =
+  | 'SUMMARY'
+  | 'EXPERIENCE'
+  | 'EDUCATION'
+  | 'SKILLS'
+  | 'CERTIFICATIONS'
+  | 'PROJECTS'
+  | 'LANGUAGES'
+  | 'VOLUNTEER'
+  | 'CUSTOM';
+
+export interface ResumeSection {
+  sectionId: number;
+  resumeId: number;
+  sectionType: SectionType;
+  title: string;
+  content: string;          // JSON string — shape varies by sectionType
+  displayOrder: number;
+  isVisible: boolean;
+  aiGenerated: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddSectionRequest {
+  resumeId: number;
+  sectionType: SectionType;
+  title: string;
+  content?: string;
+  displayOrder?: number;
+}
+
+export interface UpdateSectionRequest {
+  title?: string;
+  content?: string;
+  displayOrder?: number;
+  isVisible?: boolean;
+  aiGenerated?: boolean;
+}
+
+export interface ReorderRequest {
+  sectionIds: number[];
+}
+
+export interface BulkUpdateRequest {
+  sections: ResumeSection[];
+}
+
+// ── AI Models ─────────────────────────────────────────────────────────────────
+
+export interface AiQuota {
+  userId: number;
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface AiSummaryRequest {
+  resumeId: number;
+  targetJobTitle?: string;
+  existingContent?: string;
+}
+
+export interface AiBulletsRequest {
+  resumeId: number;
+  company: string;
+  role: string;
+  existingBullets?: string[];
+}
+
+export interface AiSkillsResponse {
+  skills: string[];
+}

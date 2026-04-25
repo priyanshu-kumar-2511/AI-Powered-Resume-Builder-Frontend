@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { TemplateService } from '../../../core/services/template.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -12,7 +13,7 @@ type FilterCategory = 'ALL' | TemplateCategory;
 @Component({
   selector: 'app-template-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink, NavbarComponent, FormsModule],
   templateUrl: './template-list.component.html'
 })
 export class TemplateListComponent implements OnInit {
@@ -27,6 +28,7 @@ export class TemplateListComponent implements OnInit {
 
   activeTier:     FilterTier     = 'ALL';
   activeCategory: FilterCategory = 'ALL';
+  searchQuery = '';
 
   categories: FilterCategory[] = ['ALL', 'PROFESSIONAL', 'CREATIVE', 'MODERN', 'MINIMALIST', 'ATS_OPTIMISED'];
   tiers:      FilterTier[]     = ['ALL', 'FREE', 'PREMIUM'];
@@ -53,11 +55,18 @@ export class TemplateListComponent implements OnInit {
   }
 
   applyFilters() {
+    const q = this.searchQuery.toLowerCase().trim();
     this.filtered = this.allTemplates.filter(t => {
       const tierMatch = this.activeTier === 'ALL' || t.tier === this.activeTier;
       const catMatch  = this.activeCategory === 'ALL' || t.category === this.activeCategory;
-      return tierMatch && catMatch;
+      const searchMatch = !q || t.name.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
+      return tierMatch && catMatch && searchMatch;
     });
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.applyFilters();
   }
 
   formatCategory(cat: string): string {

@@ -1,0 +1,105 @@
+<div class="section-editor-wrap">
+  <div class="editor-header">
+    <div class="editor-header-left">
+      <span class="editor-type-badge">{{ section.sectionType }}</span>
+      <h2 class="editor-title">{{ section.title }}</h2>
+    </div>
+    <button
+      type="button"
+      class="delete-btn"
+      [disabled]="deleting"
+      (click)="deleteSection()"
+      title="Delete section">
+      {{ deleting ? '...' : '🗑️ Delete' }}
+    </button>
+  </div>
+
+  @if (deleteError) {
+    <div class="alert alert-error">{{ deleteError }}</div>
+  }
+
+  <div class="editor-body">
+    @switch (section.sectionType) {
+      @case ('SUMMARY') {
+        <app-summary-editor [section]="section" (saved)="onUpdated($event)" />
+      }
+      @case ('EXPERIENCE') {
+        <app-experience-editor [section]="section" (saved)="onUpdated($event)" />
+      }
+      @case ('EDUCATION') {
+        <app-education-editor [section]="section" (saved)="onUpdated($event)" />
+      }
+      @case ('SKILLS') {
+        <app-skills-editor [section]="section" (saved)="onUpdated($event)" />
+      }
+      @default {
+        <app-generic-section-editor [section]="section" (saved)="onUpdated($event)" />
+      }
+    }
+  </div>
+</div>
+
+<style>
+.section-editor-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.editor-type-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--teal);
+  background: rgba(0,212,180,0.1);
+  border: 1px solid rgba(0,212,180,0.2);
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.editor-title {
+  font-size: 1.1rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-btn {
+  background: none;
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.delete-btn:hover { background: rgba(239,68,68,0.08); }
+.delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.editor-body { padding: 24px; }
+</style>

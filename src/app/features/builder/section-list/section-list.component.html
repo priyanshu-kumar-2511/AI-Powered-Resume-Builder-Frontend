@@ -1,0 +1,129 @@
+<div class="section-list">
+  @if (!sections.length) {
+    <div class="empty-list">No sections yet. Add your first one below.</div>
+  }
+
+  @for (section of sections; track section.sectionId; let i = $index) {
+    <div
+      class="section-item"
+      [class.selected]="section.sectionId === selectedSectionId"
+      [class.hidden-section]="!section.isVisible"
+      (click)="select(section)">
+
+      <!-- Reorder buttons -->
+      <div class="reorder-btns">
+        <button type="button" class="reorder-btn" title="Move up"
+                [disabled]="i === 0"
+                (click)="moveUp($event, i)">▲</button>
+        <button type="button" class="reorder-btn" title="Move down"
+                [disabled]="i === sections.length - 1"
+                (click)="moveDown($event, i)">▼</button>
+      </div>
+
+      <span class="section-icon">{{ iconFor(section.sectionType) }}</span>
+      <span class="section-title">{{ section.title }}</span>
+
+      <button
+        type="button"
+        class="vis-btn"
+        [title]="section.isVisible ? 'Hide section' : 'Show section'"
+        [disabled]="togglingId === section.sectionId"
+        (click)="toggleVisibility($event, section)">
+        {{ section.isVisible ? '👁️' : '🙈' }}
+      </button>
+    </div>
+  }
+</div>
+
+<style>
+.section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.section-item:hover { background: rgba(255,255,255,0.04); }
+
+.section-item.selected {
+  background: rgba(0,212,180,0.08);
+  border-color: rgba(0,212,180,0.25);
+}
+
+.section-item.hidden-section { opacity: 0.45; }
+
+.reorder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.section-item:hover .reorder-btns,
+.section-item.selected .reorder-btns {
+  opacity: 1;
+}
+
+.reorder-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.55rem;
+  padding: 1px 3px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color 0.1s;
+}
+.reorder-btn:hover:not(:disabled) { color: var(--teal); }
+.reorder-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+.section-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 0.85rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vis-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.section-item:hover .vis-btn,
+.section-item.selected .vis-btn {
+  opacity: 1;
+}
+
+.empty-list {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px 8px;
+}
+</style>

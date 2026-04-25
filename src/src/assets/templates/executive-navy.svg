@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#ffffff"/>
+  <!-- Dark navy header -->
+  <rect x="0" y="0" width="300" height="70" fill="#0f172a"/>
+  <text x="150" y="28" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="3">EMAA WARNER</text>
+  <text x="150" y="43" font-family="Arial,sans-serif" font-size="7.5" fill="#94a3b8" text-anchor="middle" letter-spacing="1">ACCOUNTING EXECUTIVE</text>
+  <text x="150" y="58" font-family="Arial,sans-serif" font-size="6.5" fill="#64748b" text-anchor="middle">hello@email.com | 123-456-7890 | Any City</text>
+  <!-- Summary -->
+  <text x="20" y="85" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0891b2" letter-spacing="1">SUMMARY</text>
+  <line x1="20" y1="88" x2="280" y2="88" stroke="#e2e8f0" stroke-width="1"/>
+  <rect x="20" y="92" width="260" height="5" rx="2" fill="#ddd"/>
+  <rect x="20" y="99" width="240" height="5" rx="2" fill="#ddd"/>
+  <rect x="20" y="106" width="250" height="5" rx="2" fill="#ddd"/>
+  <!-- Work Experience -->
+  <text x="20" y="122" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0891b2" letter-spacing="1">WORK EXPERIENCE</text>
+  <line x1="20" y1="125" x2="280" y2="125" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="20" y="136" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#111">Accounting Executive</text>
+  <text x="280" y="136" font-family="Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jan 2024 – Present</text>
+  <text x="20" y="144" font-family="Arial,sans-serif" font-size="6" fill="#0891b2">Borcelle Industries</text>
+  <text x="26" y="153" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Cost-control measures reducing expenses by 15%</text>
+  <text x="26" y="161" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Streamlined financial reporting, +20% efficiency</text>
+  <text x="20" y="174" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#111">Accountant</text>
+  <text x="280" y="174" font-family="Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jun 2022 – Jan 2024</text>
+  <text x="20" y="182" font-family="Arial,sans-serif" font-size="6" fill="#0891b2">Timmerman Industries</text>
+  <text x="26" y="191" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Month-end close, reducing time by 25%</text>
+  <text x="26" y="199" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• New forecasting system improving accuracy 18%</text>
+  <text x="20" y="212" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#111">Junior Accountant</text>
+  <text x="280" y="212" font-family="Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jan 2020 – Jun 2022</text>
+  <text x="20" y="220" font-family="Arial,sans-serif" font-size="6" fill="#0891b2">Timmerman Industries</text>
+  <text x="26" y="229" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Cross-functional financial strategy +10% revenue</text>
+  <!-- 2-col Education + Skills -->
+  <text x="20" y="248" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0891b2" letter-spacing="1">EDUCATION</text>
+  <line x1="20" y1="251" x2="148" y2="251" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="155" y="248" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0891b2" letter-spacing="1">SKILLS</text>
+  <line x1="155" y1="251" x2="280" y2="251" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="20" y="263" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#111">BBA</text>
+  <text x="148" y="263" font-family="Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jan 2019 – Feb 2021</text>
+  <text x="20" y="271" font-family="Arial,sans-serif" font-size="6" fill="#334155">University of Excellence</text>
+  <text x="20" y="279" font-family="Arial,sans-serif" font-size="6" fill="#64748b">CGPA: 3.90</text>
+  <text x="20" y="292" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#111">Foundation BBA</text>
+  <text x="148" y="292" font-family="Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jan 2018 – Dec 2018</text>
+  <text x="20" y="300" font-family="Arial,sans-serif" font-size="6" fill="#334155">Borcelle University</text>
+  <text x="155" y="263" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Client Acquisition</text>
+  <text x="155" y="272" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• B2B Sales</text>
+  <text x="155" y="281" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Negotiation Skills</text>
+  <text x="155" y="290" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Problem-Solving</text>
+  <text x="155" y="299" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Time Management</text>
+  <text x="155" y="308" font-family="Arial,sans-serif" font-size="6.5" fill="#334155">• Market Research</text>
+  <!-- PREMIUM badge -->
+  <rect x="226" y="378" width="62" height="16" rx="8" fill="#c9a84c"/>
+  <text x="257" y="390" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000" text-anchor="middle">★ PREMIUM</text>
+</svg>
