@@ -158,6 +158,19 @@
         </div>
       }
     </aside>
+    
+    <!-- AI Sidebar — floats on right edge -->
+    <app-ai-sidebar
+      [resumeId]="resumeId"
+      [targetJobTitle]="currentJobTitle"
+      [currentSectionType]="selectedSection?.sectionType ?? ''"
+      [currentSectionContent]="selectedSectionContentForAi"
+      [fullResumeContent]="fullResumeContentForAi"
+      (summaryAccepted)="onSummaryAccepted($event)"
+      (bulletAccepted)="onBulletAccepted($event)"
+      (skillAdded)="onSkillAdded($event)"
+      (improvedContent)="onImprovedContent($event)"
+      (atsScore)="onAtsScore($event)" />
 
   </div>
 </div>
@@ -377,6 +390,11 @@
   cursor: pointer; transition: all 0.2s; font-family: inherit;
 }
 .add-sec-btn:hover { background: rgba(0,212,180,0.1); }
+
+.canva-left app-add-section,
+.canva-left app-section-list {
+  flex: 1; overflow-y: auto; display: block; padding: 12px;
+}
 
 /* ── Center canvas ── */
 .canva-canvas {

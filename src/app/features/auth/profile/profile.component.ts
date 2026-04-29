@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { UserProfileResponse } from '../../../shared/models/models';
+import { extractErrorMessage } from '../../../shared/utils/http-error.util';
 
 @Component({
   selector: 'app-profile',
@@ -27,8 +28,8 @@ export class ProfileComponent implements OnInit {
 
   form = this.fb.group({
     fullName:     ['', [Validators.required, Validators.minLength(2)]],
-    mobileNumber: [''],
-    age:          [null as number | null]
+    mobileNumber: ['', [Validators.pattern(/^\+91[0-9]{10}$/)]],
+    age:          [null as number | null, [Validators.min(18), Validators.max(120)]]
   });
 
   ngOnInit() {
@@ -61,7 +62,7 @@ export class ProfileComponent implements OnInit {
         this.saving = false; this.editMode = false;
         this.auth.getProfile().subscribe(u => this.profile = u);
       },
-      error: (e) => { this.error = e?.error?.message || 'Update failed.'; this.saving = false; }
+      error: (e) => { this.error = extractErrorMessage(e, 'Update failed.'); this.saving = false; }
     });
   }
 

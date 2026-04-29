@@ -3,10 +3,17 @@ import { combineLatest, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { BuilderStateService } from './builder-state.service';
 import { ResumeSection, Template } from '../../../shared/models/models';
+import { AuthService } from '../../../core/services/auth.service';
+
+// ✅ FIX: mustache uses `export default` in its ESM build.
+// `import * as Mustache` gives a namespace object where .render is undefined.
+// Use a default import instead.
+import Mustache from 'mustache';
 
 @Injectable({ providedIn: 'root' })
 export class LivePreviewService implements OnDestroy {
   private builderState = inject(BuilderStateService);
+  private authService = inject(AuthService);
 
   private iframeRef: HTMLIFrameElement | null = null;
   private sub: Subscription | null = null;
@@ -20,15 +27,18 @@ export class LivePreviewService implements OnDestroy {
     if (this.sub) {
       this.sub.unsubscribe();
     }
-    
+
     this.sub = combineLatest([
       this.builderState.sections$,
-      this.builderState.template$
+      this.builderState.template$,
+      this.builderState.resume$
     ]).pipe(
       debounceTime(500),
-      distinctUntilChanged(([prevSec, prevTpl], [currSec, currTpl]) =>
+      distinctUntilChanged(([prevSec, prevTpl, prevResume], [currSec, currTpl, currResume]) =>
         JSON.stringify(prevSec) === JSON.stringify(currSec) &&
-        prevTpl?.templateId === currTpl?.templateId
+        prevTpl?.templateId === currTpl?.templateId &&
+        prevResume?.resumeId === currResume?.resumeId &&
+        prevResume?.targetJobTitle === currResume?.targetJobTitle
       )
     ).subscribe(([sections, template]) => {
       this.renderPreview(sections, template);
@@ -59,10 +69,8 @@ export class LivePreviewService implements OnDestroy {
 
     if (template?.htmlLayout) {
       if (sections.length > 0) {
-        // Fill real section data into template
         body = this.injectSections(template.htmlLayout, sections);
       } else {
-        // Fill with sample/placeholder data so template looks great immediately
         body = this.injectPlaceholders(template.htmlLayout);
       }
     } else {
@@ -84,45 +92,107 @@ export class LivePreviewService implements OnDestroy {
 
   /** Fill template placeholders with sample/demo data */
   private injectPlaceholders(layout: string): string {
-    const placeholders: Record<string, string> = {
-      '{{fullName}}':      'Richard Sanchez',
-      '{{jobTitle}}':      'Marketing Manager',
-      '{{email}}':         'rsanchez@email.com',
-      '{{phone}}':         '+1 (555) 012-3456',
-      '{{location}}':      'New York, NY',
-      '{{linkedin}}':      'linkedin.com/in/rsanchez',
-      '{{summary}}':       'Results-driven marketing professional with 8+ years of experience leading cross-functional teams. Proven track record of growing revenue by 40% through data-driven campaigns and innovative brand strategies.',
-      '{{SUMMARY}}':       '<div class="section summary"><h2>Professional Summary</h2><p>Results-driven marketing professional with 8+ years of experience. Proven track record of growing revenue by 40% through data-driven campaigns.</p></div>',
-      '{{EXPERIENCE}}':    '<div class="section experience"><h2>Work Experience</h2><div class="exp-entry"><div class="exp-header">Senior Marketing Manager</div><div class="exp-company">Bonsai Studio</div><div class="exp-dates">Jan 2022 – Present</div><ul><li>Led a team of 12 to deliver award-winning campaigns</li><li>Grew organic traffic by 60% in 18 months</li></ul></div></div>',
-      '{{EDUCATION}}':     '<div class="section education"><h2>Education</h2><div class="edu-entry"><div><strong>Stanford University</strong><div class="edu-degree">B.A. Communications</div></div><div class="edu-dates">2014–2018</div></div></div>',
-      '{{SKILLS}}':        '<div class="section skills"><h2>Skills</h2><div class="skill-chips"><span class="skill-chip">Analytics</span><span class="skill-chip">Strategy</span><span class="skill-chip">SEO/SEM</span><span class="skill-chip">Adobe Suite</span><span class="skill-chip">Leadership</span></div></div>',
+    const viewData = {
+      fullName: 'Richard Sanchez',
+      jobTitle: 'Marketing Manager',
+      email: 'rsanchez@email.com',
+      phone: '+1 (555) 012-3456',
+      location: 'New York, NY',
+      linkedin: 'linkedin.com/in/rsanchez',
+      summary: 'Results-driven marketing professional with 8+ years of experience leading cross-functional teams. Proven track record of growing revenue by 40% through data-driven campaigns and innovative brand strategies.',
+      experience: [
+        {
+          role: 'Senior Marketing Manager',
+          company: 'Bonsai Studio',
+          startDate: 'Jan 2022',
+          endDate: 'Present',
+          bullets: [{ text: 'Led a team of 12 to deliver award-winning campaigns' }, { text: 'Grew organic traffic by 60% in 18 months' }]
+        }
+      ],
+      education: [
+        {
+          degree: 'B.A. Communications',
+          institution: 'Stanford University',
+          startYear: '2014',
+          endYear: '2018',
+          grade: '3.8 GPA'
+        }
+      ],
+      skills: [{ name: 'Analytics' }, { name: 'Strategy' }, { name: 'SEO/SEM' }, { name: 'Leadership' }]
     };
-    let result = layout;
-    Object.entries(placeholders).forEach(([key, val]) => {
-      result = result.replace(new RegExp(key.replace(/[{}]/g, '\\$&'), 'g'), val);
-    });
-    return result;
+    // ✅ Mustache.render now works correctly with the default import
+    return Mustache.render(layout, viewData);
   }
 
-  /** Inject section content into template placeholder comments/divs if present */
+  /** Inject real section content into template placeholders */
   private injectSections(layout: string, sections: ResumeSection[]): string {
-    let result = layout;
+    const currentUser = this.authService.currentUser();
+    const currentResume = this.builderState.resumeSnapshot;
+
+    const viewData: any = {
+      fullName: currentUser?.fullName ?? 'Your Name',
+      jobTitle: currentResume?.targetJobTitle ?? 'Target Role',
+      email: currentUser?.email ?? '',
+      phone: currentUser?.mobileNumber ?? '',
+      location: '',
+      linkedin: '',
+      website: ''
+    };
+
     sections.forEach(section => {
-      const placeholder = `{{${section.sectionType}}}`;
-      const rendered = this.renderSection(section);
-      result = result.replace(new RegExp(placeholder, 'g'), rendered);
+      if (!section.isVisible) return;
+      let parsed = null;
+      try { parsed = JSON.parse(section.content || 'null'); } catch (e) { }
+
+      if (section.sectionType === 'SUMMARY') {
+        viewData.summary = parsed?.text || '';
+      } else if (section.sectionType === 'SKILLS') {
+        let allSkills: { name: string }[] = [];
+        if (Array.isArray(parsed)) {
+          allSkills = parsed.map((s: any) => typeof s === 'string' ? { name: s } : s);
+        } else if (parsed && typeof parsed === 'object') {
+          Object.values(parsed as Record<string, string[]>).forEach(arr => {
+            if (Array.isArray(arr)) {
+              allSkills.push(...arr.map((s: any) => typeof s === 'string' ? { name: s } : s));
+            }
+          });
+        }
+        viewData.skills = allSkills;
+      } else if (section.sectionType === 'EXPERIENCE' || section.sectionType === 'PROJECTS') {
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (Array.isArray(item.bullets)) {
+              item.bullets = item.bullets.map((b: any) => typeof b === 'string' ? { text: b } : b);
+            }
+          });
+        }
+        viewData[section.sectionType.toLowerCase()] = parsed;
+      } else if (section.sectionType === 'EDUCATION') {
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (Array.isArray(item.highlights)) {
+              item.highlights = item.highlights.map((h: any) => typeof h === 'string' ? { text: h } : h);
+            }
+          });
+        }
+        viewData[section.sectionType.toLowerCase()] = parsed;
+      } else {
+        viewData[section.sectionType.toLowerCase()] = parsed;
+      }
     });
-    return result;
+
+    // ✅ Mustache.render now works correctly with the default import
+    return Mustache.render(layout, viewData);
   }
 
-  /** Fallback layout when no template or no placeholders matched */
+  /** Fallback layout when no template */
   private buildDefaultLayout(sections: ResumeSection[]): string {
     const visible = sections.filter(s => s.isVisible);
     const content = visible.map(s => this.renderSection(s)).join('');
     return `<div class="resume-preview">${content}</div>`;
   }
 
-  /** Beautiful sample resume shown when builder first opens (no sections yet) */
+  /** Sample resume shown when builder first opens with no sections */
   private buildSampleLayout(): string {
     return `<div class="resume-preview">
       <div class="section summary">
@@ -165,7 +235,7 @@ export class LivePreviewService implements OnDestroy {
             <div class="exp-header">${e.role || ''}</div>
             <div class="exp-company">${e.company || ''}</div>
             <div class="exp-dates">${e.startDate || ''} – ${e.isCurrent ? 'Present' : (e.endDate || '')}</div>
-            <ul>${(e.bullets || []).map((b: string) => `<li>${b}</li>`).join('')}</ul>
+            <ul>${(e.bullets || []).map((b: any) => `<li>${typeof b === 'string' ? b : b.text || ''}</li>`).join('')}</ul>
           </div>`).join('');
         return `<div class="section experience"><h2>${section.title}</h2>${items}</div>`;
       }
@@ -184,9 +254,17 @@ export class LivePreviewService implements OnDestroy {
       }
 
       case 'SKILLS': {
-        const skills: string[] = Array.isArray(parsed) ? parsed : [];
-        const chips = skills.map(s => `<span class="skill-chip">${s}</span>`).join('');
-        return `<div class="section skills"><h2>${section.title}</h2><div class="skill-chips">${chips}</div></div>`;
+        let allSkills: string[] = [];
+        if (Array.isArray(parsed)) {
+          allSkills = parsed.map((s: any) => typeof s === 'string' ? s : s.name || '');
+        } else if (parsed && typeof parsed === 'object') {
+          const obj = parsed as Record<string, string[]>;
+          Object.values(obj).forEach(arr => {
+            if (Array.isArray(arr)) allSkills.push(...arr);
+          });
+        }
+        const chips = allSkills.map(s => `<span class="skill-chip">${s}</span>`).join('');
+        return `<div class="section skills"><h2>${section.title}</h2><div class="skill-chips">${chips || '<span style="color:#94a3b8;font-size:10px">No skills added yet</span>'}</div></div>`;
       }
 
       default:
@@ -214,7 +292,6 @@ export class LivePreviewService implements OnDestroy {
         padding: 40px 44px;
       }
 
-      /* Header — injected by PERSONAL_INFO or first section as fallback */
       .resume-header {
         border-bottom: 2px solid #00d4b4;
         padding-bottom: 18px;
@@ -247,7 +324,6 @@ export class LivePreviewService implements OnDestroy {
         display: inline-flex; align-items: center; gap: 3px;
       }
 
-      /* Sections */
       .section {
         margin-bottom: 20px;
         page-break-inside: avoid;
@@ -272,21 +348,17 @@ export class LivePreviewService implements OnDestroy {
         background: #00d4b4;
       }
 
-      /* Summary */
       .summary p {
         font-size: 11px;
         color: #374151;
         line-height: 1.65;
       }
 
-      /* Experience */
       .exp-entry {
         margin-bottom: 14px;
         padding-left: 10px;
         border-left: 2px solid #e2f8f5;
-        transition: border-color 0.2s;
       }
-      .exp-entry:hover { border-left-color: #00d4b4; }
 
       .exp-header {
         font-size: 11.5px;
@@ -325,7 +397,6 @@ export class LivePreviewService implements OnDestroy {
         top: 1px;
       }
 
-      /* Education */
       .edu-entry {
         margin-bottom: 10px;
         display: flex;
@@ -344,7 +415,6 @@ export class LivePreviewService implements OnDestroy {
         white-space: nowrap; margin-top: 2px; text-align: right;
       }
 
-      /* Skills */
       .skills .skill-chips {
         display: flex; flex-wrap: wrap; gap: 6px;
       }
@@ -358,7 +428,6 @@ export class LivePreviewService implements OnDestroy {
         font-weight: 600;
       }
 
-      /* Generic */
       .generic {
         font-size: 11px; color: #374151; line-height: 1.6;
       }

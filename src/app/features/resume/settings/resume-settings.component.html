@@ -70,16 +70,16 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
 
-  h2 {
-    font-size: 1.45rem;
-    margin: 10px 0 6px;
-  }
+.settings-header h2 {
+  font-size: 1.45rem;
+  margin: 10px 0 6px;
+}
 
-  p {
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-  }
+.settings-header p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
 }
 
 .save-indicator {
@@ -90,12 +90,12 @@
   color: var(--teal);
   font-size: 0.76rem;
   white-space: nowrap;
+}
 
-  &.error {
-    background: rgba(224, 82, 82, 0.12);
-    border-color: rgba(224, 82, 82, 0.2);
-    color: #f87171;
-  }
+.save-indicator.error {
+  background: rgba(224, 82, 82, 0.12);
+  border-color: rgba(224, 82, 82, 0.2);
+  color: #f87171;
 }
 
 .settings-loading {
@@ -115,9 +115,9 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
 
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 640px) {
+  .settings-grid { grid-template-columns: 1fr; }
 }
 </style>

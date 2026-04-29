@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl } from '@
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { extractErrorMessage } from '../../../shared/utils/http-error.util';
 
 @Component({
   selector: 'app-register',
@@ -77,7 +78,7 @@ export class RegisterComponent {
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (e) => {
-        this.error = e?.error?.message || 'Registration failed. Please try again.';
+        this.error = extractErrorMessage(e, 'Registration failed. Please try again.');
         this.loading = false;
       }
     });

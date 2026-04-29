@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { extractErrorMessage } from '../../../shared/utils/http-error.util';
 
 @Component({
   selector: 'app-forgot-username',
@@ -41,7 +42,7 @@ export class ForgotUsernameComponent {
       password: this.emailForm.value.password!
     }).subscribe({
       next: (res) => { this.success = res.message; this.loading = false; this.step = 2; },
-      error: (e) => { this.error = e?.error?.message || 'No account found with this email or incorrect password.'; this.loading = false; }
+      error: (e) => { this.error = extractErrorMessage(e, 'No account found with this email or incorrect password.'); this.loading = false; }
     });
   }
 
@@ -58,7 +59,7 @@ export class ForgotUsernameComponent {
         this.loading = false;
         setTimeout(() => this.router.navigate(['/login']), 3000);
       },
-      error: (e) => { this.error = e?.error?.message || 'Invalid or expired OTP.'; this.loading = false; }
+      error: (e) => { this.error = extractErrorMessage(e, 'Invalid or expired OTP.'); this.loading = false; }
     });
   }
 

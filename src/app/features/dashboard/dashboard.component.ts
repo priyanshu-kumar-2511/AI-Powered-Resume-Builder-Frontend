@@ -25,14 +25,14 @@ export class DashboardComponent implements OnInit {
 
   stats = [
     { icon: '📄', label: 'Resumes Created', value: '0', color: 'var(--teal)' },
-    { icon: '📊', label: 'Job Matches', value: '—', color: 'var(--gold)' },
-    { icon: '📥', label: 'Exports', value: '—', color: '#a78bfa' },
-    { icon: '🌍', label: 'Public Resumes', value: '0', color: '#fb923c' }
+    { icon: '📊', label: 'Job Matches',      value: '0', color: 'var(--gold)' },
+    { icon: '📥', label: 'Exports',          value: '0', color: '#a78bfa' },
+    { icon: '🌍', label: 'Public Resumes',  value: '0', color: '#fb923c' }
   ];
 
   services = [
     { icon: '📝', title: 'Resume Builder', desc: 'Build and manage your resumes with AI assistance.', route: '/resumes', badge: 'Available', color: 'var(--teal)' },
-    { icon: '🤖', title: 'AI Assistant', desc: 'Generate compelling bullet points and summaries.', route: '/dashboard', badge: 'Coming Soon', color: '#a78bfa' },
+    { icon: '🤖', title: 'AI Assistant', desc: 'Generate AI summaries, bullets & ATS scores in the builder.', route: '/resumes', badge: 'Available', color: '#a78bfa' },
     { icon: '🎯', title: 'Job Matcher', desc: 'Match your resume to any job description.', route: '/dashboard', badge: 'Coming Soon', color: '#C9A84C' },
     { icon: '📤', title: 'PDF Export', desc: 'Export your resume as a high-quality PDF.', route: '/dashboard', badge: 'Coming Soon', color: '#fb923c' },
     { icon: '🌍', title: 'Public Gallery', desc: 'Explore published resumes and track public visibility.', route: '/resumes/public', badge: 'Available', color: '#34d399' },

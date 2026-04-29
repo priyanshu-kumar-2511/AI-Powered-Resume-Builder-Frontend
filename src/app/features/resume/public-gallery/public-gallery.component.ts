@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
@@ -19,6 +19,7 @@ import { ResumeApiService } from '../services/resume-api.service';
 export class PublicGalleryComponent implements OnInit {
   private resumeApi = inject(ResumeApiService);
   private templateService = inject(TemplateService);
+  private router = inject(Router);
 
   resumes: Resume[] = [];
   templateMap = new Map<number, TemplateResponseDTO>();
@@ -39,7 +40,8 @@ export class PublicGalleryComponent implements OnInit {
       next: ({ resumes, templates }) => {
         this.resumes = resumes.sort((left, right) => right.viewCount - left.viewCount);
         this.templateMap = new Map(templates.map((template) => [template.templateId, template]));
-        this.selectedResume = this.resumes[0] ?? null;
+        // Do NOT auto-select — spotlight card only appears when user clicks "View Resume"
+        this.selectedResume = null;
         this.loading = false;
       },
       error: () => {
@@ -96,15 +98,26 @@ export class PublicGalleryComponent implements OnInit {
         this.resumes = nextResumes.sort((left, right) => right.viewCount - left.viewCount);
         this.selectedResume = this.resumes.find((item) => item.resumeId === resume.resumeId) ?? null;
         this.viewingResumeId = null;
+        setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 50);
       },
       error: () => {
         this.selectedResume = resume;
         this.viewingResumeId = null;
+        setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 50);
       }
     });
   }
 
   templateFor(templateId: number | null): TemplateResponseDTO | null {
     return templateId ? (this.templateMap.get(templateId) ?? null) : null;
+  }
+
+  goToTemplate(templateId: number | null | undefined): void {
+    if (templateId) {
+      this.router.navigate(['/templates', templateId]);
+    } else {
+      this.error = 'No template is linked to this resume.';
+      setTimeout(() => { this.error = ''; }, 3000);
+    }
   }
 }

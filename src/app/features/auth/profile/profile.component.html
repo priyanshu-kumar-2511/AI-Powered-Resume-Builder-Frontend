@@ -196,8 +196,6 @@
   grid-template-columns: 280px 1fr;
   gap: 28px;
   align-items: start;
-
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
 }
 
 .profile-sidebar {
@@ -234,10 +232,12 @@
   border-radius: 99px;
   font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
   background: var(--teal-subtle); color: var(--teal); border: 1px solid var(--border-teal);
-  &.premium {
-    background: rgba(201,168,76,0.1); color: var(--gold);
-    border-color: rgba(201,168,76,0.3);
-  }
+}
+
+.plan-chip.premium {
+  background: rgba(201,168,76,0.1);
+  color: var(--gold);
+  border-color: rgba(201,168,76,0.3);
 }
 
 .sidebar-info { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
@@ -274,9 +274,10 @@
   display: flex; align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 24px;
-  h3 { font-size: 1.2rem; font-family: var(--font-display); margin-bottom: 4px; }
-  p { font-size: 0.83rem; color: var(--text-muted); }
 }
+
+.card-header h3 { font-size: 1.2rem; font-family: var(--font-display); margin-bottom: 4px; }
+.card-header p { font-size: 0.83rem; color: var(--text-muted); }
 
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .info-item { display: flex; flex-direction: column; gap: 4px; }
@@ -297,8 +298,13 @@
   color: var(--text-secondary); font-size: 0.82rem;
   transition: var(--transition);
   font-family: var(--font-body);
-  &:hover { border-color: var(--border-teal); color: var(--teal); }
-  &.danger:hover { border-color: rgba(224,82,82,0.4); color: #f87171; }
-  .qa-icon { font-size: 1.5rem; }
+}
+
+.quick-action-card:hover { border-color: var(--border-teal); color: var(--teal); }
+.quick-action-card.danger:hover { border-color: rgba(224,82,82,0.4); color: #f87171; }
+.quick-action-card .qa-icon { font-size: 1.5rem; }
+
+@media (max-width: 900px) {
+  .profile-layout { grid-template-columns: 1fr; }
 }
 </style>

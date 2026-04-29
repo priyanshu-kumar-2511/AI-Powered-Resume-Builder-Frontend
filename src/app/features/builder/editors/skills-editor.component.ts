@@ -133,7 +133,15 @@ export class SkillsEditorComponent implements OnChanges {
 
     try {
       const parsed = JSON.parse(this.section.content || '[]');
-      this.skills = Array.isArray(parsed) ? parsed : [];
+      if (Array.isArray(parsed)) {
+        this.skills = parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        this.skills = Object.values(parsed as Record<string, unknown>)
+          .flatMap(value => Array.isArray(value) ? value.map(String) : [])
+          .filter((skill, index, arr) => skill.trim().length > 0 && arr.indexOf(skill) === index);
+      } else {
+        this.skills = [];
+      }
     } catch {
       this.skills = [];
     }

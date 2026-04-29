@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { extractErrorMessage } from '../../../shared/utils/http-error.util';
 
 @Component({
   selector: 'app-forgot-password',
@@ -43,7 +44,7 @@ export class ForgotPasswordComponent {
     // to satisfy the backend PasswordResetInitiateRequest DTO validation.
     this.auth.initiatePasswordReset({ email: this.emailForm.value.email! }).subscribe({
       next: (res) => { this.success = res.message; this.loading = false; this.step = 2; },
-      error: (e) => { this.error = e?.error?.message || 'Failed to send OTP.'; this.loading = false; }
+      error: (e) => { this.error = extractErrorMessage(e, 'Failed to send OTP.'); this.loading = false; }
     });
   }
 
@@ -62,7 +63,7 @@ export class ForgotPasswordComponent {
         this.loading = false;
         setTimeout(() => this.router.navigate(['/login']), 2500);
       },
-      error: (e) => { this.error = e?.error?.message || 'Invalid OTP or expired.'; this.loading = false; }
+      error: (e) => { this.error = extractErrorMessage(e, 'Invalid OTP or expired.'); this.loading = false; }
     });
   }
 

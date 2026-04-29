@@ -52,7 +52,7 @@
             [template]="templateFor(resume.templateId)"
             [showPublicMeta]="true"
             [disableActions]="viewingResumeId === resume.resumeId"
-            (open)="openResume($event)" />
+            (viewDetails)="openResume($event)" />
         }
       </div>
 
@@ -80,9 +80,9 @@
             </div>
 
             @if (selectedResume.templateId) {
-              <a [routerLink]="['/templates', selectedResume.templateId]" class="btn btn-primary">
+              <button type="button" (click)="goToTemplate(selectedResume.templateId)" class="btn btn-primary">
                 View Template
-              </a>
+              </button>
             }
           </div>
 
@@ -109,17 +109,17 @@
   background:
     radial-gradient(circle at top left, rgba(201, 168, 76, 0.12), transparent 28%),
     linear-gradient(180deg, var(--bg-surface), var(--bg-primary));
+}
 
-  h1 {
-    font-size: 2.5rem;
-    margin: 14px 0 10px;
-    max-width: 760px;
-  }
+.gallery-hero h1 {
+  font-size: 2.5rem;
+  margin: 14px 0 10px;
+  max-width: 760px;
+}
 
-  p {
-    color: var(--text-secondary);
-    max-width: 680px;
-  }
+.gallery-hero p {
+  color: var(--text-secondary);
+  max-width: 680px;
 }
 
 .gallery-shell {
@@ -136,16 +136,12 @@
   flex-wrap: wrap;
 }
 
-.toolbar-copy {
-  h2 {
-    font-size: 1.55rem;
-    margin-bottom: 6px;
-  }
-
-  p {
-    color: var(--text-secondary);
-  }
+.toolbar-copy h2 {
+  font-size: 1.55rem;
+  margin-bottom: 6px;
 }
+
+.toolbar-copy p { color: var(--text-secondary); }
 
 .search-box {
   width: min(360px, 100%);
@@ -173,48 +169,36 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 28px;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
 }
 
-.spotlight-copy {
-  h2 {
-    font-size: 2rem;
-    margin: 12px 0 8px;
-  }
-
-  p {
-    color: var(--text-secondary);
-  }
+.spotlight-copy h2 {
+  font-size: 2rem;
+  margin: 12px 0 8px;
 }
+
+.spotlight-copy p { color: var(--text-secondary); }
 
 .spotlight-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin: 22px 0;
+}
 
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
+.spotlight-meta div {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 212, 180, 0.05);
+  border: 1px solid rgba(0, 212, 180, 0.12);
+}
 
-  div {
-    padding: 14px;
-    border-radius: var(--radius-md);
-    background: rgba(0, 212, 180, 0.05);
-    border: 1px solid rgba(0, 212, 180, 0.12);
-  }
-
-  span {
-    display: block;
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
+.spotlight-meta span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .spotlight-preview {
@@ -222,17 +206,17 @@
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   overflow: hidden;
+}
 
-  img,
-  .spotlight-placeholder {
-    width: 100%;
-    height: 100%;
-  }
+.spotlight-preview img,
+.spotlight-preview .spotlight-placeholder {
+  width: 100%;
+  height: 100%;
+}
 
-  img {
-    object-fit: cover;
-    display: block;
-  }
+.spotlight-preview img {
+  object-fit: cover;
+  display: block;
 }
 
 .spotlight-placeholder {
@@ -241,5 +225,13 @@
   font-family: var(--font-display);
   font-size: 4rem;
   color: rgba(245, 240, 232, 0.55);
+}
+
+@media (max-width: 900px) {
+  .spotlight-card { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .spotlight-meta { grid-template-columns: 1fr; }
 }
 </style>

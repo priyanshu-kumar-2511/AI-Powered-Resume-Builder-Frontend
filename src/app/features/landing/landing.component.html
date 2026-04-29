@@ -190,23 +190,23 @@
   line-height: 1.08;
   margin-bottom: 24px;
   color: var(--text-primary);
+}
 
-  em {
-    font-style: italic;
-    color: var(--teal);
-    position: relative;
+.hero-title em {
+  font-style: italic;
+  color: var(--teal);
+  position: relative;
+}
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 4px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--teal);
-      opacity: 0.4;
-    }
-  }
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--teal);
+  opacity: 0.4;
 }
 
 .hero-subtitle {
@@ -232,22 +232,20 @@
   flex-wrap: wrap;
 }
 
-.hero-stat {
-  .stat-value {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
+.hero-stat .stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
 
-  .stat-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
+.hero-stat .stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 /* Resume card mockup */
@@ -258,8 +256,6 @@
   transform: translateY(-50%) rotate(3deg);
   opacity: 0.35;
   pointer-events: none;
-
-  @media (max-width: 900px) { display: none; }
 }
 
 .resume-card {
@@ -288,10 +284,11 @@
   height: 10px;
   border-radius: 5px;
   margin-bottom: 8px;
-  &.wide { width: 100%; }
-  &.medium { width: 65%; }
-  &.narrow { width: 40%; }
 }
+
+.rc-line.wide { width: 100%; }
+.rc-line.medium { width: 65%; }
+.rc-line.narrow { width: 40%; }
 
 .rc-section { margin-bottom: 20px; }
 .rc-section-title {
@@ -344,31 +341,31 @@
   padding: 28px;
   transition: var(--transition);
   animation: fadeSlideUp 0.5s ease forwards;
+}
 
-  &:hover {
-    border-color: var(--border-teal);
-    box-shadow: var(--shadow-teal);
-    transform: translateY(-4px);
-  }
+.feature-card:hover {
+  border-color: var(--border-teal);
+  box-shadow: var(--shadow-teal);
+  transform: translateY(-4px);
+}
 
-  .feature-icon {
-    font-size: 2rem;
-    margin-bottom: 16px;
-    display: block;
-  }
+.feature-card .feature-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  display: block;
+}
 
-  h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    font-family: var(--font-display);
-    font-weight: 600;
-  }
+.feature-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
 
-  p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.65;
-  }
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
 }
 
 /* CTA */
@@ -400,8 +397,9 @@
 .cta-box h2 {
   font-size: clamp(2rem, 4vw, 3.2rem);
   margin-bottom: 16px;
-  em { color: var(--gold); font-style: italic; }
 }
+
+.cta-box h2 em { color: var(--gold); font-style: italic; }
 
 .cta-box p {
   color: var(--text-secondary);
@@ -421,14 +419,14 @@
   border-top: 1px solid var(--border);
   padding: 48px 0;
   background: var(--bg-surface);
+}
 
-  .container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 24px;
-  }
+.footer .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
 }
 
 .footer-brand p {
@@ -440,13 +438,14 @@
 .footer-links {
   display: flex;
   gap: 28px;
-
-  a {
-    color: var(--text-muted);
-    font-size: 0.875rem;
-    &:hover { color: var(--text-primary); }
-  }
 }
+
+.footer-links a {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.footer-links a:hover { color: var(--text-primary); }
 
 .footer-copy {
   width: 100%;
@@ -461,22 +460,32 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
+}
 
-  .logo-mark {
-    width: 28px; height: 28px;
-    background: var(--teal);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-display);
-    font-weight: 700; color: #000; font-size: 0.9rem;
-  }
+.nav-logo .logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--teal);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #000;
+  font-size: 0.9rem;
+}
 
-  .logo-text {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    span { color: var(--teal); }
-  }
+.nav-logo .logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nav-logo .logo-text span { color: var(--teal); }
+
+@media (max-width: 900px) {
+  .hero-card-wrapper { display: none; }
 }
 </style>

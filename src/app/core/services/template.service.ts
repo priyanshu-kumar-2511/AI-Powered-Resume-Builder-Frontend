@@ -2,38 +2,37 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Template, TemplateResponseDTO, TemplateCategory } from '../../shared/models/models';
-
-const API = 'http://localhost:8080/api/v1/templates';
+import { TEMPLATE_API } from '../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class TemplateService {
   private http = inject(HttpClient);
 
   getAllTemplates(): Observable<TemplateResponseDTO[]> {
-    return this.http.get<TemplateResponseDTO[]>(API);
+    return this.http.get<TemplateResponseDTO[]>(TEMPLATE_API);
   }
 
   getFreeTemplates(): Observable<TemplateResponseDTO[]> {
-    return this.http.get<TemplateResponseDTO[]>(`${API}/free`);
+    return this.http.get<TemplateResponseDTO[]>(`${TEMPLATE_API}/free`);
   }
 
   getPremiumTemplates(): Observable<TemplateResponseDTO[]> {
-    return this.http.get<TemplateResponseDTO[]>(`${API}/premium`);
+    return this.http.get<TemplateResponseDTO[]>(`${TEMPLATE_API}/premium`);
   }
 
   getPopularTemplates(): Observable<TemplateResponseDTO[]> {
-    return this.http.get<TemplateResponseDTO[]>(`${API}/popular`);
+    return this.http.get<TemplateResponseDTO[]>(`${TEMPLATE_API}/popular`);
   }
 
   getTemplatesByCategory(category: TemplateCategory): Observable<TemplateResponseDTO[]> {
-    return this.http.get<TemplateResponseDTO[]>(`${API}/category/${category}`);
+    return this.http.get<TemplateResponseDTO[]>(`${TEMPLATE_API}/category/${category}`);
   }
 
   getTemplateById(id: number): Observable<Template> {
-    return this.http.get<Template>(`${API}/${id}`);
+    return this.http.get<Template>(`${TEMPLATE_API}/${id}`);
   }
 
   incrementUsage(id: number): Observable<void> {
-    return this.http.put<void>(`${API}/${id}/increment-usage`, {});
+    return this.http.put<void>(`${TEMPLATE_API}/${id}/increment-usage`, {});
   }
 }

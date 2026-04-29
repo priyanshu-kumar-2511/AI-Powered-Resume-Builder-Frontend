@@ -71,7 +71,7 @@
     @if (showPublicMeta) {
       <div class="public-footer">
         <span class="public-copy">Tap to inspect the resume details.</span>
-        <button type="button" class="action-btn action-primary" (click)="open.emit(resume)">View Resume</button>
+        <button type="button" class="action-btn action-primary" (click)="viewDetails.emit(resume)">View Resume</button>
       </div>
     } @else {
       <div class="resume-actions">

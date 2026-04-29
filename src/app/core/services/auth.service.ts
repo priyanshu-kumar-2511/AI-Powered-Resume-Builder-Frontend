@@ -7,10 +7,9 @@ import {
   UserProfileResponse, ProfileRequest, MessageResponse,
   OtpVerificationRequest, PasswordResetInitiateRequest, UsernameRecoveryRequest
 } from '../../shared/models/models';
+import { AUTH_API, GATEWAY_ORIGIN } from '../config/api.config';
 
-const API = 'http://localhost:8080/api/v1/auth';
 const TOKEN_KEY = 'resumeai_token';
-const RESUME_ID_KEY = 'resumeai_resume_user_id';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -36,7 +35,16 @@ export class AuthService {
   }
 
   getCurrentPlan(): 'FREE' | 'PREMIUM' {
-    return this.currentUser()?.subscriptionPlan ?? 'FREE';
+    const fromProfile = this.currentUser()?.subscriptionPlan;
+    if (fromProfile) {
+      return fromProfile;
+    }
+
+    const tokenClaims = this.getTokenClaims();
+    const tokenPlan = this.getStringClaim(tokenClaims, 'subscriptionPlan')
+      ?? this.getStringClaim(tokenClaims, 'plan');
+
+    return tokenPlan === 'PREMIUM' ? 'PREMIUM' : 'FREE';
   }
 
   getCurrentUserId(): number | null {
@@ -54,38 +62,16 @@ export class AuthService {
       return tokenUserId;
     }
 
-    const identityKey = this.currentUser()?.username
-      ?? this.currentUser()?.email
-      ?? this.getStringClaim(tokenClaims, 'sub')
-      ?? this.getStringClaim(tokenClaims, 'username')
-      ?? this.getStringClaim(tokenClaims, 'email');
-
-    if (!identityKey) {
-      return null;
-    }
-
-    const storageKey = `${RESUME_ID_KEY}:${identityKey}`;
-    const cached = localStorage.getItem(storageKey);
-    if (cached) {
-      const parsed = Number(cached);
-      if (Number.isInteger(parsed) && parsed > 0) {
-        return parsed;
-      }
-    }
-
-    // Temporary fallback for the current backend contract until auth exposes a numeric userId.
-    const derivedId = this.deriveStableUserId(identityKey);
-    localStorage.setItem(storageKey, String(derivedId));
-    return derivedId;
+    return null;
   }
 
   // ── Auth endpoints ───────────────────────────────────────────────────────────
   register(payload: RegisterRequest): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(`${API}/register`, payload);
+    return this.http.post<MessageResponse>(`${AUTH_API}/register`, payload);
   }
 
   login(payload: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${API}/login`, payload).pipe(
+    return this.http.post<LoginResponse>(`${AUTH_API}/login`, payload).pipe(
       tap(res => this.saveToken(res.token))
     );
   }
@@ -96,27 +82,27 @@ export class AuthService {
   }
 
   refreshToken(): Observable<{ token: string }> {
-    return this.http.get<{ token: string }>(`${API}/refresh`).pipe(
+    return this.http.get<{ token: string }>(`${AUTH_API}/refresh`).pipe(
       tap(res => this.saveToken(res.token))
     );
   }
 
   // ── Profile ──────────────────────────────────────────────────────────────────
   getProfile(): Observable<UserProfileResponse> {
-    return this.http.get<UserProfileResponse>(`${API}/profile`).pipe(
+    return this.http.get<UserProfileResponse>(`${AUTH_API}/profile`).pipe(
       tap(u => this.currentUser.set(u))
     );
   }
 
   updateProfile(payload: ProfileRequest): Observable<MessageResponse> {
-    return this.http.put<MessageResponse>(`${API}/profile`, payload);
+    return this.http.put<MessageResponse>(`${AUTH_API}/profile`, payload);
   }
 
   // ── Forgot password ──────────────────────────────────────────────────────────
   // Backend PasswordResetInitiateRequest has a single `identifier` field (email or username).
   initiatePasswordReset(payload: PasswordResetInitiateRequest): Observable<MessageResponse> {
     const body = { identifier: payload.email };
-    return this.http.post<MessageResponse>(`${API}/forgot-password/initiate`, body);
+    return this.http.post<MessageResponse>(`${AUTH_API}/forgot-password/initiate`, body);
   }
 
   // FIX: Backend OtpVerificationRequest uses `identifier` (not `email`).
@@ -126,7 +112,7 @@ export class AuthService {
       otp: payload.otp,
       newPassword: payload.newPassword
     };
-    return this.http.post<MessageResponse>(`${API}/forgot-password/verify`, body);
+    return this.http.post<MessageResponse>(`${AUTH_API}/forgot-password/verify`, body);
   }
 
   // ── Forgot username ──────────────────────────────────────────────────────────
@@ -136,7 +122,7 @@ export class AuthService {
   // which is surfaced to the user. For a better UX the form should ask for the
   // current password — see comments in forgot-username component.
   initiateUsernameRecovery(payload: UsernameRecoveryRequest): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(`${API}/forgot-username/initiate`, payload);
+    return this.http.post<MessageResponse>(`${AUTH_API}/forgot-username/initiate`, payload);
   }
 
   // FIX: Backend OtpVerificationRequest uses `identifier` (not `email`).
@@ -145,18 +131,20 @@ export class AuthService {
       identifier: payload.email,   // map frontend `email` → backend `identifier`
       otp: payload.otp
     };
-    return this.http.post<MessageResponse>(`${API}/forgot-username/verify`, body);
+    return this.http.post<MessageResponse>(`${AUTH_API}/forgot-username/verify`, body);
   }
 
   // ── OAuth2 ───────────────────────────────────────────────────────────────────
   // FIX: Backend OAuth2SuccessHandler redirects to /login?token=... not /login-success.
   // The LoginComponent.ngOnInit() picks up the `token` query param on /login.
   loginWithGoogle(): void {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    const oauthOrigin = GATEWAY_ORIGIN || window.location.origin;
+    window.location.href = `${oauthOrigin}/oauth2/authorization/google`;
   }
 
   loginWithLinkedIn(): void {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/linkedin';
+    const oauthOrigin = GATEWAY_ORIGIN || window.location.origin;
+    window.location.href = `${oauthOrigin}/oauth2/authorization/linkedin`;
   }
 
   private getTokenClaims(): Record<string, unknown> | null {
@@ -173,8 +161,11 @@ export class AuthService {
     try {
       const normalized = segments[1].replace(/-/g, '+').replace(/_/g, '/');
       const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-      const decoded = atob(padded);
-      return JSON.parse(decoded) as Record<string, unknown>;
+      const decodedBytes = atob(padded);
+      const decodedStr = decodeURIComponent(
+        decodedBytes.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+      );
+      return JSON.parse(decodedStr) as Record<string, unknown>;
     } catch {
       return null;
     }
@@ -199,16 +190,5 @@ export class AuthService {
   private getStringClaim(claims: Record<string, unknown> | null, key: string): string | null {
     const value = claims?.[key];
     return typeof value === 'string' && value.trim() ? value : null;
-  }
-
-  private deriveStableUserId(identityKey: string): number {
-    let hash = 0;
-
-    for (let index = 0; index < identityKey.length; index += 1) {
-      hash = ((hash << 5) - hash) + identityKey.charCodeAt(index);
-      hash |= 0;
-    }
-
-    return Math.abs(hash) + 1000;
   }
 }

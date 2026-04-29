@@ -40,15 +40,6 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
         this.resumes = resumes;
       });
 
-    if (this.auth.isLoggedIn() && !this.profile) {
-      this.auth.getProfile()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (profile) => { this.profile = profile; },
-          error: () => { this.profile = this.auth.currentUser(); }
-        });
-    }
-
     this.templateService.getAllTemplates()
       .pipe(
         takeUntil(this.destroy$),
@@ -58,16 +49,23 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
         this.templateMap = new Map(templates.map((template) => [template.templateId, template]));
       });
 
-    this.resumeState.load()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.loading = false;
-        },
-        error: (error: Error) => {
-          this.error = error.message || 'We could not load your resumes right now.';
-          this.loading = false;
-        }
+    // Always refresh profile first so the currentUser signal is populated.
+    // ResumeStateService.load() reads from that signal — if it's null and the
+    // JWT claim is also absent the whole load throws before any HTTP call.
+    this.auth.getProfile()
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+      .subscribe((profile) => {
+        if (profile) { this.profile = profile; }
+
+        this.resumeState.load()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => { this.loading = false; },
+            error: (error: Error) => {
+              this.error = error.message || 'We could not load your resumes right now.';
+              this.loading = false;
+            }
+          });
       });
   }
 

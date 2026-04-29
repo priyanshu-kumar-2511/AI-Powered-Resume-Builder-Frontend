@@ -209,3 +209,31 @@ export interface AiBulletsRequest {
 export interface AiSkillsResponse {
   skills: string[];
 }
+
+// ── AI Extended Models (from MODELS_PATCH) ────────────────────────────────────
+// NOTE: AiHistoryRecord, AtsReport, AiResponse already exist in features/ai/models/ai.models.ts
+// These are added here so shared/models/models.ts is the single source of truth.
+
+export interface AiHistoryRecord {
+  id: number;
+  requestType: string;
+  model: string;
+  tokensUsed: number;
+  timestamp: string;
+  inputPrompt: string;
+  response: string;
+}
+
+export interface AtsReport {
+  score: number;
+  suggestions: string[];
+  missingKeywords?: string[];
+}
+
+export interface AiResponse {
+  content: string;
+  tokensUsed?: number;
+  model?: string;
+  requestType?: string;
+  timestamp?: string;
+}

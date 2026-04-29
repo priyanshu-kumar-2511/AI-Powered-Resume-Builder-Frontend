@@ -1,13 +1,11 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC4-Section-UI`
+**Current Branch:** `feature/UC5-Ai-UI`
 
 ## 📌 Project Overview / Introduction
 
 **ResumeAI** is a full-stack AI-Powered Resume Builder platform designed to empower job seekers to create, optimize, and export professional resumes with the help of cutting-edge AI language models.
 
-The platform utilizes a robust dual-AI strategy with cross-model failover to ensure 100% uptime and optimal quality:
-*   **Free Tier:** **Google Gemini (1.5 Flash)** is the primary model. If Gemini is unavailable, the system automatically fails over to **Anthropic Claude**.
-*   **Premium Tier:** **Anthropic Claude (3.5 Sonnet)** is the primary model for professional-grade quality. If Claude is unavailable, the system automatically fails over to **Google Gemini**.
+The platform utilizes an AI-powered content layer to generate and optimize resume content for multiple user flows. The application leverages a **Groq-backed OpenAI-compatible API** (using models like `llama-3.1-8b-instant`) through the backend `ai-service`. This enables high-speed generation of professional summaries, bullet points, and real-time ATS feedback.
 
 Features include:
 *   Intelligent content generation for Professional Summaries and work experience bullet points.
@@ -100,6 +98,30 @@ This phase focuses on the end-to-end workflow of building and managing resumes.
 
 ---
 
+## 🤖 Phase 5: AI Intelligence & Dynamic Builder
+
+This phase integrates advanced AI capabilities and a robust dynamic section management system into the core builder experience.
+
+### AI & Intelligence Features
+
+| Module | Description |
+| :--- | :--- |
+| **AI Content Engine** | Generate professional summaries and optimize experience bullet points using Groq/Llama models. |
+| **ATS Scoring System** | Real-time calculation and display of ATS compatibility scores within the builder toolbar. |
+| **AI Feature Quotas** | Managed state system (`quota-state.service.ts`) to track and enforce AI usage limits based on user tiers. |
+| **AI API Integration** | Dedicated `ai-api.service.ts` for seamless communication with the backend `ai-service`. |
+
+### Advanced Builder Features
+
+| Module | Description |
+| :--- | :--- |
+| **Auto-Save System** | `AutoSaveService` ensures no progress is lost by persisting changes to the backend in real-time. |
+| **Dynamic Sections** | Modular architecture to add, remove, and reorder resume sections (Experience, Education, Skills, etc.). |
+| **Live Preview Engine** | `LivePreviewService` provides an instant visual representation of the resume as data is typed. |
+| **Section Persistence** | Full CRUD operations for individual resume sections via `section-api.service.ts`. |
+
+---
+
 ## 🛠 Required Environment & Dev Configuration
 
 ### 1. Backend Service Connection
@@ -111,6 +133,7 @@ The application connects to backend services through the **API Gateway** at `htt
 | **Auth APIs** | `http://localhost:8080/api/v1/auth` |
 | **Template APIs** | `http://localhost:8080/api/v1/templates` |
 | **Resume APIs** | `http://localhost:8080/api/v1/resumes` |
+| **AI & Section APIs** | `http://localhost:8080/api/v1/ai` & `/api/v1/sections` |
 | **Google OAuth** | `http://localhost:8080/oauth2/authorization/google` |
 | **LinkedIn OAuth** | `http://localhost:8080/oauth2/authorization/linkedin` |
 
@@ -128,7 +151,7 @@ The application connects to backend services through the **API Gateway** at `htt
 
 ## 🚀 How to Run
 
-Ensure all backend services are running (Eureka → Config Server → Auth Service → API Gateway → Template Service) before starting the frontend.
+Ensure all backend services are running (Eureka → Config Server → Auth Service → API Gateway → Template Service → Resume/Section Service → AI Service) before starting the frontend.
 
 1. **Install Dependencies**
    ```bash
@@ -151,24 +174,20 @@ Ensure all backend services are running (Eureka → Config Server → Auth Servi
 src/
 ├── app/
 │   ├── core/
-│   │   ├── guards/          # AuthGuard — protects private routes
-│   │   ├── interceptors/    # JWT interceptor — auto-attaches Bearer token
+│   │   ├── guards/          # AuthGuard
+│   │   ├── interceptors/    # JWT interceptor
 │   │   └── services/        # AuthService, TemplateService
 │   ├── features/
-│   │   ├── auth/
-│   │   │   ├── login/
-│   │   │   ├── register/
-│   │   │   ├── profile/
-│   │   │   ├── forgot-password/
-│   │   │   └── forgot-username/
-│   │   ├── builder/         # Canva-style resume editor
-│   │   ├── dashboard/       # Main dashboard
+│   │   ├── ai/              # AI Content & Quota services
+│   │   ├── auth/            # Login, Register, Profile, OTP flows
+│   │   ├── builder/         # Canva-style editor (Sections, Auto-save, Preview)
+│   │   ├── dashboard/       # User dashboard
 │   │   ├── landing/         # Public landing page
+│   │   ├── resume/          # Resume listing & state management
 │   │   └── templates/       # Template list & detail
 │   └── shared/
-│       ├── components/
-│       │   └── navbar/      # Global navigation bar
-│       └── models/          # TypeScript interfaces (models.ts)
+│       ├── components/      # Global UI components (Navbar, Toast)
+│       └── models/          # TypeScript interfaces
 ├── styles.scss              # Global design system & CSS tokens
 └── index.html
 ```
@@ -178,4 +197,29 @@ src/
 ## ✨ Recent UI & UX Extensions
 
 - **Interactive Resume Builder:** Implemented a Canva-inspired real-time editor for seamless resume customization.
+- **AI-Powered Generation:** Added Groq-backed content generation for summaries and work experience.
+- **ATS Insights:** Integrated live ATS scoring to help users optimize their resumes for job applications.
 - **Tech Stack Overview:** Built with Angular 17 (Standalone Components), SCSS Glassmorphism design, and Angular Signals for optimized performance.
+
+---
+
+## 🛠 Technology Stack
+
+| Category | Technology |
+| :--- | :--- |
+| **Framework** | Angular 17+ |
+| **State Management** | Angular Signals & RxJS |
+| **Styling** | SCSS (Glassmorphism), CSS Custom Properties |
+| **AI Integration** | Groq / Llama-3.1 (via backend `ai-service`) |
+| **Build Tool** | Angular CLI |
+| **HTTP Client** | Typed HttpClient with JWT Interceptors |
+| **Routing** | Lazy-loaded Standalone Routes |
+
+---
+
+## 🐛 Troubleshooting & UI Fixes
+
+### Recent Critical Fixes
+1. **Public Gallery UX Enhancement**: Fixed a perceived CTA issue in the public gallery where the "View Resume" button appeared to trigger no action. Implemented an auto-scroll (`window.scrollTo`) directly to the dynamically updated Spotlight Card to vastly improve user feedback.
+2. **Add Section Sidebar Scroll**: Optimized the `app-add-section` layout within the Canva-style builder. Added `overflow-y: auto` and reduced padding from `28px` to `16px` to ensure all section tiles (Summary, Experience, etc.) are scrollable and perfectly fit narrow viewports.
+3. **Template Detail Badge Fix**: Resolved a logic error where FREE templates were incorrectly showing a PREMIUM badge. Updated `template-detail.component.ts` to correctly evaluate the `tier` property from the template model.

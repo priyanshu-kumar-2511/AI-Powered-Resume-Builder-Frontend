@@ -19,7 +19,7 @@ export class ResumeCardComponent {
   @Output() publish = new EventEmitter<Resume>();
   @Output() unpublish = new EventEmitter<Resume>();
   @Output() delete = new EventEmitter<Resume>();
-  @Output() open = new EventEmitter<Resume>();
+  @Output() viewDetails = new EventEmitter<Resume>();
 
   get atsScore(): number {
     return Math.max(0, Math.min(100, this.resume.atsScore ?? 0));
@@ -70,7 +70,7 @@ export class ResumeCardComponent {
 
   handleOpen(): void {
     if (this.showPublicMeta) {
-      this.open.emit(this.resume);
+      this.viewDetails.emit(this.resume);
     }
   }
 }
