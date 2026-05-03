@@ -12,6 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class LandingComponent {
   auth = inject(AuthService);
+  get isAdmin(): boolean { return this.auth.isAdmin(); }
 
   features = [
     { icon: '🤖', title: 'AI-Powered Content', desc: 'Let our AI craft compelling bullet points and summaries tailored to your experience and target role.' },

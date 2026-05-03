@@ -5,6 +5,7 @@ import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, filter,
 import { Resume, ResumeStatus, UpdateResumeRequest } from '../../../shared/models/models';
 import { ResumeApiService } from '../services/resume-api.service';
 import { ResumeStateService } from '../services/resume-state.service';
+import { ExportModalComponent } from '../../export/modal/export-modal.component';
 
 type ResumeSettingsForm = FormGroup<{
   title: FormControl<string>;
@@ -16,7 +17,7 @@ type ResumeSettingsForm = FormGroup<{
 @Component({
   selector: 'app-resume-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ExportModalComponent],
   templateUrl: './resume-settings.component.html'
 })
 export class ResumeSettingsComponent implements OnInit, OnDestroy {
@@ -45,6 +46,7 @@ export class ResumeSettingsComponent implements OnInit, OnDestroy {
 
   loading = true;
   error = '';
+  isExportOpen = false;
   saveState: 'idle' | 'saving' | 'saved' | 'error' = 'idle';
   lastSavedAt: Date | null = null;
 

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { AuthService } from '../../core/services/auth.service';
 import { TemplateService } from '../../core/services/template.service';
@@ -15,6 +15,7 @@ import { TemplateResponseDTO, UserProfileResponse } from '../../shared/models/mo
 })
 export class DashboardComponent implements OnInit {
   auth = inject(AuthService);
+  router = inject(Router);
   templateSvc = inject(TemplateService);
   resumeState = inject(ResumeStateService);
 
@@ -34,12 +35,17 @@ export class DashboardComponent implements OnInit {
     { icon: '📝', title: 'Resume Builder', desc: 'Build and manage your resumes with AI assistance.', route: '/resumes', badge: 'Available', color: 'var(--teal)' },
     { icon: '🤖', title: 'AI Assistant', desc: 'Generate AI summaries, bullets & ATS scores in the builder.', route: '/resumes', badge: 'Available', color: '#a78bfa' },
     { icon: '🎯', title: 'Job Matcher', desc: 'Match your resume to any job description.', route: '/dashboard', badge: 'Coming Soon', color: '#C9A84C' },
-    { icon: '📤', title: 'PDF Export', desc: 'Export your resume as a high-quality PDF.', route: '/dashboard', badge: 'Coming Soon', color: '#fb923c' },
+    { icon: '📤', title: 'PDF Export', desc: 'Export your resume as a high-quality PDF.', route: '/resumes', badge: 'Available', color: '#fb923c' },
     { icon: '🌍', title: 'Public Gallery', desc: 'Explore published resumes and track public visibility.', route: '/resumes/public', badge: 'Available', color: '#34d399' },
     { icon: '🎨', title: 'Templates', desc: 'Browse and apply beautiful resume templates.', route: '/templates', badge: 'Available', color: 'var(--teal)' }
   ];
 
   ngOnInit(): void {
+    if (this.auth.isAdmin()) {
+      this.router.navigateByUrl('/admin');
+      return;
+    }
+
     this.auth.getProfile().subscribe({
       next: (user) => {
         this.profile = user;

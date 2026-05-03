@@ -83,8 +83,10 @@ const LANGUAGES = [
     .translate { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
     .ai-gen-header { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; font-weight: 700; color: #00d4b4; text-transform: uppercase; letter-spacing: 0.06em; }
     .lang-select-wrap { display: flex; gap: 8px; }
-    .ai-select { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; color: rgba(255,255,255,0.85); font-size: 0.8rem; padding: 8px 10px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .ai-select { flex: 1; background: #171c26; border: 1px solid rgba(0,212,180,0.35); border-radius: 7px; color: #f8fafc; font-size: 0.8rem; padding: 8px 10px; font-family: inherit; outline: none; transition: border-color 0.2s; color-scheme: dark; }
     .ai-select:focus { border-color: rgba(0,212,180,0.4); }
+    .ai-select option { background: #0f172a; color: #fff; }
+    .ai-select option:checked { background: #0f766e; color: #fff; }
     .translate-note { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: rgba(255,255,255,0.35); }
     .ai-btn { display: flex; align-items: center; justify-content: center; gap: 7px; background: linear-gradient(135deg, rgba(0,212,180,0.15), rgba(0,212,180,0.08)); border: 1px solid rgba(0,212,180,0.3); color: #00d4b4; font-size: 0.78rem; font-weight: 600; padding: 9px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
     .ai-btn:hover:not(:disabled) { background: rgba(0,212,180,0.2); }

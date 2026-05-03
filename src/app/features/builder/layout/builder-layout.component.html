@@ -5,74 +5,118 @@
   <header class="canva-topbar">
     <div class="topbar-left">
       <a routerLink="/resumes" class="exit-btn" title="Back to my resumes">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
       </a>
       <div class="divider-v"></div>
       <div class="resume-title-wrap">
         <span class="resume-title">Resume Builder</span>
-        <span class="save-chip" [class.saving]="(autoSave.saveStatus$ | async) === 'saving'" [class.err]="(autoSave.saveStatus$ | async) === 'error'">
+        <span class="save-chip" [class.saving]="(autoSave.saveStatus$ | async) === 'saving'"
+          [class.err]="(autoSave.saveStatus$ | async) === 'error'">
           {{ autoSave.statusLabel }}
         </span>
       </div>
     </div>
 
-    <!-- Canva-style format toolbar (center) -->
+    <!-- Format toolbar (center) — ALL WIRED UP -->
     <div class="topbar-format-bar">
-      <!-- Font family -->
-      <select class="fmt-select" title="Font Family">
-        <option>Inter</option>
-        <option>Georgia</option>
-        <option>Arial</option>
-        <option>Roboto</option>
-        <option>Times New Roman</option>
+
+      <!-- ✅ Font family — wired to builderState -->
+      <select class="fmt-select" title="Font Family" [value]="currentFont.fontFamily"
+        (change)="onFontFamilyChange($event)">
+        <option value="Inter">Inter</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Arial">Arial</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Times New Roman">Times New Roman</option>
       </select>
 
       <div class="fmt-divider"></div>
 
-      <!-- Font size -->
-      <button class="fmt-btn" title="Decrease font size">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <!-- ✅ Font size — wired to builderState -->
+      <button class="fmt-btn" title="Decrease font size" (click)="decreaseFontSize()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
       </button>
-      <input class="fmt-size-input" type="number" value="10" min="6" max="72" title="Font size">
-      <button class="fmt-btn" title="Increase font size">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <input class="fmt-size-input" type="number" min="6" max="24" [value]="currentFont.fontSize"
+        (change)="onFontSizeChange($event)" title="Font size">
+      <button class="fmt-btn" title="Increase font size" (click)="increaseFontSize()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
       </button>
 
       <div class="fmt-divider"></div>
 
-      <!-- Bold / Italic / Underline / Strikethrough -->
-      <button class="fmt-btn fmt-bold" title="Bold"><strong>B</strong></button>
-      <button class="fmt-btn fmt-italic" title="Italic"><em>I</em></button>
-      <button class="fmt-btn" title="Underline" style="text-decoration:underline">U</button>
-      <button class="fmt-btn" title="Strikethrough" style="text-decoration:line-through">S</button>
+      <!-- Inline text formatting -->
+      <button class="fmt-btn fmt-bold" title="Bold" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('**')"><strong>B</strong></button>
+      <button class="fmt-btn fmt-italic" title="Italic" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('*')"><em>I</em></button>
+      <button class="fmt-btn" title="Underline" style="text-decoration:underline" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('++')">U</button>
+      <button class="fmt-btn" title="Strikethrough" style="text-decoration:line-through" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('~~')">S</button>
 
       <div class="fmt-divider"></div>
 
-      <!-- Text color -->
-      <div class="fmt-color-wrap" title="Text Color">
-        <div class="fmt-color-swatch" style="background:#1e293b"></div>
-        <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      <!-- Live template accent color -->
+      <div class="fmt-color-wrap" title="Template Accent Color">
+        <div class="fmt-color-swatch" [style.background]="currentFont.primaryColor"></div>
+        <div class="fmt-color-palette">
+          @for (color of colorPresets; track color) {
+          <button
+            type="button"
+            class="fmt-color-chip"
+            [style.background]="color"
+            [class.active]="currentFont.primaryColor === color"
+            (click)="onPrimaryColorChange(color)"
+            [attr.aria-label]="'Use accent color ' + color"></button>
+          }
+          <input
+            type="color"
+            class="fmt-color-input"
+            [value]="currentFont.primaryColor"
+            (input)="onPrimaryColorChange($any($event.target).value)"
+            aria-label="Choose custom accent color">
+        </div>
       </div>
 
       <div class="fmt-divider"></div>
 
       <!-- Alignment -->
       <button class="fmt-btn" title="Align Left">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="15" y2="12" />
+          <line x1="3" y1="18" x2="18" y2="18" />
+        </svg>
       </button>
       <button class="fmt-btn" title="Align Center">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="7" y1="12" x2="17" y2="12" />
+          <line x1="4" y1="18" x2="20" y2="18" />
+        </svg>
       </button>
     </div>
 
     <div class="topbar-right">
+      <!-- Save badge -->
       <span class="save-status-badge">
-        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         Saved
       </span>
-      <button class="export-btn">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export PDF
+
+      <!-- ✅ Export button — NOW WIRED to open ExportModalComponent -->
+      <button class="export-btn" (click)="showExportModal = true">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Export
       </button>
     </div>
   </header>
@@ -80,395 +124,691 @@
   <!-- ═══ MAIN BODY ═══ -->
   <div class="canva-body">
 
-    <!-- LEFT ICON SIDEBAR (like Canva's left rail) -->
+    <!-- LEFT ICON SIDEBAR — only Sections button (Text/Styles removed, they did nothing) -->
     <nav class="canva-sidenav">
-      <button class="snav-btn active" (click)="openAddSection()" title="Sections">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        <span>Sections</span>
-      </button>
-      <button class="snav-btn" title="Text Blocks">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-        <span>Text</span>
-      </button>
-      <button class="snav-btn" title="Templates">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <button class="snav-btn" [class.active]="showTemplates" (click)="toggleTemplatePanel()" title="Templates">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M3 9h18M9 21V9" />
+        </svg>
         <span>Templates</span>
       </button>
-      <button class="snav-btn" title="Styles">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/></svg>
-        <span>Styles</span>
+
+      <button class="snav-btn" [class.active]="showSectionList || showAddSection" (click)="toggleSectionPanel()" title="Sections">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+        </svg>
+        <span>Sections</span>
       </button>
     </nav>
 
-    <!-- LEFT PANEL (slides out from sidenav) -->
-    <aside class="canva-left" [class.open]="showAddSection || showSectionList">
-      @if (showAddSection) {
-        <div class="cleft-head">
-          <span>Add Section</span>
-          <button class="cl-close" (click)="closeAddSection()">✕</button>
-        </div>
-        <app-add-section
-          [resumeId]="resumeId"
-          (sectionAdded)="onSectionAdded($event)"
-          (cancelled)="closeAddSection()" />
+    <!-- LEFT PANEL -->
+    <aside class="canva-left" [class.open]="showAddSection || showSectionList || showTemplates">
+      @if (showTemplates) {
+      <div class="cleft-head">
+        <span>Templates</span>
+        <button class="cl-close" (click)="showTemplates = false">✕</button>
+      </div>
+      <div class="template-sel-wrap">
+        <app-template-selector [selectedTemplateId]="(builderState.template$ | async)?.templateId ?? null"
+          (templateSelected)="onTemplateSelect($event)" />
+      </div>
+      } @else if (showAddSection) {
+      <div class="cleft-head">
+        <span>Add Section</span>
+        <button class="cl-close" (click)="closeAddSection()">✕</button>
+      </div>
+      <app-add-section [resumeId]="resumeId" (sectionAdded)="onSectionAdded($event)" (cancelled)="closeAddSection()" />
       } @else {
-        <div class="cleft-head">
-          <span>Sections</span>
-          <button class="cl-close" (click)="showSectionList = false">✕</button>
-        </div>
-        <app-section-list
-          [resumeId]="resumeId"
-          [selectedSectionId]="selectedSection?.sectionId ?? null"
-          (sectionSelected)="onSectionSelect($event)"
-          (sectionDeleted)="onSectionDeleted($event)" />
-        <button type="button" class="add-sec-btn" (click)="openAddSection()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Section
-        </button>
+      <div class="cleft-head">
+        <span>Sections</span>
+        <button class="cl-close" (click)="showSectionList = false">✕</button>
+      </div>
+      <app-section-list [resumeId]="resumeId" [selectedSectionId]="selectedSection?.sectionId ?? null"
+        (sectionSelected)="onSectionSelect($event)" (sectionDeleted)="onSectionDeleted($event)" />
+      <button type="button" class="add-sec-btn" (click)="openAddSection()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Section
+      </button>
       }
     </aside>
 
     <!-- CENTER CANVAS -->
     <main class="canva-canvas" (click)="onCanvasClick()">
-      <!-- Click-to-edit hint banner -->
       <div class="canvas-hint" [class.hidden]="selectedSection">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
         Click any section in the resume to edit it
       </div>
       <app-live-preview (sectionClicked)="onSectionClickFromPreview($event)" />
     </main>
 
-    <!-- RIGHT PANEL — editor slides in -->
-    <aside class="canva-right" [class.open]="selectedSection">
-      @if (selectedSection) {
-        <div class="panel-inner">
-          <div class="panel-head">
-            <div class="panel-head-left">
-              <span class="panel-type-badge">{{ selectedSection.sectionType }}</span>
-              <span class="panel-title">{{ selectedSection.title }}</span>
-            </div>
-            <button class="panel-close" (click)="clearSection()">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+    <!-- RIGHT PANEL — section editor -->
+    <aside class="canva-right" [class.open]="selectedSection || editingContact">
+      @if (editingContact) {
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <span class="panel-type-badge">CONTACT</span>
+            <span class="panel-title">Profile & Contact</span>
           </div>
-          <app-section-editor
-            [section]="selectedSection"
-            (sectionUpdated)="onSectionSelect($event)"
-            (sectionDeleted)="onSectionDeleted($event)" />
+          <button class="panel-close" (click)="clearSection()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
+        <div class="panel-editor-wrap" (focusin)="captureFocusedField($event)">
+          <app-contact-editor [resumeId]="resumeId" (saved)="onContactSaved()" />
+        </div>
+      </div>
+      } @else if (selectedSection) {
+      <div class="panel-inner">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <span class="panel-type-badge">{{ selectedSection.sectionType }}</span>
+            <span class="panel-title">{{ selectedSection.title }}</span>
+          </div>
+          <button class="panel-close" (click)="clearSection()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <app-section-editor [section]="selectedSection" (focusin)="captureFocusedField($event)" (sectionUpdated)="onSectionSelect($event)"
+          (sectionDeleted)="onSectionDeleted($event)" />
+      </div>
       }
     </aside>
-    
-    <!-- AI Sidebar — floats on right edge -->
-    <app-ai-sidebar
-      [resumeId]="resumeId"
-      [targetJobTitle]="currentJobTitle"
-      [currentSectionType]="selectedSection?.sectionType ?? ''"
-      [currentSectionContent]="selectedSectionContentForAi"
-      [fullResumeContent]="fullResumeContentForAi"
-      (summaryAccepted)="onSummaryAccepted($event)"
-      (bulletAccepted)="onBulletAccepted($event)"
-      (skillAdded)="onSkillAdded($event)"
-      (improvedContent)="onImprovedContent($event)"
-      (atsScore)="onAtsScore($event)" />
+
+    <!-- AI Sidebar -->
+    <app-ai-sidebar [resumeId]="resumeId" [targetJobTitle]="currentJobTitle"
+      [currentSectionType]="selectedSection?.sectionType ?? ''" [currentSectionContent]="selectedSectionContentForAi"
+      [fullResumeContent]="fullResumeContentForAi" (summaryAccepted)="onSummaryAccepted($event)"
+      (bulletAccepted)="onBulletAccepted($event)" (skillAdded)="onSkillAdded($event)"
+      (improvedContent)="onImprovedContent($event)" (atsScore)="onAtsScore($event)" />
 
   </div>
+
+  <!-- ✅ Export Modal — renders on top of builder when showExportModal = true -->
+  @if (showExportModal) {
+  <app-export-modal [resumeId]="resumeId" (close)="showExportModal = false" />
+  }
+
 </div>
 
 <style>
-/* Full-screen override */
-:host {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: #1a1f2e;
-}
+  :host {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #1a1f2e;
+  }
 
-.canva-builder {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  font-family: var(--font-body, 'Inter', sans-serif);
-}
+  .canva-builder {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: var(--font-body, 'Inter', sans-serif);
+  }
 
-/* ══════════════════════════════
-   TOP BAR
-══════════════════════════════ */
-.canva-topbar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  flex-shrink: 0;
-  background: #0d1117;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding: 0 12px;
-  gap: 10px;
-  z-index: 20;
-}
-.topbar-left, .topbar-right {
-  display: flex; align-items: center; gap: 10px;
-  flex: 0 0 auto;
-}
-.topbar-right { margin-left: auto; }
+  /* TOP BAR */
+  .canva-topbar {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    flex-shrink: 0;
+    background: #0d1117;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0 12px;
+    gap: 10px;
+    z-index: 20;
+  }
 
-.exit-btn {
-  width: 32px; height: 32px; border-radius: 7px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5); text-decoration: none;
-  transition: all 0.2s; flex-shrink: 0;
-}
-.exit-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .topbar-left,
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
 
-.divider-v { width: 1px; height: 22px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
+  .topbar-right {
+    margin-left: auto;
+  }
 
-.resume-title-wrap { display: flex; flex-direction: column; gap: 1px; }
-.resume-title { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; }
-.save-chip { font-size: 0.66rem; color: rgba(255,255,255,0.3); }
-.save-chip.saving { color: #00d4b4; }
-.save-chip.err { color: #ef4444; }
+  .exit-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
 
-/* ── Canva-style format toolbar (center) ── */
-.topbar-format-bar {
-  display: flex; align-items: center; gap: 3px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 8px;
-  padding: 4px 8px;
-  flex: 1; max-width: 680px;
-  margin: 0 auto;
-}
+  .exit-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
 
-.fmt-select {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 5px;
-  color: rgba(255,255,255,0.75);
-  font-size: 0.78rem;
-  padding: 3px 6px;
-  height: 28px;
-  cursor: pointer;
-  font-family: inherit;
-  outline: none;
-  min-width: 110px;
-}
-.fmt-select:hover { background: rgba(255,255,255,0.08); }
+  .divider-v {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+  }
 
-.fmt-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); margin: 0 3px; flex-shrink: 0; }
+  .resume-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
 
-.fmt-btn {
-  width: 28px; height: 28px; border-radius: 5px;
-  display: grid; place-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255,255,255,0.6);
-  cursor: pointer; font-size: 0.82rem;
-  transition: all 0.15s; flex-shrink: 0;
-  font-family: inherit;
-}
-.fmt-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.12); color: #fff; }
-.fmt-btn.active { background: rgba(0,212,180,0.12); border-color: rgba(0,212,180,0.3); color: #00d4b4; }
-.fmt-bold strong { font-size: 0.88rem; }
-.fmt-italic em { font-size: 0.88rem; font-style: italic; }
+  .resume-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+  }
 
-.fmt-size-input {
-  width: 36px; height: 28px; text-align: center;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 5px; color: rgba(255,255,255,0.8);
-  font-size: 0.78rem; font-family: inherit;
-  outline: none;
-}
-.fmt-size-input::-webkit-inner-spin-button { display: none; }
+  .save-chip {
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.3);
+  }
 
-.fmt-color-wrap {
-  display: flex; align-items: center; gap: 2px;
-  cursor: pointer; padding: 4px 5px; border-radius: 5px;
-  border: 1px solid transparent; color: rgba(255,255,255,0.4);
-  transition: all 0.15s;
-}
-.fmt-color-wrap:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
-.fmt-color-swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); }
+  .save-chip.saving {
+    color: #00d4b4;
+  }
 
-/* Right buttons */
-.save-status-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.72rem; color: #00d4b4;
-  background: rgba(0,212,180,0.08);
-  border: 1px solid rgba(0,212,180,0.2);
-  padding: 5px 10px; border-radius: 6px;
-}
+  .save-chip.err {
+    color: #ef4444;
+  }
 
-.export-btn {
-  display: flex; align-items: center; gap: 6px;
-  background: linear-gradient(135deg, #00d4b4, #00b89c);
-  color: #000; font-weight: 700; font-size: 0.8rem;
-  padding: 7px 14px; border-radius: 8px; border: none;
-  cursor: pointer; font-family: inherit;
-  transition: all 0.2s; white-space: nowrap;
-}
-.export-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,212,180,0.35); }
+  /* Format toolbar */
+  .topbar-format-bar {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    padding: 4px 8px;
+    flex: 1;
+    max-width: 680px;
+    margin: 0 auto;
+  }
 
-/* ══════════════════════════════
-   BODY LAYOUT
-══════════════════════════════ */
-.canva-body {
-  display: flex; flex: 1; overflow: hidden;
-}
+  .fmt-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.78rem;
+    padding: 3px 6px;
+    height: 28px;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    min-width: 110px;
+  }
 
-/* ── Left icon sidebar ── */
-.canva-sidenav {
-  width: 68px; flex-shrink: 0;
-  background: #0a0d14;
-  border-right: 1px solid rgba(255,255,255,0.05);
-  display: flex; flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
-  gap: 4px;
-  z-index: 10;
-}
+  .fmt-select:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 
-.snav-btn {
-  width: 56px;
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
-  padding: 8px 4px;
-  border-radius: 8px;
-  background: transparent;
-  border: none;
-  color: rgba(255,255,255,0.4);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-.snav-btn:hover, .snav-btn.active {
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.85);
-}
-.snav-btn.active { color: #00d4b4; }
-.snav-btn span { font-size: 0.58rem; letter-spacing: 0.02em; text-align: center; }
+  .fmt-select option {
+    background: #ffffff;
+    color: #111827;
+  }
 
-/* ── Left expandable panel ── */
-.canva-left {
-  width: 0; overflow: hidden;
-  transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
-  background: #111520;
-  border-right: 1px solid rgba(255,255,255,0.05);
-  flex-shrink: 0;
-  display: flex; flex-direction: column;
-}
-.canva-left.open { width: 260px; }
+  .fmt-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 3px;
+    flex-shrink: 0;
+  }
 
-.cleft-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px 10px;
-  font-size: 0.78rem; font-weight: 700;
-  color: rgba(255,255,255,0.6);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  flex-shrink: 0;
-}
-.cl-close {
-  background: none; border: none; color: rgba(255,255,255,0.3);
-  cursor: pointer; font-size: 0.9rem; padding: 2px;
-  transition: color 0.15s;
-}
-.cl-close:hover { color: rgba(255,255,255,0.7); }
+  .fmt-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    font-family: inherit;
+  }
 
-.add-sec-btn {
-  margin: auto 12px 12px;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 9px;
-  background: rgba(0,212,180,0.05);
-  border: 1px dashed rgba(0,212,180,0.3);
-  border-radius: 8px;
-  color: #00d4b4; font-size: 0.78rem; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-}
-.add-sec-btn:hover { background: rgba(0,212,180,0.1); }
+  .fmt-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
 
-.canva-left app-add-section,
-.canva-left app-section-list {
-  flex: 1; overflow-y: auto; display: block; padding: 12px;
-}
+  .fmt-btn:active {
+    background: rgba(0, 212, 180, 0.15);
+    color: #00d4b4;
+  }
 
-/* ── Center canvas ── */
-.canva-canvas {
-  flex: 1; overflow: hidden; position: relative;
-  background:
-    radial-gradient(circle at 30% 70%, rgba(0,212,180,0.03) 0%, transparent 50%),
-    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(255,255,255,0.012) 28px, rgba(255,255,255,0.012) 29px),
-    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(255,255,255,0.012) 28px, rgba(255,255,255,0.012) 29px),
-    #1a1f2e;
-  cursor: default;
-}
+  .fmt-bold strong {
+    font-size: 0.88rem;
+  }
 
-/* hint banner */
-.canvas-hint {
-  position: absolute; top: 12px; left: 50%;
-  transform: translateX(-50%);
-  display: flex; align-items: center; gap: 8px;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 0.72rem; color: rgba(255,255,255,0.4);
-  z-index: 5; pointer-events: none;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-}
-.canvas-hint.hidden { opacity: 0; }
+  .fmt-italic em {
+    font-size: 0.88rem;
+    font-style: italic;
+  }
 
-/* ── Right panel ── */
-.canva-right {
-  width: 0; overflow: hidden;
-  transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
-  background: #0d1117;
-  border-left: 1px solid rgba(255,255,255,0.06);
-  flex-shrink: 0;
-}
-.canva-right.open { width: 340px; }
+  .fmt-size-input {
+    width: 36px;
+    height: 28px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.78rem;
+    font-family: inherit;
+    outline: none;
+  }
 
-.panel-inner {
-  width: 340px; height: 100%;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
+  .fmt-size-input::-webkit-inner-spin-button {
+    display: none;
+  }
 
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  flex-shrink: 0; gap: 10px;
-}
-.panel-head-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.panel-type-badge {
-  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: #00d4b4;
-  background: rgba(0,212,180,0.1); border: 1px solid rgba(0,212,180,0.2);
-  padding: 2px 8px; border-radius: 999px; flex-shrink: 0;
-}
-.panel-title {
-  font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.85);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+  .fmt-size-input:focus {
+    border-color: rgba(0, 212, 180, 0.4);
+    background: rgba(0, 212, 180, 0.05);
+  }
 
-.panel-close {
-  width: 28px; height: 28px; border-radius: 6px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.4); cursor: pointer;
-  transition: all 0.15s; flex-shrink: 0;
-}
-.panel-close:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: #ef4444; }
+  .fmt-color-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.55);
+    transition: all 0.15s;
+  }
 
-.panel-inner app-section-editor,
-.panel-inner app-add-section {
-  flex: 1; overflow-y: auto; display: block;
-}
+  .fmt-color-wrap:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .fmt-color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+  }
+
+  .fmt-color-palette {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fmt-color-chip,
+  .fmt-color-input {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .fmt-color-chip {
+    background: transparent;
+  }
+
+  .fmt-color-chip:hover,
+  .fmt-color-input:hover {
+    transform: scale(1.12);
+  }
+
+  .fmt-color-chip.active {
+    border-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 2px rgba(0, 212, 180, 0.2);
+  }
+
+  .fmt-color-input {
+    appearance: none;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+  }
+
+  .fmt-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  .fmt-color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+  }
+
+  .save-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: #00d4b4;
+    background: rgba(0, 212, 180, 0.08);
+    border: 1px solid rgba(0, 212, 180, 0.2);
+    padding: 5px 10px;
+    border-radius: 6px;
+  }
+
+  /* ✅ Export button — now clickable green CTA */
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #00d4b4, #00b89c);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 212, 180, 0.35);
+  }
+
+  /* BODY LAYOUT */
+  .canva-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Left icon sidebar */
+  .canva-sidenav {
+    width: 68px;
+    flex-shrink: 0;
+    background: #0a0d14;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 4px;
+    z-index: 10;
+  }
+
+  .snav-btn {
+    width: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .snav-btn:hover,
+  .snav-btn.active {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .snav-btn.active {
+    color: #00d4b4;
+  }
+
+  .snav-btn span {
+    font-size: 0.58rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  /* Left expandable panel */
+  .canva-left {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #111520;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .canva-left.open {
+    width: 260px;
+  }
+
+  .cleft-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+  }
+
+  .cl-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 2px;
+    transition: color 0.15s;
+  }
+
+  .cl-close:hover {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .add-sec-btn {
+    margin: auto 12px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px;
+    background: rgba(0, 212, 180, 0.05);
+    border: 1px dashed rgba(0, 212, 180, 0.3);
+    border-radius: 8px;
+    color: #00d4b4;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .add-sec-btn:hover {
+    background: rgba(0, 212, 180, 0.1);
+  }
+
+  .canva-left app-add-section,
+  .canva-left app-section-list,
+  .template-sel-wrap {
+    flex: 1;
+    overflow-y: auto;
+    display: block;
+    padding: 12px;
+  }
+
+  /* Center canvas */
+  .canva-canvas {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(circle at 30% 70%, rgba(0, 212, 180, 0.03) 0%, transparent 50%),
+      repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(255, 255, 255, 0.012) 28px, rgba(255, 255, 255, 0.012) 29px),
+      repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(255, 255, 255, 0.012) 28px, rgba(255, 255, 255, 0.012) 29px),
+      #1a1f2e;
+    cursor: default;
+  }
+
+  .canvas-hint {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.4);
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .canvas-hint.hidden {
+    opacity: 0;
+  }
+
+  /* Right panel */
+  .canva-right {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #0d1117;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+  }
+
+  .canva-right.open {
+    width: 340px;
+  }
+
+  .panel-inner {
+    width: 340px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+    gap: 10px;
+  }
+
+  .panel-head-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .panel-type-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #00d4b4;
+    background: rgba(0, 212, 180, 0.1);
+    border: 1px solid rgba(0, 212, 180, 0.2);
+    padding: 2px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .panel-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .panel-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+  }
+
+  .panel-inner app-section-editor,
+  .panel-inner app-add-section {
+    flex: 1;
+    overflow-y: auto;
+    display: block;
+  }
+
+  .panel-editor-wrap {
+    flex: 1;
+    overflow-y: auto;
+    display: block;
+    padding: 24px;
+  }
 </style>

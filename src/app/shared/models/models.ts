@@ -25,6 +25,10 @@ export interface UserProfileResponse {
   fullName: string;
   email: string;
   mobileNumber: string;
+  location?: string;
+  linkedin?: string;
+  github?: string;
+  website?: string;
   age: number;
   subscriptionPlan: 'FREE' | 'PREMIUM';
   roles: string[];
@@ -73,7 +77,7 @@ export interface MessageResponse {
 // ── Template Models ───────────────────────────────────────────────────────────
 
 export type TemplateCategory = 'PROFESSIONAL' | 'CREATIVE' | 'MODERN' | 'MINIMALIST' | 'ATS_OPTIMISED';
-export type TemplateTier     = 'FREE' | 'PREMIUM';
+export type TemplateTier = 'FREE' | 'PREMIUM';
 
 export interface TemplateResponseDTO {
   templateId: number;
@@ -124,6 +128,7 @@ export interface UpdateResumeRequest {
   title?: string;
   targetJobTitle?: string;
   language?: string;
+  templateId?: number | null;
   status?: ResumeStatus;
 }
 
@@ -236,4 +241,39 @@ export interface AiResponse {
   model?: string;
   requestType?: string;
   timestamp?: string;
+}
+
+// ── Export Service Models ────────────────────────────────────────────────────-
+
+export type ExportFormat = 'PDF' | 'DOCX' | 'JSON';
+export type ExportStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface ExportJob {
+  jobId: string;
+  userId: number;
+  resumeId: number;
+  format: ExportFormat;
+  status: ExportStatus;
+  fileUrl: string | null;
+  fileSizeKb: number | null;
+  requestedAt: string;
+  completedAt: string | null;
+  expiresAt: string | null;
+  templateId: number | null;
+  customizations: string | null;
+  failureReason?: string | null;
+}
+
+export interface ExportStats {
+  userId: number;
+  totalExports: number;
+  todayPdfCount: number;
+  countByFormat: Record<ExportFormat, number>;
+}
+
+export interface ExportCustomization {
+  primaryColor?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  margins?: 'narrow' | 'normal' | 'wide';
 }

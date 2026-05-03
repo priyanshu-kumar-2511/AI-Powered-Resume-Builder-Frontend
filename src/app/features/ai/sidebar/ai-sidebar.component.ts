@@ -6,13 +6,11 @@ import { AiSummaryGeneratorComponent } from '../summary/ai-summary-generator.com
 import { AiBulletsGeneratorComponent } from '../bullets/ai-bullets-generator.component';
 import { SkillSuggestionsComponent } from '../skills/skill-suggestions.component';
 import { AtsCheckerComponent } from '../ats/ats-checker.component';
-import { CoverLetterGeneratorComponent } from '../cover-letter/cover-letter-generator.component';
 import { SectionImproverComponent } from '../improve/section-improver.component';
 import { ResumeTailorComponent } from '../tailor/resume-tailor.component';
-import { TranslateResumeComponent } from '../translate/translate-resume.component';
 import { AiHistoryComponent } from '../history/ai-history.component';
 
-type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
+type AiTab = 'generate' | 'improve' | 'ats' | 'history';
 
 @Component({
   selector: 'app-ai-sidebar',
@@ -24,15 +22,13 @@ type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
     AiBulletsGeneratorComponent,
     SkillSuggestionsComponent,
     AtsCheckerComponent,
-    CoverLetterGeneratorComponent,
     SectionImproverComponent,
     ResumeTailorComponent,
-    TranslateResumeComponent,
     AiHistoryComponent
   ],
   template: `
     <!-- Toggle button (outside panel) -->
-    <button class="ai-toggle" (click)="collapsed = !collapsed" [title]="collapsed ? 'Open AI panel' : 'Close AI panel'">
+    <button class="ai-toggle" [class.open]="!collapsed" (click)="collapsed = !collapsed" [title]="collapsed ? 'Open AI panel' : 'Close AI panel'">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
         @if (collapsed) {
           <path d="M12 2a10 10 0 1 0 10 10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>
@@ -75,6 +71,16 @@ type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
 
       <!-- Tab content -->
       <div class="ai-content">
+        @if (activeTab === 'improve') {
+          <app-section-improver
+            [resumeId]="resumeId"
+            [selectedSectionType]="currentSectionType"
+            [currentContent]="currentSectionContent"
+            (contentApplied)="improvedContent.emit($event)" />
+          <div class="ai-section-divider"></div>
+          <app-resume-tailor [resumeId]="resumeId" [resumeContent]="fullResumeContent" />
+        }
+
         @if (activeTab === 'generate') {
           <!-- Summary: accepted text bubbles up to parent via summaryAccepted output -->
           <app-ai-summary-generator
@@ -96,27 +102,11 @@ type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
             (skillAdded)="skillAdded.emit($event)" />
         }
 
-        @if (activeTab === 'improve') {
-          <app-cover-letter-generator [resumeId]="resumeId" [targetJobTitle]="targetJobTitle" />
-          <div class="ai-section-divider"></div>
-          <app-section-improver
-            [resumeId]="resumeId"
-            [selectedSectionType]="currentSectionType"
-            [currentContent]="currentSectionContent"
-            (contentApplied)="improvedContent.emit($event)" />
-          <div class="ai-section-divider"></div>
-          <app-resume-tailor [resumeId]="resumeId" [resumeContent]="fullResumeContent" />
-        }
-
         @if (activeTab === 'ats') {
           <app-ats-checker
             [resumeId]="resumeId"
             [resumeContent]="fullResumeContent"
             (scoreUpdated)="atsScore.emit($event)" />
-        }
-
-        @if (activeTab === 'translate') {
-          <app-translate-resume [resumeId]="resumeId" [resumeContent]="fullResumeContent" />
         }
 
         @if (activeTab === 'history') {
@@ -142,6 +132,15 @@ type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
       box-shadow: 0 4px 20px rgba(0,212,180,0.1);
     }
     .ai-toggle:hover { background: rgba(0,212,180,0.08); box-shadow: 0 4px 20px rgba(0,212,180,0.2); }
+    .ai-toggle.open {
+      right: 336px;
+      top: 88px;
+      transform: none;
+      width: 32px;
+      padding: 8px 0;
+      border-radius: 8px;
+      z-index: 60;
+    }
 
     .ai-sidebar {
       position: fixed; right: 0; top: 56px; bottom: 0;
@@ -153,6 +152,13 @@ type AiTab = 'generate' | 'improve' | 'ats' | 'translate' | 'history';
       z-index: 40;
     }
     .ai-sidebar.open { width: 320px; }
+
+    @media (max-width: 900px) {
+      .ai-toggle.open {
+        right: 12px;
+        top: 64px;
+      }
+    }
 
     .ai-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -211,13 +217,12 @@ export class AiSidebarComponent implements OnInit {
   private auth = inject(AuthService);
 
   collapsed = true;
-  activeTab: AiTab = 'generate';
+  activeTab: AiTab = 'improve';
 
   readonly tabs: { id: AiTab; label: string; premium?: boolean }[] = [
-    { id: 'generate',  label: 'Generate' },
     { id: 'improve',   label: 'Improve',   premium: true },
+    { id: 'generate',  label: 'Generate' },
     { id: 'ats',       label: 'ATS Check' },
-    { id: 'translate', label: 'Translate', premium: true },
     { id: 'history',   label: 'History',   premium: true },
   ];
 

@@ -67,7 +67,7 @@
       }
 
       @if (selectedResume) {
-        <section class="spotlight-card">
+        <section class="spotlight-card" id="spotlight">
           <div class="spotlight-copy">
             <span class="badge badge-teal">Resume Spotlight</span>
             <h2>{{ selectedResume.title }}</h2>
@@ -79,21 +79,35 @@
               <div><span>Status</span><strong>{{ selectedResume.status }}</strong></div>
             </div>
 
-            @if (selectedResume.templateId) {
-              <button type="button" (click)="goToTemplate(selectedResume.templateId)" class="btn btn-primary">
-                View Template
-              </button>
-            }
+            <div class="spotlight-actions">
+              @if (selectedResume.templateId) {
+                <button type="button" (click)="goToTemplate(selectedResume.templateId)" class="btn btn-primary">
+                  View Template
+                </button>
+              }
+              <button type="button" class="btn btn-ghost" (click)="selectedResume = null">Close Preview</button>
+            </div>
           </div>
 
           <div class="spotlight-preview">
-            @if (templateFor(selectedResume.templateId)?.thumbnailUrl) {
-              <img
-                [src]="templateFor(selectedResume.templateId)?.thumbnailUrl || ''"
-                [alt]="selectedResume.title"
-                loading="lazy">
+            @if (previewHtml) {
+               <div class="preview-frame-container">
+                  <iframe 
+                    [srcdoc]="previewHtml" 
+                    frameborder="0" 
+                    class="live-frame"
+                    title="Resume Preview">
+                  </iframe>
+               </div>
+            } @else if (error) {
+              <div class="preview-error">
+                <span>⚠️ {{ error }}</span>
+              </div>
             } @else {
-              <div class="spotlight-placeholder">{{ selectedResume.title.charAt(0) }}</div>
+              <div class="preview-loading">
+                <div class="spinner"></div>
+                <span>Generating live preview...</span>
+              </div>
             }
           </div>
         </section>
@@ -202,16 +216,23 @@
 }
 
 .spotlight-preview {
-  min-height: 320px;
+  min-height: 450px;
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   overflow: hidden;
 }
 
 .spotlight-preview img,
+.spotlight-preview .live-frame,
 .spotlight-preview .spotlight-placeholder {
   width: 100%;
   height: 100%;
+  min-height: 450px;
+}
+
+.spotlight-preview .live-frame {
+  background: white;
+  border: none;
 }
 
 .spotlight-preview img {
@@ -227,11 +248,46 @@
   color: rgba(245, 240, 232, 0.55);
 }
 
-@media (max-width: 900px) {
-  .spotlight-card { grid-template-columns: 1fr; }
+.spotlight-actions {
+  display: flex;
+  gap: 12px;
 }
 
-@media (max-width: 640px) {
-  .spotlight-meta { grid-template-columns: 1fr; }
+.preview-loading {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 212, 180, 0.1);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-frame-container {
+  height: 100%;
+  width: 100%;
+  background: white;
+.preview-error {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  font-size: 0.9rem;
+  padding: 20px;
+  text-align: center;
 }
 </style>

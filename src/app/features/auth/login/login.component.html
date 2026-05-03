@@ -91,3 +91,23 @@
     </div>
   </div>
 </div>
+
+<!-- Suspension Modal -->
+@if (isSuspended) {
+  <div class="modal-backdrop" (click)="isSuspended = false">
+    <div class="suspend-popup" (click)="$event.stopPropagation()">
+      <div class="popup-icon">🚫</div>
+      <h2 class="popup-title">Account Suspended</h2>
+      <p class="popup-desc">
+        Your account has been suspended for violating our platform's policies.
+      </p>
+      <div class="contact-card">
+        <p>Please contact customer care to resolve this:</p>
+        <a href="mailto:kumarpriyanshu77828&#64;gmail.com" class="contact-email">
+          kumarpriyanshu77828&#64;gmail.com
+        </a>
+      </div>
+      <button class="btn btn-primary btn-full" (click)="isSuspended = false">Close</button>
+    </div>
+  </div>
+}

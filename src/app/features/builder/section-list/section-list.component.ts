@@ -33,7 +33,7 @@ export class SectionListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.builderState.sections$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(sections => this.sections = sections);
+      .subscribe((sections: ResumeSection[]) => this.sections = sections);
   }
 
   ngOnDestroy(): void {
@@ -53,7 +53,7 @@ export class SectionListComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     this.togglingId = section.sectionId;
     this.sectionApi.toggleVisibility(section.sectionId).subscribe({
-      next: updated => {
+      next: (updated: ResumeSection) => {
         this.builderState.updateSection(updated);
         this.togglingId = null;
       },
@@ -78,7 +78,7 @@ export class SectionListComponent implements OnInit, OnDestroy {
     const temp = reordered[from];
     reordered[from] = reordered[to];
     reordered[to] = temp;
-    const updated = reordered.map((s, i) => ({ ...s, displayOrder: i }));
+    const updated = reordered.map((s: ResumeSection, i: number) => ({ ...s, displayOrder: i }));
     this.builderState.setSections(updated);
     this.sectionApi.reorder(this.resumeId, updated.map(s => s.sectionId)).subscribe();
   }

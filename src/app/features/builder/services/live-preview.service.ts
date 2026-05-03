@@ -1,23 +1,34 @@
-import { Injectable, inject, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Resume, ResumeSection, Template, UserProfileResponse } from '../../../shared/models/models';
+import { TemplateRenderService } from '../../../shared/services/template-render.service';
 import { BuilderStateService } from './builder-state.service';
-import { ResumeSection, Template } from '../../../shared/models/models';
-import { AuthService } from '../../../core/services/auth.service';
 
-// ✅ FIX: mustache uses `export default` in its ESM build.
-// `import * as Mustache` gives a namespace object where .render is undefined.
-// Use a default import instead.
-import Mustache from 'mustache';
+type PreviewStyle = {
+  fontSize: number;
+  fontFamily: string;
+  primaryColor: string;
+};
 
+/**
+ * Service responsible for rendering the live resume preview.
+ * Listens to state changes across sections, templates, and styling preferences,
+ * debounces them, and dynamically writes the compiled HTML into a hidden iframe.
+ */
 @Injectable({ providedIn: 'root' })
 export class LivePreviewService implements OnDestroy {
   private builderState = inject(BuilderStateService);
-  private authService = inject(AuthService);
+  private templateRenderer = inject(TemplateRenderService);
 
   private iframeRef: HTMLIFrameElement | null = null;
   private sub: Subscription | null = null;
 
+  /**
+   * Registers the target iframe element where the resume will be rendered.
+   * Immediately begins listening for state changes to update the iframe content.
+   * @param iframe The HTMLIFrameElement to render into
+   */
   registerIframe(iframe: HTMLIFrameElement): void {
     this.iframeRef = iframe;
     this.startListening();
@@ -31,17 +42,21 @@ export class LivePreviewService implements OnDestroy {
     this.sub = combineLatest([
       this.builderState.sections$,
       this.builderState.template$,
-      this.builderState.resume$
+      this.builderState.resume$,
+      this.builderState.userProfile$,
+      this.builderState.font$
     ]).pipe(
       debounceTime(500),
-      distinctUntilChanged(([prevSec, prevTpl, prevResume], [currSec, currTpl, currResume]) =>
+      distinctUntilChanged(([prevSec, prevTpl, prevResume, prevProfile, prevFont], [currSec, currTpl, currResume, currProfile, currFont]) =>
         JSON.stringify(prevSec) === JSON.stringify(currSec) &&
         prevTpl?.templateId === currTpl?.templateId &&
         prevResume?.resumeId === currResume?.resumeId &&
-        prevResume?.targetJobTitle === currResume?.targetJobTitle
+        prevResume?.targetJobTitle === currResume?.targetJobTitle &&
+        JSON.stringify(prevProfile) === JSON.stringify(currProfile) &&
+        JSON.stringify(prevFont) === JSON.stringify(currFont)
       )
-    ).subscribe(([sections, template]) => {
-      this.renderPreview(sections, template);
+    ).subscribe(([sections, template, resume, profile, font]) => {
+      this.renderPreview(sections, template, resume, profile, font);
     });
   }
 
@@ -51,10 +66,45 @@ export class LivePreviewService implements OnDestroy {
     }
   }
 
-  private renderPreview(sections: ResumeSection[], template: Template | null): void {
+  /**
+   * Returns a snapshot of the current preview styling preferences.
+   */
+  getCurrentStyle(): PreviewStyle {
+    return this.builderState.fontSnapshot;
+  }
+
+  /**
+   * Generates the final, static HTML string for the resume without writing it to the iframe.
+   * Used heavily by the ExportService to capture the DOM for PDF printing.
+   * @param overrides Optional styling overrides (e.g., custom colors for export)
+   * @returns The fully compiled HTML string
+   */
+  getRenderedHtml(overrides?: { primaryColor?: string; fontFamily?: string }): string | null {
+    const sections = this.builderState.sectionsSnapshot;
+    const template = this.builderState.templateSnapshot;
+    const resume = this.builderState.resumeSnapshot;
+    const profile = this.builderState.userProfileSnapshot;
+    const font = this.builderState.fontSnapshot;
+
+    const mergedFont = {
+      fontSize: font.fontSize,
+      fontFamily: overrides?.fontFamily ?? font.fontFamily,
+      primaryColor: overrides?.primaryColor ?? font.primaryColor
+    };
+
+    return this.buildHtml(sections, template, resume, profile, mergedFont, mergedFont.primaryColor) || null;
+  }
+
+  private renderPreview(
+    sections: ResumeSection[],
+    template: Template | null,
+    resume: Resume | null,
+    profile: UserProfileResponse | null,
+    font: PreviewStyle
+  ): void {
     if (!this.iframeRef) return;
 
-    const html = this.buildHtml(sections, template);
+    const html = this.buildHtml(sections, template, resume, profile, font);
     const doc = this.iframeRef.contentDocument;
     if (!doc) return;
 
@@ -63,136 +113,57 @@ export class LivePreviewService implements OnDestroy {
     doc.close();
   }
 
-  private buildHtml(sections: ResumeSection[], template: Template | null): string {
-    const css = template?.cssStyles || this.defaultCss();
-    let body: string;
+  private buildHtml(
+    sections: ResumeSection[],
+    template: Template | null,
+    resume: Resume | null,
+    profile: UserProfileResponse | null,
+    font: PreviewStyle,
+    primaryColor?: string
+  ): string {
+    const renderedTemplate = this.templateRenderer.renderDocument(template, {
+      sections,
+      profile,
+      resume,
+      font,
+      primaryColor: primaryColor ?? font.primaryColor
+    });
 
-    if (template?.htmlLayout) {
-      if (sections.length > 0) {
-        body = this.injectSections(template.htmlLayout, sections);
-      } else {
-        body = this.injectPlaceholders(template.htmlLayout);
-      }
-    } else {
-      body = sections.length > 0
-        ? this.buildDefaultLayout(sections)
-        : this.buildSampleLayout();
+    if (renderedTemplate) {
+      return renderedTemplate;
     }
+
+    const body = sections.length > 0
+      ? this.buildDefaultLayout(sections)
+      : this.buildSampleLayout();
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>${css}</style>
+  <style>
+    ${this.defaultCss()}
+    :root {
+      --font-family: '${font.fontFamily}', sans-serif;
+      --font-size: ${font.fontSize}px;
+    }
+    body {
+      font-family: var(--font-family) !important;
+      font-size: var(--font-size) !important;
+    }
+  </style>
 </head>
 <body>${body}</body>
 </html>`;
   }
 
-  /** Fill template placeholders with sample/demo data */
-  private injectPlaceholders(layout: string): string {
-    const viewData = {
-      fullName: 'Richard Sanchez',
-      jobTitle: 'Marketing Manager',
-      email: 'rsanchez@email.com',
-      phone: '+1 (555) 012-3456',
-      location: 'New York, NY',
-      linkedin: 'linkedin.com/in/rsanchez',
-      summary: 'Results-driven marketing professional with 8+ years of experience leading cross-functional teams. Proven track record of growing revenue by 40% through data-driven campaigns and innovative brand strategies.',
-      experience: [
-        {
-          role: 'Senior Marketing Manager',
-          company: 'Bonsai Studio',
-          startDate: 'Jan 2022',
-          endDate: 'Present',
-          bullets: [{ text: 'Led a team of 12 to deliver award-winning campaigns' }, { text: 'Grew organic traffic by 60% in 18 months' }]
-        }
-      ],
-      education: [
-        {
-          degree: 'B.A. Communications',
-          institution: 'Stanford University',
-          startYear: '2014',
-          endYear: '2018',
-          grade: '3.8 GPA'
-        }
-      ],
-      skills: [{ name: 'Analytics' }, { name: 'Strategy' }, { name: 'SEO/SEM' }, { name: 'Leadership' }]
-    };
-    // ✅ Mustache.render now works correctly with the default import
-    return Mustache.render(layout, viewData);
-  }
-
-  /** Inject real section content into template placeholders */
-  private injectSections(layout: string, sections: ResumeSection[]): string {
-    const currentUser = this.authService.currentUser();
-    const currentResume = this.builderState.resumeSnapshot;
-
-    const viewData: any = {
-      fullName: currentUser?.fullName ?? 'Your Name',
-      jobTitle: currentResume?.targetJobTitle ?? 'Target Role',
-      email: currentUser?.email ?? '',
-      phone: currentUser?.mobileNumber ?? '',
-      location: '',
-      linkedin: '',
-      website: ''
-    };
-
-    sections.forEach(section => {
-      if (!section.isVisible) return;
-      let parsed = null;
-      try { parsed = JSON.parse(section.content || 'null'); } catch (e) { }
-
-      if (section.sectionType === 'SUMMARY') {
-        viewData.summary = parsed?.text || '';
-      } else if (section.sectionType === 'SKILLS') {
-        let allSkills: { name: string }[] = [];
-        if (Array.isArray(parsed)) {
-          allSkills = parsed.map((s: any) => typeof s === 'string' ? { name: s } : s);
-        } else if (parsed && typeof parsed === 'object') {
-          Object.values(parsed as Record<string, string[]>).forEach(arr => {
-            if (Array.isArray(arr)) {
-              allSkills.push(...arr.map((s: any) => typeof s === 'string' ? { name: s } : s));
-            }
-          });
-        }
-        viewData.skills = allSkills;
-      } else if (section.sectionType === 'EXPERIENCE' || section.sectionType === 'PROJECTS') {
-        if (Array.isArray(parsed)) {
-          parsed.forEach(item => {
-            if (Array.isArray(item.bullets)) {
-              item.bullets = item.bullets.map((b: any) => typeof b === 'string' ? { text: b } : b);
-            }
-          });
-        }
-        viewData[section.sectionType.toLowerCase()] = parsed;
-      } else if (section.sectionType === 'EDUCATION') {
-        if (Array.isArray(parsed)) {
-          parsed.forEach(item => {
-            if (Array.isArray(item.highlights)) {
-              item.highlights = item.highlights.map((h: any) => typeof h === 'string' ? { text: h } : h);
-            }
-          });
-        }
-        viewData[section.sectionType.toLowerCase()] = parsed;
-      } else {
-        viewData[section.sectionType.toLowerCase()] = parsed;
-      }
-    });
-
-    // ✅ Mustache.render now works correctly with the default import
-    return Mustache.render(layout, viewData);
-  }
-
-  /** Fallback layout when no template */
   private buildDefaultLayout(sections: ResumeSection[]): string {
-    const visible = sections.filter(s => s.isVisible);
-    const content = visible.map(s => this.renderSection(s)).join('');
+    const visible = sections.filter((section) => section.isVisible);
+    const content = visible.map((section) => this.renderSection(section)).join('');
     return `<div class="resume-preview">${content}</div>`;
   }
 
-  /** Sample resume shown when builder first opens with no sections */
   private buildSampleLayout(): string {
     return `<div class="resume-preview">
       <div class="section summary">
@@ -204,7 +175,7 @@ export class LivePreviewService implements OnDestroy {
         <div class="exp-entry">
           <div class="exp-header">Senior Marketing Manager</div>
           <div class="exp-company">Bonsai Studio</div>
-          <div class="exp-dates">Jan 2022 – Present</div>
+          <div class="exp-dates">Jan 2022 - Present</div>
           <ul><li>Led team of 12 to deliver award-winning campaigns</li><li>Grew organic traffic 60% in 18 months</li></ul>
         </div>
       </div>
@@ -226,29 +197,29 @@ export class LivePreviewService implements OnDestroy {
 
     switch (section.sectionType) {
       case 'SUMMARY':
-        return `<div class="section summary"><h2>${section.title}</h2><p>${(parsed as any)?.text || ''}</p></div>`;
+        return `<div class="section summary"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
 
       case 'EXPERIENCE': {
         const entries: any[] = Array.isArray(parsed) ? parsed : [];
-        const items = entries.map(e => `
+        const items = entries.map((entry) => `
           <div class="exp-entry">
-            <div class="exp-header">${e.role || ''}</div>
-            <div class="exp-company">${e.company || ''}</div>
-            <div class="exp-dates">${e.startDate || ''} – ${e.isCurrent ? 'Present' : (e.endDate || '')}</div>
-            <ul>${(e.bullets || []).map((b: any) => `<li>${typeof b === 'string' ? b : b.text || ''}</li>`).join('')}</ul>
+            <div class="exp-header">${entry.role || ''}</div>
+            <div class="exp-company">${entry.company || ''}</div>
+            <div class="exp-dates">${entry.startDate || ''} - ${entry.isCurrent ? 'Present' : (entry.endDate || '')}</div>
+            <ul>${(entry.bullets || []).map((bullet: any) => `<li>${typeof bullet === 'string' ? bullet : bullet.text || ''}</li>`).join('')}</ul>
           </div>`).join('');
         return `<div class="section experience"><h2>${section.title}</h2>${items}</div>`;
       }
 
       case 'EDUCATION': {
         const entries: any[] = Array.isArray(parsed) ? parsed : [];
-        const items = entries.map(e => `
+        const items = entries.map((entry) => `
           <div class="edu-entry">
             <div>
-              <strong>${e.institution || ''}</strong>
-              <div class="edu-degree">${e.degree || ''}${e.fieldOfStudy ? ' · ' + e.fieldOfStudy : ''}</div>
+              <strong>${entry.institution || ''}</strong>
+              <div class="edu-degree">${entry.degree || ''}${entry.fieldOfStudy ? ' - ' + entry.fieldOfStudy : ''}</div>
             </div>
-            <div class="edu-dates">${e.startYear || ''} – ${e.endYear || ''}${e.grade ? '<br>' + e.grade : ''}</div>
+            <div class="edu-dates">${entry.startYear || ''} - ${entry.endYear || ''}${entry.grade ? '<br>' + entry.grade : ''}</div>
           </div>`).join('');
         return `<div class="section education"><h2>${section.title}</h2>${items}</div>`;
       }
@@ -256,25 +227,53 @@ export class LivePreviewService implements OnDestroy {
       case 'SKILLS': {
         let allSkills: string[] = [];
         if (Array.isArray(parsed)) {
-          allSkills = parsed.map((s: any) => typeof s === 'string' ? s : s.name || '');
+          allSkills = parsed.map((skill: any) => typeof skill === 'string' ? skill : skill.name || '');
         } else if (parsed && typeof parsed === 'object') {
-          const obj = parsed as Record<string, string[]>;
-          Object.values(obj).forEach(arr => {
-            if (Array.isArray(arr)) allSkills.push(...arr);
+          const objectValue = parsed as Record<string, string[]>;
+          Object.values(objectValue).forEach((group) => {
+            if (Array.isArray(group)) allSkills.push(...group);
           });
         }
-        const chips = allSkills.map(s => `<span class="skill-chip">${s}</span>`).join('');
+        const chips = allSkills.map((skill) => `<span class="skill-chip">${skill}</span>`).join('');
         return `<div class="section skills"><h2>${section.title}</h2><div class="skill-chips">${chips || '<span style="color:#94a3b8;font-size:10px">No skills added yet</span>'}</div></div>`;
       }
 
       default:
-        return `<div class="section generic"><h2>${section.title}</h2><div>${(parsed as any)?.html || (parsed as any)?.text || ''}</div></div>`;
+        return `<div class="section generic"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
     }
+  }
+
+  private extractTextValue(value: unknown): string {
+    if (typeof value === 'string') return value;
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+      if (typeof record['html'] === 'string') return String(record['html']);
+      if (typeof record['text'] === 'string') return String(record['text']);
+    }
+    return '';
+  }
+
+  private renderRichText(value: string): string {
+    return this.escapeHtml(value)
+      .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/gs, '<em>$1</em>')
+      .replace(/\+\+(.+?)\+\+/gs, '<u>$1</u>')
+      .replace(/~~(.+?)~~/gs, '<s>$1</s>')
+      .replace(/\r?\n/g, '<br>');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   private defaultCss(): string {
     return `
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Merriweather:wght@700&display=swap');
 
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -293,7 +292,7 @@ export class LivePreviewService implements OnDestroy {
       }
 
       .resume-header {
-        border-bottom: 2px solid #00d4b4;
+        border-bottom: 2px solid var(--primary, #00d4b4);
         padding-bottom: 18px;
         margin-bottom: 24px;
       }
@@ -308,7 +307,7 @@ export class LivePreviewService implements OnDestroy {
       .resume-role {
         font-size: 12px;
         font-weight: 600;
-        color: #00b89c;
+        color: var(--primary, #00b89c);
         letter-spacing: 0.04em;
         text-transform: uppercase;
         margin-bottom: 8px;
@@ -334,7 +333,7 @@ export class LivePreviewService implements OnDestroy {
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        color: #00b89c;
+        color: var(--primary, #00b89c);
         border-bottom: 1.5px solid #e2f8f5;
         padding-bottom: 5px;
         margin-bottom: 12px;
@@ -345,14 +344,20 @@ export class LivePreviewService implements OnDestroy {
         position: absolute;
         bottom: -1.5px; left: 0;
         width: 28px; height: 1.5px;
-        background: #00d4b4;
+        background: var(--primary, #00d4b4);
       }
 
       .summary p {
+      .summary .rich-text {
         font-size: 11px;
         color: #374151;
         line-height: 1.65;
       }
+
+      .rich-text strong { font-weight: 700; }
+      .rich-text em { font-style: italic; }
+      .rich-text u { text-decoration: underline; }
+      .rich-text s { text-decoration: line-through; }
 
       .exp-entry {
         margin-bottom: 14px;
@@ -369,7 +374,7 @@ export class LivePreviewService implements OnDestroy {
       .exp-company {
         font-size: 10.5px;
         font-weight: 600;
-        color: #00b89c;
+        color: var(--primary, #00b89c);
         margin-bottom: 2px;
       }
       .exp-dates {
@@ -391,9 +396,9 @@ export class LivePreviewService implements OnDestroy {
         line-height: 1.55;
       }
       .exp-entry ul li::before {
-        content: '▸';
+        content: '>';
         position: absolute; left: 0;
-        color: #00d4b4; font-size: 8px;
+        color: var(--primary, #00d4b4); font-size: 8px;
         top: 1px;
       }
 

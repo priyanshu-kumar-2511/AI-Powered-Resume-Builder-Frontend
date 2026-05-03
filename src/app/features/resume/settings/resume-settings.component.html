@@ -5,8 +5,13 @@
       <h2>Resume metadata</h2>
       <p>Updates save automatically as you type.</p>
     </div>
-    <div class="save-indicator" [class.error]="saveState === 'error'">
-      {{ saveLabel }}
+    <div class="settings-actions">
+      <button type="button" class="export-trigger" [disabled]="loading" (click)="isExportOpen = true">
+        Export Resume
+      </button>
+      <div class="save-indicator" [class.error]="saveState === 'error'">
+        {{ saveLabel }}
+      </div>
     </div>
   </div>
 
@@ -53,6 +58,10 @@
   }
 </aside>
 
+@if (isExportOpen) {
+  <app-export-modal [resumeId]="resumeId" (close)="isExportOpen = false" />
+}
+
 <style>
 .settings-card {
   background: var(--bg-card);
@@ -70,6 +79,14 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .settings-header h2 {
@@ -90,6 +107,29 @@
   color: var(--teal);
   font-size: 0.76rem;
   white-space: nowrap;
+}
+
+.export-trigger {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #00d4b4, #00b89c);
+  color: #04120f;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.export-trigger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 212, 180, 0.25);
+}
+
+.export-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .save-indicator.error {

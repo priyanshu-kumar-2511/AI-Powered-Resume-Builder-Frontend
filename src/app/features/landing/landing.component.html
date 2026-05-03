@@ -24,10 +24,17 @@
 
       <div class="hero-actions">
         @if (auth.isLoggedIn()) {
-          <a routerLink="/dashboard" class="btn btn-primary btn-lg">
-            Go to Dashboard
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
+          @if (isAdmin) {
+            <a routerLink="/admin" class="btn btn-primary btn-lg">
+              Go to Admin Panel
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </a>
+          } @else {
+            <a routerLink="/dashboard" class="btn btn-primary btn-lg">
+              Go to Dashboard
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          }
         } @else {
           <a routerLink="/register" class="btn btn-primary btn-lg">
             Start for Free
@@ -119,7 +126,11 @@
             <a routerLink="/register" class="btn btn-primary btn-lg">Create Your Resume</a>
             <a routerLink="/templates" class="btn btn-ghost btn-lg">Explore Templates</a>
           } @else {
-            <a routerLink="/dashboard" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            @if (isAdmin) {
+              <a routerLink="/admin" class="btn btn-primary btn-lg">Go to Admin Panel</a>
+            } @else {
+              <a routerLink="/dashboard" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            }
           }
         </div>
       </div>

@@ -26,6 +26,7 @@ export class LoginComponent implements OnInit {
   error      = '';
   oauthError = false;
   showPwd    = false;
+  isSuspended = false;
   returnUrl  = '/dashboard';
 
   ngOnInit(): void {
@@ -35,15 +36,18 @@ export class LoginComponent implements OnInit {
       this.returnUrl = storedReturnUrl;
     }
 
-    // FIX: OAuth2 success handler redirects to /login?token=... (not /login-success)
-    // Handle the token param on this page directly.
+    // Handle OAuth2 token on redirect back to /login?token=...
     const token = this.route.snapshot.queryParamMap.get('token')
       || this.route.snapshot.queryParamMap.get('accessToken');
     if (token) {
       localStorage.setItem('resumeai_token', token);
       this.auth.isLoggedIn.set(true);
       sessionStorage.removeItem('resumeai_return_url');
-      this.router.navigateByUrl(this.returnUrl);
+      // Load profile then redirect based on role
+      this.auth.getProfile().subscribe({
+        next:  () => this.redirectAfterLogin(),
+        error: () => this.redirectAfterLogin()
+      });
       return;
     }
 
@@ -54,25 +58,51 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  submit() {
+  submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true; this.error = ''; this.oauthError = false;
 
     this.auth.login(this.form.value as any).subscribe({
-      next: () => this.router.navigateByUrl(this.returnUrl),
+      next: () => {
+        // After saving token, load profile to get roles, then redirect
+        this.auth.getProfile().subscribe({
+          next:  () => this.redirectAfterLogin(),
+          error: () => this.redirectAfterLogin()  // even on profile error, redirect
+        });
+      },
       error: (e) => {
-        this.error = e?.error?.message || 'Invalid username or password.';
+        const msg = e?.error?.message || '';
+        if (msg === 'ACCOUNT_SUSPENDED') {
+          this.isSuspended = true;
+        } else {
+          this.error = msg || 'Invalid username or password.';
+        }
         this.loading = false;
       }
     });
   }
 
-  googleLogin() {
+  /**
+   * Redirect logic after successful login:
+   * - If the user has ROLE_ADMIN → go to /admin
+   * - If there is a stored returnUrl → go there
+   * - Otherwise → go to /dashboard
+   */
+  private redirectAfterLogin(): void {
+    sessionStorage.removeItem('resumeai_return_url');
+    if (this.auth.isAdmin()) {
+      this.router.navigateByUrl('/admin');
+    } else {
+      this.router.navigateByUrl(this.returnUrl);
+    }
+  }
+
+  googleLogin(): void {
     sessionStorage.setItem('resumeai_return_url', this.returnUrl);
     this.auth.loginWithGoogle();
   }
 
-  linkedinLogin() {
+  linkedinLogin(): void {
     sessionStorage.setItem('resumeai_return_url', this.returnUrl);
     this.auth.loginWithLinkedIn();
   }

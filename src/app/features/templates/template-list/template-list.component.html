@@ -1,57 +1,53 @@
 <app-navbar />
 
 <div class="canva-templates-page">
-
-  <!-- Header + Search -->
   <div class="templates-header">
     <h1 class="page-title">Templates</h1>
     <div class="search-bar-wrap">
-      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
       <input
         type="text"
         class="search-input"
-        placeholder="Search templates…"
+        placeholder="Search templates..."
         [(ngModel)]="searchQuery"
         (input)="applyFilters()" />
       @if (searchQuery) {
         <button class="search-clear" (click)="clearSearch()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
         </button>
       }
     </div>
 
-    <!-- Filter row -->
     <div class="filter-row">
       @for (tier of tiers; track tier) {
         <button class="filter-pill" [class.active]="activeTier === tier" (click)="setTier(tier)">{{ tier }}</button>
       }
       <div class="filter-divider"></div>
-      @for (cat of categories; track cat) {
-        <button class="filter-pill" [class.active]="activeCategory === cat" (click)="setCategory(cat)">{{ formatCategory(cat) }}</button>
+      @for (category of categories; track category) {
+        <button class="filter-pill" [class.active]="activeCategory === category" (click)="setCategory(category)">{{ formatCategory(category) }}</button>
       }
     </div>
   </div>
 
-  <!-- Results -->
   <div class="templates-grid-wrap">
     @if (loading) {
       <div class="tpl-grid">
-        @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
           <div class="tpl-card-skeleton">
-            <div class="skeleton" style="width:100%;aspect-ratio:0.707/1;border-radius:4px"></div>
+            <div class="skeleton" style="width:100%;aspect-ratio:0.707/1;border-radius:8px"></div>
             <div class="skeleton" style="height:12px;width:55%;margin-top:10px;border-radius:4px"></div>
           </div>
         }
       </div>
     } @else if (error) {
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon">!</div>
         <h3>Something went wrong</h3>
         <p>{{ error }}</p>
       </div>
     } @else if (filtered.length === 0) {
       <div class="empty-state">
-        <svg width="56" height="56" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg width="56" height="56" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
         <h3>No templates found</h3>
         <p>Try a different search or category.</p>
         <button class="btn btn-outline" (click)="setTier('ALL'); setCategory('ALL'); clearSearch()">Clear Filters</button>
@@ -61,107 +57,32 @@
       <div class="tpl-grid">
         @for (template of filtered; track template.templateId) {
           <a [routerLink]="['/templates', template.templateId]" class="tpl-card">
-
-            <!-- Preview Area — always inline HTML like Canva -->
             <div class="tpl-preview">
-              <div class="resume-mock">
-                @switch (template.name) {
-                  @case ('Estelle Darcy - UX Designer') {
-                    <div class="rm-estelle">
-                      <div class="rm-es-header">
-                        <div class="rm-es-name">ESTELLE DARCY</div>
-                        <div class="rm-es-role">UX DESIGNER</div>
-                        <div class="rm-es-contact">123 Anywhere St. | hello&#64;site.com</div>
-                      </div>
-                      <div class="rm-es-sec">AREA OF EXPERTISE</div>
-                      <div class="rm-es-grid"><span>Prototyping Tools</span><span>Interaction Design</span></div>
-                      <div class="rm-es-sec">PROFESSIONAL EXPERIENCE</div>
-                      <div class="rm-es-item">
-                        <div style="font-weight:700">Instant Chartz App</div>
-                        <div>Led development of automation...</div>
-                      </div>
-                    </div>
-                  }
-                  @case ('Priyanshu Kumar') {
-                    <div class="rm-priyanshu">
-                      <div class="rm-pr-name">Priyanshu Kumar</div>
-                      <div class="rm-pr-contact">Phone | Email | LinkedIn | GitHub</div>
-                      <div class="rm-pr-sec">CAREER OBJECTIVE</div>
-                      <div class="rm-pr-line"></div>
-                      <div class="rm-pr-sec">EDUCATION</div>
-                      <div class="rm-pr-item">B.Tech Data Science</div>
-                      <div class="rm-pr-sec">TECHNICAL SKILLS</div>
-                      <div class="rm-pr-item">Java, Python, SQL</div>
-                    </div>
-                  }
-                  @case ('EMAA WARNER') {
-                    <div class="rm-emaa">
-                      <div class="rm-em-header">
-                        <div class="rm-em-name">EMAA WARNER</div>
-                        <div class="rm-em-contact">123 Anywhere | hello&#64;site.com</div>
-                      </div>
-                      <div class="rm-em-body">
-                        <div class="rm-em-sec">SUMMARY</div>
-                        <div class="rm-em-line"></div>
-                        <div class="rm-em-sec">WORK EXPERIENCE</div>
-                        <div class="rm-em-job">Accounting Executive</div>
-                        <div class="rm-em-date">Borcelle | Jan 2024</div>
-                      </div>
-                    </div>
-                  }
-                  @case ('OLIVIA SANCHEZ') {
-                    <div class="rm-olivia">
-                      <div class="rm-ol-header">
-                        <div class="rm-ol-name">OLIVIA SANCHEZ</div>
-                        <div class="rm-ol-role">Administrative Manager</div>
-                      </div>
-                      <div class="rm-ol-sec">SUMMARY</div>
-                      <div class="rm-ol-text">Detail-oriented administrative professional...</div>
-                      <div class="rm-ol-sec">WORK EXPERIENCE</div>
-                      <div class="rm-ol-item">Administrative Assistant</div>
-                    </div>
-                  }
-                  @case ('ANAISHA PARVATI') {
-                    <div class="rm-anaisha">
-                      <div class="rm-an-inner">
-                        <div class="rm-an-name">ANAISHA PARVATI</div>
-                        <div class="rm-an-role">HEAD MANAGER</div>
-                        <div class="rm-an-contact">Phone | Email</div>
-                        <div class="rm-an-sec">ABOUT ME</div>
-                        <div class="rm-an-sec">EDUCATION</div>
-                        <div style="display:flex;gap:5px;font-size:4px">
-                          <div style="width:20px;font-weight:700">2020</div><div>Master of Business</div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  @default {
-                    <div class="rm-empty-preview">Template</div>
-                  }
-                }
-              </div>
+              @if (getPreviewDoc(template.templateId); as previewDoc) {
+                <iframe class="tpl-preview-frame" [srcdoc]="previewDoc" sandbox="allow-same-origin"></iframe>
+              } @else if (template.thumbnailUrl) {
+                <img class="tpl-thumb" [src]="template.thumbnailUrl" [alt]="template.name">
+              } @else {
+                <div class="tpl-preview-fallback">{{ template.name }}</div>
+              }
 
-              <!-- Tier badge -->
               <div class="tpl-badge-wrap">
                 @if (template.tier === 'PREMIUM') {
-                  <span class="tpl-badge-premium">★ Pro</span>
+                  <span class="tpl-badge-premium">Pro</span>
                 } @else {
                   <span class="tpl-badge-free">Free</span>
                 }
               </div>
 
-              <!-- Hover overlay -->
               <div class="tpl-hover-overlay">
-                <button class="use-template-btn">Use this template</button>
+                <button class="use-template-btn">Preview template</button>
               </div>
             </div>
 
-            <!-- Card label -->
             <div class="tpl-label">
               <span class="tpl-name">{{ template.name }}</span>
               <span class="tpl-uses">{{ template.usageCount | number }} uses</span>
             </div>
-
           </a>
         }
       </div>
@@ -173,12 +94,13 @@
 .canva-templates-page {
   min-height: 100vh;
   background: #1a1f2e;
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header */
 .templates-header {
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   padding: 48px 24px 24px;
   gap: 20px;
@@ -186,241 +108,298 @@
 }
 
 .page-title {
-  font-size: 3rem; font-weight: 800;
-  color: #fff; margin: 0;
+  font-size: 3rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
   font-family: var(--font-display);
   letter-spacing: -0.5px;
 }
 
-/* Search */
 .search-bar-wrap {
-  position: relative; width: 100%; max-width: 560px;
-  display: flex; align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
 }
+
 .search-icon {
-  position: absolute; left: 18px;
-  color: rgba(255,255,255,0.35); pointer-events: none;
+  position: absolute;
+  left: 18px;
+  color: rgba(255,255,255,0.35);
+  pointer-events: none;
 }
+
 .search-input {
-  width: 100%; height: 50px;
+  width: 100%;
+  height: 50px;
   background: rgba(255,255,255,0.06);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-radius: 999px;
   padding: 0 44px 0 50px;
-  color: #fff; font-size: 0.95rem;
-  outline: none; transition: all 0.2s;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
   font-family: inherit;
 }
+
 .search-input::placeholder { color: rgba(255,255,255,0.3); }
+
 .search-input:focus {
   border-color: rgba(0,212,180,0.5);
   background: rgba(0,212,180,0.04);
   box-shadow: 0 0 0 3px rgba(0,212,180,0.08);
 }
-.search-clear {
-  position: absolute; right: 16px;
-  background: rgba(255,255,255,0.1); border: none;
-  width: 22px; height: 22px; border-radius: 50%;
-  display: grid; place-items: center;
-  color: rgba(255,255,255,0.5); cursor: pointer;
-  transition: background 0.15s;
-}
-.search-clear:hover { background: rgba(255,255,255,0.18); }
 
-/* Filters */
-.filter-row {
-  display: flex; align-items: center;
-  flex-wrap: wrap; gap: 8px; justify-content: center;
+.search-clear {
+  position: absolute;
+  right: 16px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
 }
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
 .filter-pill {
-  padding: 6px 16px; border-radius: 999px;
+  padding: 6px 16px;
+  border-radius: 999px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.6);
-  font-size: 0.82rem; font-weight: 500;
-  cursor: pointer; transition: all 0.18s;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
   font-family: inherit;
 }
-.filter-pill:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
-.filter-pill.active {
-  background: #fff; color: #0d1117;
-  border-color: #fff; font-weight: 700;
-}
-.filter-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
 
-/* Grid */
+.filter-pill:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.filter-pill.active {
+  background: #fff;
+  color: #0d1117;
+  border-color: #fff;
+  font-weight: 700;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.1);
+}
+
 .templates-grid-wrap {
-  flex: 1; padding: 12px 32px 60px;
+  flex: 1;
+  padding: 12px 32px 60px;
 }
+
 .results-label {
-  font-size: 0.8rem; color: rgba(255,255,255,0.35);
-  margin-bottom: 16px; margin-top: 4px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 16px;
+  margin-top: 4px;
 }
+
 .tpl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
 }
 
-/* Card */
 .tpl-card {
-  display: flex; flex-direction: column;
-  gap: 10px; text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
   cursor: pointer;
 }
-.tpl-card:hover .tpl-hover-overlay { opacity: 1; }
-.tpl-card:hover .tpl-img { transform: scale(1.02); }
 
 .tpl-preview {
   position: relative;
-  aspect-ratio: 0.707 / 1; /* A4 ratio */
-  border-radius: 6px; overflow: hidden;
+  aspect-ratio: 0.707 / 1;
+  border-radius: 10px;
+  overflow: hidden;
   background: #fff;
   box-shadow: 0 2px 12px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05);
   transition: box-shadow 0.3s, transform 0.3s;
 }
+
 .tpl-card:hover .tpl-preview {
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(0,212,180,0.4);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(0,212,180,0.28);
   transform: translateY(-4px);
 }
 
-.tpl-img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  transition: transform 0.4s ease;
+.tpl-preview-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 215%;
+  height: 215%;
+  transform-origin: top left;
+  transform: scale(0.465);
+  border: none;
+  display: block;
+  pointer-events: none;
+  background: #fff;
 }
 
-/* Hover overlay */
+.tpl-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tpl-preview-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
 .tpl-hover-overlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.25s;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s;
   backdrop-filter: blur(2px);
 }
+
+.tpl-card:hover .tpl-hover-overlay {
+  opacity: 1;
+}
+
 .use-template-btn {
   background: linear-gradient(135deg, #00d4b4, #00b89c);
-  color: #000; font-weight: 700; font-size: 0.82rem;
-  padding: 10px 18px; border-radius: 8px; border: none;
-  cursor: pointer; font-family: inherit;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
   box-shadow: 0 4px 16px rgba(0,212,180,0.35);
-  transform: translateY(4px);
-  transition: transform 0.25s;
 }
-.tpl-hover-overlay:hover .use-template-btn,
-.tpl-card:hover .use-template-btn { transform: translateY(0); }
 
-/* Tier badges */
-.tpl-badge-wrap { position: absolute; top: 10px; left: 10px; }
+.tpl-badge-wrap {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+}
+
 .tpl-badge-premium {
   background: linear-gradient(135deg, #c9a84c, #f0c855);
-  color: #1a1200; padding: 3px 8px; border-radius: 999px;
-  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em;
-}
-.tpl-badge-free {
-  background: rgba(0,212,180,0.9);
-  color: #003d36; padding: 3px 8px; border-radius: 999px;
-  font-size: 0.62rem; font-weight: 800;
+  color: #1a1200;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-/* Card label */
+.tpl-badge-free {
+  background: rgba(0,212,180,0.92);
+  color: #003d36;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
 .tpl-label {
-  display: flex; align-items: baseline;
-  justify-content: space-between; gap: 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   padding: 0 2px;
 }
-.tpl-name { font-size: 0.83rem; font-weight: 600; color: rgba(255,255,255,0.85); }
-.tpl-uses { font-size: 0.72rem; color: rgba(255,255,255,0.3); flex-shrink: 0; }
 
-/* ── New rich resume mocks ── */
-.resume-mock {
-  width: 100%; height: 100%;
-  background: #fff;
-  overflow: hidden;
-  font-size: 0;
+.tpl-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.88);
 }
 
-/* PROFESSIONAL */
-.rm-professional { display:flex;flex-direction:column;height:100%;padding:0;font-size:0; }
-.rm-p-header { display:flex;align-items:center;gap:8px;background:#1e293b;padding:12px 12px 10px; }
-.rm-p-avatar { width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.25);flex-shrink:0; }
-.rm-p-info { display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden; }
-.rm-p-name { font-size:7px;font-weight:800;color:#fff;letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.rm-p-role { font-size:5.5px;font-weight:600;color:#00d4b4;letter-spacing:0.5px;text-transform:uppercase; }
-.rm-p-contact { font-size:4.5px;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden; }
-.rm-divider { height:1.5px;background:#00d4b4;margin:0; }
-.rm-p-sec { font-size:5px;font-weight:800;color:#00b89c;text-transform:uppercase;letter-spacing:0.8px;padding:7px 12px 3px; }
-.rm-p-job { font-size:5.5px;font-weight:700;color:#1e293b;padding:0 12px 1px; }
-.rm-p-date { font-size:4.5px;color:#94a3b8;padding:0 12px 4px; }
-.rm-p-line { height:3px;background:#e8f4f1;border-radius:2px;margin:2px 12px; }
-.rm-p-chips { display:flex;flex-wrap:wrap;gap:3px;padding:3px 12px; }
-.rm-p-chips span { font-size:4px;background:#e0fdf4;color:#065f46;border:0.5px solid #a7f3d0;border-radius:3px;padding:1px 5px;font-weight:600; }
+.tpl-uses {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
 
-/* ESTELLE DARCY */
-.rm-estelle { padding:15px;background:#fff;color:#333;font-family:sans-serif;height:100%; }
-.rm-es-header { text-align:center;margin-bottom:10px; }
-.rm-es-name { font-size:10px;font-weight:800;color:#1a1a1a;margin-bottom:2px; }
-.rm-es-role { font-size:6px;font-weight:700;margin-bottom:4px; }
-.rm-es-contact { font-size:4px;border-top:0.5px solid #333;border-bottom:0.5px solid #333;padding:2px 0; }
-.rm-es-sec { font-size:5px;font-weight:800;border-bottom:1px solid #1a1a1a;padding-bottom:1px;margin:8px 0 4px; }
-.rm-es-grid { display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:4px; }
-.rm-es-item { font-size:4px;line-height:1.4; }
+.tpl-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-/* PRIYANSHU KUMAR */
-.rm-priyanshu { padding:15px;background:#fff;color:#000;font-family:serif;height:100%; }
-.rm-pr-name { font-size:12px;text-align:center;margin-bottom:4px; }
-.rm-pr-contact { display:flex;justify-content:space-between;font-size:3.5px;border-top:1px solid #000;border-bottom:1px solid #000;padding:2px 0;margin-bottom:6px;font-family:sans-serif; }
-.rm-pr-sec { font-size:5px;font-weight:700;border-bottom:0.5px solid #000;margin:6px 0 3px;font-family:sans-serif; }
-.rm-pr-line { height:2px;background:#f0f0f0;margin-bottom:3px; }
-.rm-pr-item { font-size:4px;font-family:sans-serif;margin-bottom:2px; }
-
-/* EMAA WARNER */
-.rm-emaa { background:#fff;color:#333;font-family:sans-serif;height:100%; }
-.rm-em-header { background:#1a365d;color:#fff;text-align:center;padding:15px 5px; }
-.rm-em-name { font-size:11px;letter-spacing:1px;margin-bottom:4px; }
-.rm-em-contact { font-size:3.5px; }
-.rm-em-body { padding:10px; }
-.rm-em-sec { font-size:5px;font-weight:700;color:#2b6cb0;border-bottom:1px solid #2b6cb0;padding-bottom:1px;margin:6px 0 3px; }
-.rm-em-line { height:2px;background:#f0f0f0;margin-bottom:3px; }
-.rm-em-job { font-size:4.5px;font-weight:700;color:#2d3748; }
-.rm-em-date { font-size:3.5px;color:#718096; }
-
-/* OLIVIA SANCHEZ */
-.rm-olivia { padding:15px;background:#fff;color:#2d3748;font-family:sans-serif;height:100%; }
-.rm-ol-header { text-align:center;margin-bottom:10px; }
-.rm-ol-name { font-size:10px;font-weight:700;color:#000; }
-.rm-ol-role { font-size:5px;font-weight:600;color:#4a5568;margin-bottom:4px; }
-.rm-ol-sec { font-size:4.5px;font-weight:700;background:#e2e8f0;padding:3px;margin:6px 0 4px;color:#1a202c; }
-.rm-ol-text { font-size:4px;line-height:1.4;padding:0 3px; }
-.rm-ol-item { font-size:4.5px;font-weight:700;padding:0 3px; }
-
-/* ANAISHA PARVATI */
-.rm-anaisha { padding:8px;background:#fff;color:#2d3748;font-family:sans-serif;height:100%; }
-.rm-an-inner { border:1px solid #1a202c;padding:12px;height:100%; }
-.rm-an-name { text-align:center;font-size:10px;font-weight:800;color:#1a202c; }
-.rm-an-role { text-align:center;font-size:4.5px;color:#4a5568;margin-bottom:6px; }
-.rm-an-contact { font-size:3.5px;display:flex;justify-content:center;gap:5px;border-top:0.5px solid #e2e8f0;border-bottom:0.5px solid #e2e8f0;padding:3px 0;margin-bottom:8px; }
-.rm-an-sec { font-size:5px;font-weight:800;border-bottom:1px solid #e2e8f0;margin:6px 0 4px;padding-bottom:2px; }
-
-.rm-empty-preview { padding: 20px; text-align: center; font-size: 10px; color: #ccc; }
-
-/* Skeleton */
-.tpl-card-skeleton { display: flex; flex-direction: column; gap: 10px; }
-
-/* Empty */
 .empty-state {
-  text-align: center; padding: 80px 40px;
+  text-align: center;
+  padding: 80px 40px;
   color: rgba(255,255,255,0.4);
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
-.empty-state h3 { color: rgba(255,255,255,0.7); font-size: 1.2rem; }
-.empty-state p { font-size: 0.9rem; margin: 0; }
+
+.empty-state h3 {
+  color: rgba(255,255,255,0.7);
+  font-size: 1.2rem;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+}
 
 @media (max-width: 768px) {
-  .tpl-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-  .page-title { font-size: 2rem; }
+  .tpl-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
 }
 </style>
-
-
-

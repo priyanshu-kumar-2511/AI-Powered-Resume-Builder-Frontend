@@ -8,6 +8,11 @@ import { BuilderStateService } from '../services/builder-state.service';
 import { LivePreviewService } from '../services/live-preview.service';
 import { ResumeSection, Template } from '../../../shared/models/models';
 
+/**
+ * Component responsible for rendering the visual representation of the resume.
+ * Utilizes a secure iframe to isolate CSS from the main Angular application,
+ * injecting interaction listeners to sync iframe clicks back to Angular state.
+ */
 @Component({
   selector: 'app-live-preview',
   standalone: true,
@@ -41,7 +46,7 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     // Receive postMessage from inside the iframe when a section is clicked
     window.addEventListener('message', this.onIframeMessage);
 
-    this.builderState.sections$.pipe(takeUntil(this.destroy$)).subscribe(s => {
+    this.builderState.sections$.pipe(takeUntil(this.destroy$)).subscribe((s: ResumeSection[]) => {
       this.sections = s;
       this.sectionsLoaded = true;
       if (this.templateLoaded) {
@@ -50,7 +55,7 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.builderState.template$.pipe(takeUntil(this.destroy$)).subscribe(t => {
+    this.builderState.template$.pipe(takeUntil(this.destroy$)).subscribe((t: Template | null) => {
       this.template = t;
       this.templateLoaded = true;
       if (this.sectionsLoaded) {
@@ -111,35 +116,82 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
       `;
       doc.head.appendChild(style);
 
-      const sectionTypes = ['SUMMARY','EXPERIENCE','EDUCATION','SKILLS',
-        'CERTIFICATIONS','LANGUAGES','PROJECTS','REFERENCES','CUSTOM'];
+      const previousHandler = (doc as Document & { __resumeClickHandler?: EventListener }).__resumeClickHandler;
+      if (previousHandler) {
+        doc.removeEventListener('click', previousHandler, true);
+      }
 
-      const selectors = [
-        '.section','section','.summary','.experience','.skills',
-        '.education','.certifications','.languages','.projects',
-        '.references','.custom','[data-section]'
-      ];
+      const handler: EventListener = (event: Event) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
 
-      selectors.forEach(sel => {
-        doc.querySelectorAll<HTMLElement>(sel).forEach(el => {
-          // Remove existing listener by cloning (simple approach)
-          const clone = el.cloneNode(true) as HTMLElement;
-          el.parentNode?.replaceChild(clone, el);
-          clone.addEventListener('click', (e: Event) => {
-            e.stopPropagation();
-            // Highlight clicked section
-            doc.querySelectorAll('.__selected').forEach(s => s.classList.remove('__selected'));
-            clone.classList.add('__selected');
-            // Find matching sectionType from element classes
-            const classes = Array.from(clone.classList).map(c => c.toUpperCase());
-            const matched = sectionTypes.find(t => classes.some(c => c.includes(t)));
-            if (matched) {
-              window.parent.postMessage({ type: 'SECTION_CLICK', sectionType: matched }, '*');
-            }
-          });
-        });
-      });
+        const clickable = target.closest<HTMLElement>(
+          '.section, section, .summary, .experience, .skills, .education, .certifications, .languages, .projects, .references, .custom, .contact, .header, .sidebar, .sidebar-panel, .header-main, .header-text, .ats-header, .corp-header, .navy-header, .timeline-header, .teal-header, [data-section]'
+        );
+
+        if (!clickable) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        doc.querySelectorAll('.__selected').forEach((selected) => selected.classList.remove('__selected'));
+        clickable.classList.add('__selected');
+
+        const matched = this.resolveSectionType(clickable);
+        if (matched) {
+          window.parent.postMessage({ type: 'SECTION_CLICK', sectionType: matched }, '*');
+        }
+      };
+
+      (doc as Document & { __resumeClickHandler?: EventListener }).__resumeClickHandler = handler;
+      doc.addEventListener('click', handler, true);
     } catch { /* not ready / cross-origin */ }
+  }
+
+  private resolveSectionType(element: HTMLElement): string | null {
+    const classes = Array.from(element.classList).map((cls) => cls.toLowerCase());
+    const text = (element.textContent || '').toLowerCase();
+
+    if (classes.some((cls) => ['contact', 'header', 'sidebar', 'sidebar-panel', 'ats-header', 'corp-header', 'navy-header', 'timeline-header', 'teal-header'].includes(cls))) {
+      return 'CONTACT';
+    }
+
+    if (classes.some((cls) => cls.includes('summary')) || /about me|summary|professional summary|profile/.test(text)) {
+      return 'SUMMARY';
+    }
+
+    if (classes.some((cls) => cls.includes('experience')) || /work experience|professional experience|experience/.test(text)) {
+      return 'EXPERIENCE';
+    }
+
+    if (classes.some((cls) => cls.includes('education')) || /education/.test(text)) {
+      return 'EDUCATION';
+    }
+
+    if (
+      classes.some((cls) => cls.includes('skills') || cls.includes('expertise')) ||
+      /skills|key skills|technical skills|soft skills|area of expertise|expertise/.test(text)
+    ) {
+      return 'SKILLS';
+    }
+
+    if (classes.some((cls) => cls.includes('projects')) || /projects?/.test(text)) {
+      return 'PROJECTS';
+    }
+
+    if (classes.some((cls) => cls.includes('languages')) || /languages?/.test(text)) {
+      return 'LANGUAGES';
+    }
+
+    if (classes.some((cls) => cls.includes('certifications')) || /certifications?/.test(text)) {
+      return 'CERTIFICATIONS';
+    }
+
+    if (classes.some((cls) => cls.includes('references')) || /references?/.test(text)) {
+      return 'CONTACT';
+    }
+
+    return null;
   }
 
   private onIframeMessage = (event: MessageEvent): void => {

@@ -15,16 +15,22 @@ export class NavbarComponent implements OnInit {
 
   menuOpen = false;
 
-  ngOnInit() {
-    if (this.auth.isLoggedIn() && !this.auth.currentUser()) {
+  ngOnInit(): void {
+    // Always load profile when logged in so isAdmin() / getCurrentPlan() work
+    // immediately — don't skip if currentUser is already set (it may be stale)
+    if (this.auth.isLoggedIn()) {
       this.auth.getProfile().subscribe();
     }
   }
 
-  logout() {
-    this.auth.logout();
-  }
+  logout(): void { this.auth.logout(); }
+  toggleMenu(): void { this.menuOpen = !this.menuOpen; }
+  closeMenu():  void { this.menuOpen = false; }
 
-  toggleMenu() { this.menuOpen = !this.menuOpen; }
-  closeMenu()  { this.menuOpen = false; }
+  /**
+   * Checks admin status from both the profile signal AND JWT claims.
+   * Combining both means the navbar shows correctly even before getProfile()
+   * resolves (JWT claims are decoded synchronously from localStorage).
+   */
+  get isAdmin(): boolean { return this.auth.isAdmin(); }
 }

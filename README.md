@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC5-Ai-UI`
+**Current Branch:** `feature/UC7-Export-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -122,6 +122,20 @@ This phase integrates advanced AI capabilities and a robust dynamic section mana
 
 ---
 
+## 🖨️ Phase 6: Document Export
+
+This phase focuses on converting the dynamic web-based resume into highly accurate, pixel-perfect documents.
+
+### Export Features
+
+| Module | Description |
+| :--- | :--- |
+| **Export Service Integration** | Communicates with the backend `export-service` (when applicable) to process document generations. |
+| **Client-Side PDF Generation** | Utilizes a zero-latency `window.print` strategy integrated with dynamic CSS `@page` rules to generate pixel-perfect PDF exports directly from the browser without backend overhead. |
+| **Export Modal Interface** | Clean, user-friendly UI for selecting export options and monitoring download progress. |
+
+---
+
 ## 🛠 Required Environment & Dev Configuration
 
 ### 1. Backend Service Connection
@@ -223,3 +237,5 @@ src/
 1. **Public Gallery UX Enhancement**: Fixed a perceived CTA issue in the public gallery where the "View Resume" button appeared to trigger no action. Implemented an auto-scroll (`window.scrollTo`) directly to the dynamically updated Spotlight Card to vastly improve user feedback.
 2. **Add Section Sidebar Scroll**: Optimized the `app-add-section` layout within the Canva-style builder. Added `overflow-y: auto` and reduced padding from `28px` to `16px` to ensure all section tiles (Summary, Experience, etc.) are scrollable and perfectly fit narrow viewports.
 3. **Template Detail Badge Fix**: Resolved a logic error where FREE templates were incorrectly showing a PREMIUM badge. Updated `template-detail.component.ts` to correctly evaluate the `tier` property from the template model.
+4. **Template Gallery Render Fix**: Resolved an Angular change detection bug in the Template Gallery where preview iframes remained blank. Replaced internal `Map` state tracking with plain Object references to ensure the UI properly updates when dynamically loaded HTML templates resolve.
+5. **Streamlined PDF Export**: Removed legacy, slow backend DOCX processing and optimized the export flow to utilize zero-latency, high-fidelity client-side PDF generation.

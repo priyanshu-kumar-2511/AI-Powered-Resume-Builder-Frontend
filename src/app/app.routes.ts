@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './features/admin/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -59,5 +60,44 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/auth/profile/profile.component').then(m => m.ProfileComponent)
   },
+
+  // ── ADMIN PANEL ──────────────────────────────────────────────────────────────
+  // IMPORTANT: Must be BEFORE the wildcard '**' route, otherwise Angular's router
+  // matches '**' first and redirects all admin URLs to home.
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component')
+      .then(m => m.AdminDashboardComponent),
+    children: [
+      {
+        path: 'users',
+        loadComponent: () => import('./features/admin/users/admin-users.component')
+          .then(m => m.AdminUsersComponent)
+      },
+      {
+        path: 'templates',
+        loadComponent: () => import('./features/admin/templates/admin-templates.component')
+          .then(m => m.AdminTemplatesComponent)
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./features/admin/analytics/admin-analytics.component')
+          .then(m => m.AdminAnalyticsComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/admin/notifications/admin-notifications.component')
+          .then(m => m.AdminNotificationsComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full'
+      }
+    ]
+  },
+
+  // Wildcard MUST be last
   { path: '**', redirectTo: '' }
 ];

@@ -26,7 +26,7 @@ export class BuilderToolbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.builderState.resume$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(r => this.resume = r);
+      .subscribe((r: Resume | null) => this.resume = r);
   }
 
   ngOnDestroy(): void {

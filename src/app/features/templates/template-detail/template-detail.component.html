@@ -28,12 +28,14 @@
     <!-- Template preview paper -->
     <div class="paper-showcase">
       <div class="paper-wrap">
-        @if (safeHtml) {
-        <iframe class="preview-iframe" [srcdoc]="safeHtml" sandbox="allow-same-origin allow-scripts"></iframe>
+        @if (previewSrcdoc) {
+        <iframe class="preview-iframe" [srcdoc]="previewSrcdoc" sandbox="allow-same-origin"></iframe>
+        } @else if (previewImageUrl) {
+        <img class="preview-image" [src]="previewImageUrl" [alt]="template.name + ' preview'">
         } @else {
         <div class="paper-empty">
           <span class="pe-letter">{{ template.name[0] }}</span>
-          <p>Preview will appear after you start editing</p>
+          <p>Preview unavailable for this template</p>
         </div>
         }
       </div>
@@ -173,7 +175,7 @@
   }
 
   .paper-wrap {
-    width: min(500px, 100%);
+    width: min(560px, 100%);
     aspect-ratio: 0.707 / 1;
     background: #fff;
     border-radius: 4px;
@@ -186,10 +188,10 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 160%;
-    height: 160%;
+    width: 200%;
+    height: 200%;
     transform-origin: top left;
-    transform: scale(0.625);
+    transform: scale(0.5);
     border: none;
     display: block;
     pointer-events: none;
@@ -229,6 +231,14 @@
     opacity: 0;
     transition: opacity 0.25s;
     pointer-events: none;
+  }
+
+  .preview-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    background: #fff;
   }
 
   .paper-showcase:hover .paper-cta-overlay {
