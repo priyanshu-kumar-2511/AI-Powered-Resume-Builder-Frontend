@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AdminApiService } from '../services/admin-api.service';
 
 @Component({
@@ -173,7 +174,31 @@ export class AdminNotificationsComponent {
         this.title = ''; this.message = '';
         setTimeout(() => this.successMsg = '', 3500);
       },
-      error: () => { this.sending = false; this.errorMsg = 'Failed to send. Please try again.'; }
+      error: (error: HttpErrorResponse) => {
+        this.sending = false;
+        this.errorMsg = this.getErrorMessage(error);
+      }
     });
+  }
+
+  private getErrorMessage(error: HttpErrorResponse): string {
+    const apiMessage =
+      error.error?.message ||
+      error.error?.error ||
+      error.error?.details;
+
+    if (typeof apiMessage === 'string' && apiMessage.trim()) {
+      return apiMessage;
+    }
+
+    if (error.status === 403) {
+      return 'Your current login session is not authorized for broadcast. Log out and log in again to refresh admin token.';
+    }
+
+    if (error.status === 0) {
+      return 'Notification service unreachable. Check backend services and API gateway.';
+    }
+
+    return 'Failed to send. Please try again.';
   }
 }

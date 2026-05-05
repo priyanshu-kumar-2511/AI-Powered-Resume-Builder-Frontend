@@ -15,29 +15,62 @@ import { ResumeSection } from '../../../shared/models/models';
         <span class="save-hint" [class.saving]="saving" [class.error]="saveError">
           {{ saving ? 'Saving...' : saveError ? 'Save failed' : 'Autosave on' }}
         </span>
-        <span class="skill-count">{{ skills.length }} skill{{ skills.length !== 1 ? 's' : '' }}</span>
       </div>
 
-      <div class="chip-area">
-        @for (skill of skills; track i; let i = $index) {
-          <span class="skill-chip">
-            {{ skill }}
-            <button type="button" class="chip-remove" (click)="removeSkill(i)" title="Remove">✕</button>
-          </span>
-        }
-        @if (!skills.length) {
-          <span class="chip-placeholder">No skills added yet. Type below to add.</span>
-        }
+      <!-- Technical Skills Section -->
+      <div class="skill-category">
+        <div class="category-header">
+          <h4>Technical Skills</h4>
+          <span class="skill-count">{{ technicalSkills.length }} skill{{ technicalSkills.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="chip-area">
+          @for (skill of technicalSkills; track i; let i = $index) {
+            <span class="skill-chip">
+              {{ skill }}
+              <button type="button" class="chip-remove" (click)="removeSkill('technical', i)" title="Remove">✕</button>
+            </span>
+          }
+          @if (!technicalSkills.length) {
+            <span class="chip-placeholder">No technical skills added yet.</span>
+          }
+        </div>
+        <div class="input-row">
+          <input
+            class="skill-input"
+            [formControl]="techInputControl"
+            placeholder="Type a technical skill and press Enter…"
+            (keydown.enter)="$event.preventDefault(); addFromInput('technical')"
+            (keydown.comma)="$event.preventDefault(); addFromInput('technical')" />
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addFromInput('technical')">Add</button>
+        </div>
       </div>
 
-      <div class="input-row">
-        <input
-          class="skill-input"
-          [formControl]="inputControl"
-          placeholder="Type a skill and press Enter or comma…"
-          (keydown.enter)="$event.preventDefault(); addFromInput()"
-          (keydown.comma)="$event.preventDefault(); addFromInput()" />
-        <button type="button" class="btn btn-ghost btn-sm" (click)="addFromInput()">Add</button>
+      <!-- Soft Skills Section -->
+      <div class="skill-category">
+        <div class="category-header">
+          <h4>Soft Skills</h4>
+          <span class="skill-count">{{ softSkills.length }} skill{{ softSkills.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="chip-area soft-chip-area">
+          @for (skill of softSkills; track i; let i = $index) {
+            <span class="skill-chip soft-chip">
+              {{ skill }}
+              <button type="button" class="chip-remove" (click)="removeSkill('soft', i)" title="Remove">✕</button>
+            </span>
+          }
+          @if (!softSkills.length) {
+            <span class="chip-placeholder">No soft skills added yet.</span>
+          }
+        </div>
+        <div class="input-row">
+          <input
+            class="skill-input"
+            [formControl]="softInputControl"
+            placeholder="Type a soft skill and press Enter…"
+            (keydown.enter)="$event.preventDefault(); addFromInput('soft')"
+            (keydown.comma)="$event.preventDefault(); addFromInput('soft')" />
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addFromInput('soft')">Add</button>
+        </div>
       </div>
 
       @if (saveError) {
@@ -46,11 +79,15 @@ import { ResumeSection } from '../../../shared/models/models';
     </div>
 
     <style>
-    .skills-editor { display: flex; flex-direction: column; gap: 14px; }
-    .editor-top-row { display: flex; justify-content: space-between; align-items: center; }
+    .skills-editor { display: flex; flex-direction: column; gap: 20px; }
+    .editor-top-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: -10px; }
     .save-hint { font-size: 0.75rem; color: var(--text-muted); }
     .save-hint.saving { color: var(--teal); }
     .save-hint.error  { color: #ef4444; }
+    
+    .skill-category { display: flex; flex-direction: column; gap: 10px; }
+    .category-header { display: flex; justify-content: space-between; align-items: center; }
+    .category-header h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; }
     .skill-count { font-size: 0.75rem; color: var(--text-muted); }
 
     .chip-area {
@@ -64,6 +101,8 @@ import { ResumeSection } from '../../../shared/models/models';
       background: var(--bg-surface);
       align-content: flex-start;
     }
+
+    .soft-chip-area { background: rgba(59, 130, 246, 0.03); border-color: rgba(59, 130, 246, 0.2); }
 
     .chip-placeholder {
       font-size: 0.82rem;
@@ -84,11 +123,17 @@ import { ResumeSection } from '../../../shared/models/models';
       font-weight: 500;
     }
 
+    .soft-chip {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+    }
+
     .chip-remove {
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--teal);
+      color: inherit;
       font-size: 0.7rem;
       padding: 0;
       line-height: 1;
@@ -96,11 +141,7 @@ import { ResumeSection } from '../../../shared/models/models';
     }
     .chip-remove:hover { opacity: 1; }
 
-    .input-row {
-      display: flex;
-      gap: 8px;
-    }
-
+    .input-row { display: flex; gap: 8px; }
     .skill-input {
       flex: 1;
       padding: 9px 12px;
@@ -120,40 +161,54 @@ export class SkillsEditorComponent implements OnChanges {
 
   private sectionApi = inject(SectionApiService);
   private destroy$   = new Subject<void>();
-  private save$      = new Subject<string[]>();
+  private save$      = new Subject<{ technical: string[], soft: string[] }>();
 
-  skills: string[]    = [];
-  inputControl        = new FormControl('', { nonNullable: true });
-  saving              = false;
-  saveError           = '';
+  technicalSkills: string[] = [];
+  softSkills: string[]      = [];
+  techInputControl          = new FormControl('', { nonNullable: true });
+  softInputControl          = new FormControl('', { nonNullable: true });
+  saving                    = false;
+  saveError                 = '';
 
   ngOnChanges(): void {
     this.destroy$.next();
     this.saveError = '';
 
     try {
-      const parsed = JSON.parse(this.section.content || '[]');
+      const parsed = JSON.parse(this.section.content || '{}');
+      
       if (Array.isArray(parsed)) {
-        this.skills = parsed;
+        // Legacy array support: default all to technical skills
+        this.technicalSkills = parsed;
+        this.softSkills = [];
       } else if (parsed && typeof parsed === 'object') {
-        this.skills = Object.values(parsed as Record<string, unknown>)
-          .flatMap(value => Array.isArray(value) ? value.map(String) : [])
-          .filter((skill, index, arr) => skill.trim().length > 0 && arr.indexOf(skill) === index);
+        if (parsed['technical'] || parsed['soft']) {
+          this.technicalSkills = Array.isArray(parsed['technical']) ? parsed['technical'] : [];
+          this.softSkills = Array.isArray(parsed['soft']) ? parsed['soft'] : [];
+        } else {
+          // Fallback if structured randomly
+          this.technicalSkills = Object.values(parsed as Record<string, unknown>)
+            .flatMap(value => Array.isArray(value) ? value.map(String) : [])
+            .filter((skill, index, arr) => skill.trim().length > 0 && arr.indexOf(skill) === index);
+          this.softSkills = [];
+        }
       } else {
-        this.skills = [];
+        this.technicalSkills = [];
+        this.softSkills = [];
       }
     } catch {
-      this.skills = [];
+      this.technicalSkills = [];
+      this.softSkills = [];
     }
 
     this.save$.pipe(
       debounceTime(600),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-      switchMap(skills => {
+      switchMap(skillsObj => {
         this.saving = true;
         this.saveError = '';
         return this.sectionApi.updateSection(this.section.sectionId, {
-          content: JSON.stringify(skills)
+          content: JSON.stringify(skillsObj)
         }).pipe(
           catchError(() => {
             this.saving = false;
@@ -169,26 +224,37 @@ export class SkillsEditorComponent implements OnChanges {
     });
   }
 
-  addFromInput(): void {
-    const raw = this.inputControl.value.trim().replace(/,$/, '').trim();
+  addFromInput(type: 'technical' | 'soft'): void {
+    const control = type === 'technical' ? this.techInputControl : this.softInputControl;
+    const raw = control.value.trim().replace(/,$/, '').trim();
     if (!raw) return;
 
+    const list = type === 'technical' ? this.technicalSkills : this.softSkills;
     const newSkills = raw.split(',')
       .map(s => s.trim())
-      .filter(s => s && !this.skills.includes(s));
+      .filter(s => s && !list.includes(s));
 
     if (!newSkills.length) {
-      this.inputControl.reset();
+      control.reset();
       return;
     }
 
-    this.skills = [...this.skills, ...newSkills];
-    this.inputControl.reset();
-    this.save$.next(this.skills);
+    if (type === 'technical') {
+      this.technicalSkills = [...this.technicalSkills, ...newSkills];
+    } else {
+      this.softSkills = [...this.softSkills, ...newSkills];
+    }
+    
+    control.reset();
+    this.save$.next({ technical: this.technicalSkills, soft: this.softSkills });
   }
 
-  removeSkill(index: number): void {
-    this.skills = this.skills.filter((_, i) => i !== index);
-    this.save$.next(this.skills);
+  removeSkill(type: 'technical' | 'soft', index: number): void {
+    if (type === 'technical') {
+      this.technicalSkills = this.technicalSkills.filter((_, i) => i !== index);
+    } else {
+      this.softSkills = this.softSkills.filter((_, i) => i !== index);
+    }
+    this.save$.next({ technical: this.technicalSkills, soft: this.softSkills });
   }
 }

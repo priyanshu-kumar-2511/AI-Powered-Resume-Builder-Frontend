@@ -1,43 +1,19 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ExportModalComponent } from './export-modal.component';
-import { ExportApiService } from '../services/export-api.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { LivePreviewService } from '../../builder/services/live-preview.service';
-import { ExportJob } from '../../../shared/models/models';
 
 describe('ExportModalComponent', () => {
   let component: ExportModalComponent;
   let fixture: ComponentFixture<ExportModalComponent>;
-  let exportApi: jasmine.SpyObj<ExportApiService>;
-  let auth: jasmine.SpyObj<AuthService>;
   let livePreview: jasmine.SpyObj<LivePreviewService>;
 
   beforeEach(async () => {
-    exportApi = jasmine.createSpyObj<ExportApiService>('ExportApiService', [
-      'exportPdf',
-      'exportDocx',
-      'exportJson',
-      'pollJobStatus',
-      'downloadFile'
-    ]);
-    auth = jasmine.createSpyObj<AuthService>('AuthService', ['getCurrentPlan', 'isAdmin']);
-    livePreview = jasmine.createSpyObj<LivePreviewService>('LivePreviewService', ['getCurrentStyle', 'getRenderedHtml']);
-
-    auth.getCurrentPlan.and.returnValue('PREMIUM');
-    auth.isAdmin.and.returnValue(false);
-    livePreview.getCurrentStyle.and.returnValue({
-      fontSize: 11,
-      fontFamily: 'Inter',
-      primaryColor: '#00d4b4'
-    });
+    livePreview = jasmine.createSpyObj<LivePreviewService>('LivePreviewService', ['getRenderedHtml']);
     livePreview.getRenderedHtml.and.returnValue('<html><body>Resume</body></html>');
 
     await TestBed.configureTestingModule({
       imports: [ExportModalComponent],
       providers: [
-        { provide: ExportApiService, useValue: exportApi },
-        { provide: AuthService, useValue: auth },
         { provide: LivePreviewService, useValue: livePreview }
       ]
     }).compileComponents();
@@ -52,35 +28,37 @@ describe('ExportModalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should select a tab', () => {
-    component.selectTab('DOCX');
-    expect(component.activeTab).toBe('DOCX');
-  });
+  it('should start client-side export and change steps', fakeAsync(() => {
+    // Spy on printHtml to prevent actual print popup
+    spyOn<any>(component, 'printHtml').and.stub();
 
-  it('should start DOCX export and show backend failure reason', () => {
-    const queuedJob = { jobId: 'job-123', status: 'QUEUED' } as ExportJob;
-    const failedJob = { jobId: 'job-123', status: 'FAILED', failureReason: 'Template fetch unauthorized' } as ExportJob;
-
-    exportApi.exportDocx.and.returnValue(of(queuedJob));
-    exportApi.pollJobStatus.and.returnValue(of(failedJob));
-
-    component.selectTab('DOCX');
     component.submitExport();
+    expect(component.submitting).toBeTrue();
+    expect(component.step).toBe('exporting');
+    
+    tick(500);
+    expect(livePreview.getRenderedHtml).toHaveBeenCalled();
+    expect(component.currentStep).toBe('PROCESSING');
+    
+    tick(800);
+    expect(component['printHtml']).toHaveBeenCalled();
+    expect(component.currentStep).toBe('COMPLETED');
+    
+    tick(600);
+    expect(component.step).toBe('done');
+    expect(component.submitting).toBeFalse();
+  }));
 
-    expect(exportApi.exportDocx).toHaveBeenCalled();
-    expect(component.step).toBe('error');
-    expect(component.errorMsg).toContain('Template fetch unauthorized');
-  });
+  it('should handle error when rendering fails', fakeAsync(() => {
+    livePreview.getRenderedHtml.and.returnValue(null as any);
 
-  it('should handle backend export start error', () => {
-    exportApi.exportDocx.and.returnValue(throwError(() => ({ error: { message: 'Premium required' } })));
-
-    component.selectTab('DOCX');
     component.submitExport();
-
+    
+    tick(500);
     expect(component.step).toBe('error');
-    expect(component.errorMsg).toContain('Premium required');
-  });
+    expect(component.submitting).toBeFalse();
+    expect(component.errorMsg).toContain('Could not read resume preview');
+  }));
 
   it('should reset to form view', () => {
     component.step = 'error';

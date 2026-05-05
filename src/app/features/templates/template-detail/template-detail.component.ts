@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
@@ -28,9 +28,20 @@ export class TemplateDetailComponent implements OnInit {
   loading = true;
   error = '';
   creating = false;
+  showPremiumModal = false;
+  private previewIframe: HTMLIFrameElement | null = null;
+
+  @ViewChild('previewFrame') set previewFrameRef(ref: ElementRef<HTMLIFrameElement> | undefined) {
+    if (!ref?.nativeElement) {
+      return;
+    }
+
+    this.previewIframe = ref.nativeElement;
+    queueMicrotask(() => this.writePreviewFrame());
+  }
 
   get previewSrcdoc(): string | null {
-    return this.templateRenderer.renderDocument(this.template);
+    return this.templateRenderer.renderDocument(this.template, { fitToPage: true });
   }
 
   get previewImageUrl(): string | null {
@@ -43,6 +54,7 @@ export class TemplateDetailComponent implements OnInit {
       next: (template) => {
         this.template = template;
         this.loading = false;
+        queueMicrotask(() => this.writePreviewFrame());
       },
       error: () => {
         this.error = 'Template not found.';
@@ -58,6 +70,11 @@ export class TemplateDetailComponent implements OnInit {
       return;
     }
     if (!this.template) return;
+
+    if (this.template.tier === 'PREMIUM' && this.auth.getCurrentPlan() !== 'PREMIUM') {
+      this.showPremiumModal = true;
+      return;
+    }
 
     const userId = this.auth.getCurrentUserId();
     if (userId !== null) {
@@ -110,5 +127,19 @@ export class TemplateDetailComponent implements OnInit {
 
   formatCategory(category: string): string {
     return category.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  private writePreviewFrame(): void {
+    const targetFrame = this.previewIframe;
+    const html = this.previewSrcdoc;
+    const doc = targetFrame?.contentDocument;
+
+    if (!targetFrame || !doc || !html) {
+      return;
+    }
+
+    doc.open();
+    doc.write(html);
+    doc.close();
   }
 }

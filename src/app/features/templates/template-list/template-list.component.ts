@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { TemplateService } from '../../../core/services/template.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
-import { TemplateCategory, Template, TemplateResponseDTO, TemplateTier } from '../../../shared/models/models';
-import { TemplateRenderService } from '../../../shared/services/template-render.service';
+import { TemplateCategory, TemplateResponseDTO, TemplateTier } from '../../../shared/models/models';
 
 type FilterTier = 'ALL' | TemplateTier;
 type FilterCategory = 'ALL' | TemplateCategory;
@@ -20,13 +18,11 @@ type FilterCategory = 'ALL' | TemplateCategory;
 })
 export class TemplateListComponent implements OnInit {
   private templateSvc = inject(TemplateService);
-  private templateRenderer = inject(TemplateRenderService);
 
   auth = inject(AuthService);
 
   allTemplates: TemplateResponseDTO[] = [];
   filtered: TemplateResponseDTO[] = [];
-  previewDocs: Record<number, string> = {};
 
   loading = true;
   error = '';
@@ -44,7 +40,6 @@ export class TemplateListComponent implements OnInit {
         this.allTemplates = templates;
         this.applyFilters();
         this.loading = false;
-        this.loadPreviews(templates);
       },
       error: () => {
         this.error = 'Failed to load templates.';
@@ -80,34 +75,7 @@ export class TemplateListComponent implements OnInit {
     this.applyFilters();
   }
 
-  getPreviewDoc(templateId: number): string | null {
-    return this.previewDocs[templateId] || null;
-  }
-
   formatCategory(category: string): string {
     return category.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  private loadPreviews(templates: TemplateResponseDTO[]): void {
-    if (!templates.length) {
-      return;
-    }
-
-    forkJoin(
-      templates.map((template) =>
-        this.templateSvc.getTemplateById(template.templateId).pipe(catchError(() => of(null as Template | null)))
-      )
-    ).subscribe((fullTemplates) => {
-      const newDocs: Record<number, string> = {};
-      fullTemplates.forEach((template) => {
-        if (!template) return;
-        const previewDoc = this.templateRenderer.renderDocument(template);
-        if (previewDoc) {
-          newDocs[template.templateId] = previewDoc;
-        }
-      });
-      // Assign a new object reference so Angular CD detects the change
-      this.previewDocs = { ...newDocs };
-    });
   }
 }

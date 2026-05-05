@@ -149,18 +149,39 @@ export class AdminApiService {
     return this.http.get<Record<string, number>>(`${API_BASE}/exports/admin/stats`);
   }
 
+  // ── Resume Management ────────────────────────────────────────────────────
+
+  getAllResumes(): Observable<any[]> {
+    return this.http.get<any[]>(`${API_BASE}/resumes/admin/all`);
+  }
+
+  deleteResume(resumeId: number): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/resumes/admin/${resumeId}`);
+  }
+
   // ── Broadcast Notifications ──────────────────────────────────────────────
 
   sendBroadcastToAll(title: string, message: string): Observable<void> {
-    return this.http.post<void>(`${API_BASE}/notifications/broadcast/all`, { title, message });
+    return this.http.post<void>(`${API_BASE}/notifications/send-bulk`, {
+      title, message, tier: 'ALL'
+    });
   }
 
   sendBroadcastByPlan(plan: 'FREE' | 'PREMIUM', title: string, message: string): Observable<void> {
-    return this.http.post<void>(`${API_BASE}/notifications/broadcast/plan`, { plan, title, message });
+    return this.http.post<void>(`${API_BASE}/notifications/send-bulk`, {
+      title, message, tier: plan
+    });
   }
 
+  // ── Audit Logs ───────────────────────────────────────────────────────────
+
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${ADMIN_BASE}/audit-logs`);
+  }
+
+
   // ── User Detailed History ────────────────────────────────────────────────
-  
+
   getUserResumes(userId: number): Observable<any[]> {
     return this.http.get<any[]>(`${API_BASE}/resumes/user/${userId}`);
   }

@@ -60,6 +60,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/auth/profile/profile.component').then(m => m.ProfileComponent)
   },
+  {
+    path: 'pricing',
+    loadComponent: () => import('./features/pricing/pricing.component').then(m => m.PricingComponent)
+  },
+
+  {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/notifications/centre/notification-centre.component').then(m => m.NotificationCentreComponent)
+  },
 
   // ── ADMIN PANEL ──────────────────────────────────────────────────────────────
   // IMPORTANT: Must be BEFORE the wildcard '**' route, otherwise Angular's router
@@ -76,6 +86,11 @@ export const routes: Routes = [
           .then(m => m.AdminUsersComponent)
       },
       {
+        path: 'resumes',
+        loadComponent: () => import('./features/admin/resumes/resume-management.component')
+          .then(m => m.ResumeManagementComponent)
+      },
+      {
         path: 'templates',
         loadComponent: () => import('./features/admin/templates/admin-templates.component')
           .then(m => m.AdminTemplatesComponent)
@@ -86,10 +101,31 @@ export const routes: Routes = [
           .then(m => m.AdminAnalyticsComponent)
       },
       {
-        path: 'notifications',
+        path: 'ai-stats',
+        loadComponent: () => import('./features/admin/ai-stats/ai-usage-stats.component')
+          .then(m => m.AiUsageStatsComponent)
+      },
+      {
+        path: 'exports',
+        loadComponent: () => import('./features/admin/exports/export-admin-stats.component')
+          .then(m => m.ExportAdminStatsComponent)
+      },
+      {
+        path: 'broadcast',
         loadComponent: () => import('./features/admin/notifications/admin-notifications.component')
           .then(m => m.AdminNotificationsComponent)
       },
+      {
+        path: 'audit',
+        loadComponent: () => import('./features/admin/audit/audit-logs.component')
+          .then(m => m.AuditLogsComponent)
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () => import('./features/admin/subscriptions/admin-subscriptions.component')
+          .then(m => m.AdminSubscriptionsComponent)
+      },
+      { path: 'notifications', redirectTo: 'broadcast', pathMatch: 'full' },
       {
         path: '',
         redirectTo: 'users',

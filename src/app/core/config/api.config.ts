@@ -9,4 +9,9 @@ export const AUTH_API = `${API_BASE}/auth`;
 export const TEMPLATE_API = `${API_BASE}/templates`;
 export const RESUME_API = `${API_BASE}/resumes`;
 export const SECTION_API = `${API_BASE}/sections`;
+export const NOTIFICATION_API = `${API_BASE}/notifications`;
 export const AI_API = `${API_BASE}/ai`;
+export const PAYMENT_API = `${API_BASE}/payments`;
+
+// Keep this off by default so localhost uses the real Razorpay test checkout popup.
+export const USE_LOCALHOST_SIMULATED_PAYMENT = false && isLocalFrontendDev;

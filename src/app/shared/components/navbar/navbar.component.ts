@@ -2,28 +2,32 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationBellComponent } from '../../../features/notifications/bell/notification-bell.component';
+import { NotificationPollingService } from '../../../features/notifications/services/notification-polling.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, RouterLinkActive, CommonModule, NotificationBellComponent],
   templateUrl: './navbar.component.html'
 })
 export class NavbarComponent implements OnInit {
-  auth   = inject(AuthService);
-  router = inject(Router);
+  auth     = inject(AuthService);
+  router   = inject(Router);
+  polling  = inject(NotificationPollingService);
 
   menuOpen = false;
 
   ngOnInit(): void {
-    // Always load profile when logged in so isAdmin() / getCurrentPlan() work
-    // immediately — don't skip if currentUser is already set (it may be stale)
     if (this.auth.isLoggedIn()) {
       this.auth.getProfile().subscribe();
+      if (!this.auth.isAdmin()) {
+        this.polling.startPolling();
+      }
     }
   }
 
-  logout(): void { this.auth.logout(); }
+  logout(): void { this.polling.stopPolling(); this.auth.logout(); }
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
   closeMenu():  void { this.menuOpen = false; }
 

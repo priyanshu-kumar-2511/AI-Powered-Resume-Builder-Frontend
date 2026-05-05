@@ -41,7 +41,7 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
           <table class="admin-table">
             <thead>
               <tr>
-                <th>User</th><th>Email</th><th>Role</th><th>Plan</th>
+                <th>User</th><th>Email</th><th>Role</th><th>Subscription Plan</th>
                 <th>Status</th><th>Joined</th><th>Actions</th>
               </tr>
             </thead>
@@ -71,7 +71,7 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
                         {{ isAdmin(user) ? 'Admin' : 'User' }}
                       </span>
                       <button class="act-btn role-toggle-btn"
-                              (click)="confirmRoleChange(user)"
+                              (click)="$event.stopPropagation(); confirmRoleChange(user)"
                               [disabled]="busy === user.userId"
                               [title]="isAdmin(user) ? 'Demote to User' : 'Promote to Admin'">
                         {{ isAdmin(user) ? '⬇' : '⬆' }}
@@ -83,6 +83,7 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
                   <td>
                     <select class="plan-select"
                             [value]="user.subscriptionPlan"
+                            (click)="$event.stopPropagation()"
                             (change)="onPlanChange(user, $event)"
                             [disabled]="busy === user.userId">
                       <option value="FREE">Free</option>
@@ -105,17 +106,17 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
                     <div class="action-btns">
                       @if (user.isActive) {
                         <button class="act-btn warn"
-                                (click)="openSuspendModal(user)"
+                                (click)="$event.stopPropagation(); openSuspendModal(user)"
                                 [disabled]="busy === user.userId"
                                 title="Suspend user">🚫</button>
                       } @else {
                         <button class="act-btn ok"
-                                (click)="reactivate(user)"
+                                (click)="$event.stopPropagation(); reactivate(user)"
                                 [disabled]="busy === user.userId"
                                 title="Reactivate user">✅</button>
                       }
                       <button class="act-btn danger"
-                              (click)="confirmDelete(user)"
+                              (click)="$event.stopPropagation(); confirmDelete(user)"
                               [disabled]="busy === user.userId"
                               title="Delete user permanently">🗑</button>
                     </div>

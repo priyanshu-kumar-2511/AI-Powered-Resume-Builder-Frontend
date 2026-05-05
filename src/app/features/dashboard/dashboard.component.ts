@@ -26,7 +26,6 @@ export class DashboardComponent implements OnInit {
 
   stats = [
     { icon: '📄', label: 'Resumes Created', value: '0', color: 'var(--teal)' },
-    { icon: '📊', label: 'Job Matches',      value: '0', color: 'var(--gold)' },
     { icon: '📥', label: 'Exports',          value: '0', color: '#a78bfa' },
     { icon: '🌍', label: 'Public Resumes',  value: '0', color: '#fb923c' }
   ];
@@ -34,8 +33,8 @@ export class DashboardComponent implements OnInit {
   services = [
     { icon: '📝', title: 'Resume Builder', desc: 'Build and manage your resumes with AI assistance.', route: '/resumes', badge: 'Available', color: 'var(--teal)' },
     { icon: '🤖', title: 'AI Assistant', desc: 'Generate AI summaries, bullets & ATS scores in the builder.', route: '/resumes', badge: 'Available', color: '#a78bfa' },
-    { icon: '🎯', title: 'Job Matcher', desc: 'Match your resume to any job description.', route: '/dashboard', badge: 'Coming Soon', color: '#C9A84C' },
     { icon: '📤', title: 'PDF Export', desc: 'Export your resume as a high-quality PDF.', route: '/resumes', badge: 'Available', color: '#fb923c' },
+    { icon: '🔔', title: 'Notifications', desc: 'View your alerts for exports, ATS scores and AI results.', route: '/notifications', badge: 'Available', color: '#f59e0b' },
     { icon: '🌍', title: 'Public Gallery', desc: 'Explore published resumes and track public visibility.', route: '/resumes/public', badge: 'Available', color: '#34d399' },
     { icon: '🎨', title: 'Templates', desc: 'Browse and apply beautiful resume templates.', route: '/templates', badge: 'Available', color: 'var(--teal)' }
   ];
@@ -70,7 +69,7 @@ export class DashboardComponent implements OnInit {
     this.resumeState.load().subscribe({
       next: (resumes) => {
         this.stats[0].value = String(resumes.length);
-        this.stats[3].value = String(resumes.filter((resume) => resume.isPublic).length);
+        this.stats[2].value = String(resumes.filter((resume) => resume.isPublic).length);
       },
       error: () => undefined
     });

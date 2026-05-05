@@ -55,6 +55,23 @@ export class AuthService {
   }
 
   /**
+   * Called after a successful Razorpay payment verification.
+   * Replaces the stored JWT with the new one (which contains PREMIUM plan claim)
+   * and updates the currentUser signal reactively so all plan-gated UI responds instantly.
+   */
+  refreshTokenFromPayment(newToken: string): void {
+    localStorage.setItem(TOKEN_KEY, newToken);
+    this.isLoggedIn.set(true);
+    // Update subscriptionPlan reactively in currentUser signal
+    const user = this.currentUser();
+    if (user) {
+      this.currentUser.set({ ...user, subscriptionPlan: 'PREMIUM' as any });
+    }
+    // Reload full profile to sync all fields
+    this.getProfile().subscribe();
+  }
+
+  /**
    * Determines the user's current subscription plan by checking the profile
    * first, and falling back to JWT claims if the profile is not loaded.
    * @returns 'FREE' or 'PREMIUM'
@@ -142,7 +159,10 @@ export class AuthService {
   getProfile(): Observable<UserProfileResponse> {
     return this.http
       .get<UserProfileResponse>(`${AUTH_API}/profile`)
-      .pipe(tap((u) => this.currentUser.set(u)));
+      .pipe(tap((u) => {
+        this.currentUser.set(u);
+        this.refreshTokenIfClaimsMismatch(u);
+      }));
   }
 
   /**
@@ -331,5 +351,42 @@ export class AuthService {
   /** Returns the subscription plan as a signal-compatible string */
   subscriptionPlan(): 'FREE' | 'PREMIUM' {
     return this.getCurrentPlan();
+  }
+
+  private refreshTokenIfClaimsMismatch(profile: UserProfileResponse): void {
+    const claims = this.getTokenClaims();
+    if (!claims) {
+      return;
+    }
+
+    const tokenRolesRaw = claims['roles'] ?? claims['role'];
+    const tokenRoles = Array.isArray(tokenRolesRaw)
+      ? tokenRolesRaw.map((role) => String(role))
+      : tokenRolesRaw
+        ? [String(tokenRolesRaw)]
+        : [];
+
+    const profileRoles = (profile.roles ?? []).map((role) => String(role));
+    const tokenUserId = this.getNumericClaim(claims, 'userId')
+      ?? this.getNumericClaim(claims, 'user_id')
+      ?? this.getNumericClaim(claims, 'id');
+    const tokenPlan = this.getStringClaim(claims, 'subscriptionPlan')
+      ?? this.getStringClaim(claims, 'plan');
+
+    const sameRoles =
+      profileRoles.length === tokenRoles.length &&
+      profileRoles.every((role) => tokenRoles.includes(role));
+    const sameUserId = tokenUserId === profile.userId;
+    const samePlan = !profile.subscriptionPlan || tokenPlan === profile.subscriptionPlan;
+
+    if (sameRoles && sameUserId && samePlan) {
+      return;
+    }
+
+    this.refreshToken().subscribe({
+      error: () => {
+        // Leave the current token in place; the caller will surface any auth failures.
+      }
+    });
   }
 }

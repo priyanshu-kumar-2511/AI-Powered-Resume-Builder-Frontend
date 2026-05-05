@@ -1,5 +1,7 @@
-// ── Auth Models ──────────────────────────────────────────────────────────────
-
+// ── Auth & Identity Models ──────────────────────────────────────────────────
+/**
+ * Data required for user registration.
+ */
 export interface RegisterRequest {
   fullName: string;
   age: number;
@@ -9,16 +11,25 @@ export interface RegisterRequest {
   password: string;
 }
 
+/**
+ * Basic login credentials.
+ */
 export interface LoginRequest {
   username: string;
   password: string;
 }
 
+/**
+ * Response structure after successful authentication.
+ */
 export interface LoginResponse {
   message: string;
-  token: string;
+  token: string; // Bearer token for JWT authentication
 }
 
+/**
+ * Comprehensive user profile data used across the application.
+ */
 export interface UserProfileResponse {
   userId?: number;
   username: string;
@@ -30,8 +41,8 @@ export interface UserProfileResponse {
   github?: string;
   website?: string;
   age: number;
-  subscriptionPlan: 'FREE' | 'PREMIUM';
-  roles: string[];
+  subscriptionPlan: 'FREE' | 'PREMIUM'; // Controls access to AI quotas and templates
+  roles: string[];                       // e.g., ['ROLE_USER', 'ROLE_ADMIN']
   isActive: boolean;
 }
 
@@ -245,7 +256,7 @@ export interface AiResponse {
 
 // ── Export Service Models ────────────────────────────────────────────────────-
 
-export type ExportFormat = 'PDF' | 'DOCX' | 'JSON';
+export type ExportFormat = 'PDF';
 export type ExportStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
 export interface ExportJob {
@@ -276,4 +287,30 @@ export interface ExportCustomization {
   fontFamily?: string;
   fontSize?: number;
   margins?: 'narrow' | 'normal' | 'wide';
+}
+
+// ── Notification Models ───────────────────────────────────────────────────────
+
+export type NotificationType = 'INFO' | 'ALERT' | 'PROMO' | 'SYSTEM' | 'SUCCESS' | 'WARNING';
+export type NotificationChannel = 'APP' | 'EMAIL';
+export type NotificationTier = 'ALL' | 'FREE' | 'PREMIUM';
+
+export interface Notification {
+  id: number;
+  recipientId: number;
+  title: string;
+  message: string;
+  type: NotificationType;
+  tier: NotificationTier;
+  isRead: boolean;
+  createdAt: string;
+  readAt?: string;
+}
+
+export interface NotificationPage {
+  content: Notification[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
 }

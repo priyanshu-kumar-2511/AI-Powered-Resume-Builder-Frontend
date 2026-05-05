@@ -62,6 +62,7 @@ type TemplateViewData = {
   website: string;
   summary: string;
   skills: PreviewSkill[];
+  technicalSkills: PreviewSkill[];
   softSkills: PreviewSkill[];
   expertise: PreviewSkill[];
   experience: PreviewExperience[];
@@ -93,6 +94,11 @@ export class TemplateRenderService {
       { name: 'Leadership' },
       { name: 'Time Management' },
       { name: 'Effective Communication' }
+    ],
+    technicalSkills: [
+      { name: 'Project Management' },
+      { name: 'Public Relations' },
+      { name: 'Time Management' }
     ],
     softSkills: [
       { name: 'Leadership' },
@@ -200,6 +206,7 @@ export class TemplateRenderService {
       resume?: Resume | null;
       font?: PreviewFont;
       primaryColor?: string;
+      fitToPage?: boolean;
     }
   ): string | null {
     const layout = this.getLayout(template);
@@ -237,6 +244,41 @@ export class TemplateRenderService {
       ? ` style="--primary: ${options.primaryColor}; --accent: ${options.primaryColor}; --color-primary: ${options.primaryColor};"`
       : '';
 
+    const fitToPageCss = options?.fitToPage
+      ? `
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      min-height: 100% !important;
+      background: #fff !important;
+      overflow: hidden !important;
+    }
+
+    body > * {
+      width: 100% !important;
+      max-width: none !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    .resume,
+    .ats-resume,
+    .corp-resume,
+    .sidebar-resume,
+    .navy-resume,
+    .timeline-resume,
+    .teal-resume,
+    .creative-resume {
+      width: 100% !important;
+      max-width: none !important;
+      min-height: 100vh !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }`
+      : '';
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -245,6 +287,7 @@ export class TemplateRenderService {
   <style>
     ${styles}
     ${fontCss}
+    ${fitToPageCss}
   </style>
 </head>
 <body${bodyAttrs}>${renderedBody}</body>
@@ -267,7 +310,8 @@ export class TemplateRenderService {
     if (this.hasText(profile?.website)) viewData.website = profile!.website!.trim();
     if (this.hasText(resume?.targetJobTitle)) viewData.jobTitle = resume!.targetJobTitle.trim();
 
-    const actualSkills: string[] = [];
+    const actualTechnicalSkills: string[] = [];
+    const actualSoftSkills: string[] = [];
     const actualExperience: PreviewExperience[] = [];
     const actualEducation: PreviewEducation[] = [];
     const actualProjects: PreviewProject[] = [];
@@ -291,7 +335,9 @@ export class TemplateRenderService {
           break;
         }
         case 'SKILLS': {
-          actualSkills.push(...this.extractSkills(parsed));
+          const extracted = this.extractSkills(parsed);
+          actualTechnicalSkills.push(...extracted.technical);
+          actualSoftSkills.push(...extracted.soft);
           break;
         }
         case 'EXPERIENCE': {
@@ -362,15 +408,15 @@ export class TemplateRenderService {
       viewData.additionalInfo = merged;
     }
 
-    const uniqueSkills = Array.from(
-      new Set(actualSkills.map((skill) => skill.trim()).filter((skill) => skill.length > 0))
-    );
+    const uniqueTechnical = Array.from(new Set(actualTechnicalSkills.map(s => s.trim()).filter(s => s.length > 0)));
+    const uniqueSoft = Array.from(new Set(actualSoftSkills.map(s => s.trim()).filter(s => s.length > 0)));
+    const combined = [...uniqueTechnical, ...uniqueSoft];
 
-    if (uniqueSkills.length) {
-      const skillItems = uniqueSkills.map((name) => ({ name }));
-      viewData.skills = skillItems;
-      viewData.expertise = skillItems.slice(0, 6);
-      viewData.softSkills = skillItems.slice(-3);
+    if (combined.length) {
+      viewData.skills = combined.map(name => ({ name }));
+      viewData.technicalSkills = uniqueTechnical.map(name => ({ name }));
+      viewData.softSkills = uniqueSoft.map(name => ({ name }));
+      viewData.expertise = combined.slice(0, 6).map(name => ({ name }));
     }
 
     return viewData;
@@ -436,9 +482,12 @@ export class TemplateRenderService {
       .replace(/'/g, '&#39;');
   }
 
-  private extractSkills(value: unknown): string[] {
+  private extractSkills(value: unknown): { technical: string[]; soft: string[] } {
+    const result = { technical: [] as string[], soft: [] as string[] };
+    if (!value) return result;
+
     if (Array.isArray(value)) {
-      return value
+      result.technical = value
         .map((item) => {
           if (typeof item === 'string') return item;
           if (item && typeof item === 'object' && typeof (item as Record<string, unknown>)['name'] === 'string') {
@@ -447,16 +496,28 @@ export class TemplateRenderService {
           return '';
         })
         .filter((item) => this.hasText(item));
+      return result;
     }
 
-    if (value && typeof value === 'object') {
-      return Object.values(value as Record<string, unknown>).flatMap((entry) => {
-        if (!Array.isArray(entry)) return [];
-        return entry.map((item) => String(item)).filter((item) => this.hasText(item));
-      });
+    if (typeof value === 'object') {
+      const obj = value as Record<string, unknown>;
+      
+      if (Array.isArray(obj['technical'])) {
+        result.technical = obj['technical'].map(String).filter((s) => this.hasText(s));
+      }
+      if (Array.isArray(obj['soft'])) {
+        result.soft = obj['soft'].map(String).filter((s) => this.hasText(s));
+      }
+
+      if (!obj['technical'] && !obj['soft']) {
+        result.technical = Object.values(obj).flatMap((entry) => {
+          if (!Array.isArray(entry)) return [];
+          return entry.map(String).filter((s) => this.hasText(s));
+        });
+      }
     }
 
-    return [];
+    return result;
   }
 
   private extractExperience(value: unknown): PreviewExperience[] {

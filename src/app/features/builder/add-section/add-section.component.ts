@@ -97,7 +97,9 @@ export class AddSectionComponent {
       case 'SUMMARY':    return JSON.stringify({ text: '' });
       case 'EXPERIENCE': return JSON.stringify([]);
       case 'EDUCATION':  return JSON.stringify([]);
+      case 'PROJECTS':   return JSON.stringify([]);
       case 'SKILLS':     return JSON.stringify([]);
+      case 'CERTIFICATIONS': return JSON.stringify([]);
       default:           return JSON.stringify({ html: '' });
     }
   }

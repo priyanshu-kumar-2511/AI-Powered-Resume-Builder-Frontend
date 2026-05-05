@@ -29,12 +29,12 @@ describe('AiApiService', () => {
   });
 
   it('should generate summary and decrement quota', () => {
-    const mockRequest: AiRequest = { targetJobTitle: 'Dev' };
-    const mockResponse: AiResponse = { text: 'Summary', status: 'SUCCESS' };
+    const mockRequest: AiRequest = { userId: '1', targetJobTitle: 'Dev' };
+    const mockResponse: AiResponse = { content: 'Summary' };
     spyOn(quotaState, 'decrementSummary');
 
     service.generateSummary(mockRequest).subscribe(res => {
-      expect(res.text).toBe('Summary');
+      expect(res.content).toBe('Summary');
     });
 
     const req = httpMock.expectOne(`${AI_API}/generate-summary`);

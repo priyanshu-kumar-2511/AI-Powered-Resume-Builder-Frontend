@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/UC7-Export-UI`
+**Current Branch:** `feature/7-Notification-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -133,6 +133,34 @@ This phase focuses on converting the dynamic web-based resume into highly accura
 | **Export Service Integration** | Communicates with the backend `export-service` (when applicable) to process document generations. |
 | **Client-Side PDF Generation** | Utilizes a zero-latency `window.print` strategy integrated with dynamic CSS `@page` rules to generate pixel-perfect PDF exports directly from the browser without backend overhead. |
 | **Export Modal Interface** | Clean, user-friendly UI for selecting export options and monitoring download progress. |
+
+---
+
+## 🔔 Phase 7: Notifications, Subscriptions & Admin Governance
+
+This phase integrates real-time communication, the monetization engine, and the specialized administrative control center.
+
+### 📢 Communication & Pricing
+
+| Module | Description |
+| :--- | :--- |
+| **Notification Centre** | `/notifications` - Real-time alert list with "Mark as Read" functionality and personalized notifications. |
+| **Razorpay Integration** | `/pricing` - Secure payment gateway integration for upgrading to Premium plans. |
+| **Subscription Guard** | Enforces feature access (Premium templates, unlimited AI) based on user subscription status. |
+| **Notification Service** | `notification.service.ts` - Connects to the backend `notification-service` for fetching and managing alerts. |
+
+### 🛡️ Administrative Control Center
+
+A restricted interface for platform administrators to oversee the entire ecosystem.
+
+| Module | Route | Description |
+| :--- | :--- | :--- |
+| **User Management** | `/admin/users` | Comprehensive list of registered users with details and management actions. |
+| **Resume Oversight** | `/admin/resumes` | Monitor all resumes created on the platform with search and filter capabilities. |
+| **Template Editor** | `/admin/templates` | Create, edit, and manage the official template library. |
+| **AI & Export Analytics** | `/admin/analytics` | Visualize AI usage trends and document generation performance metrics. |
+| **Broadcast System** | `/admin/broadcast` | Dispatch platform-wide announcements to all users via the Notification Service. |
+| **Audit Logs** | `/admin/audit` | Track critical administrative actions for security and compliance. |
 
 ---
 

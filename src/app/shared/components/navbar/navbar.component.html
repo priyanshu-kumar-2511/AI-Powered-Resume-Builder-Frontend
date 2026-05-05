@@ -45,7 +45,9 @@
           }
         </div>
 
-        <div class="user-menu">
+        <div class="user-menu-wrapper">
+          <app-notification-bell />
+          <div class="user-menu">
           <div class="user-avatar" [class.premium]="auth.getCurrentPlan() === 'PREMIUM'"
                [class.admin-avatar]="isAdmin">
             {{ (auth.currentUser()?.fullName || auth.currentUser()?.username || 'U')[0].toUpperCase() }}
@@ -73,6 +75,13 @@
               </svg>
               Profile
             </a>
+            <a routerLink="/notifications" class="dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              Notifications
+            </a>
             <a routerLink="/dashboard" class="dropdown-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -92,6 +101,7 @@
               Logout
             </button>
           </div>
+        </div>
         </div>
       } @else {
         <a routerLink="/login" class="btn btn-ghost btn-sm">Sign In</a>
@@ -113,6 +123,7 @@
       @if (isAdmin) {
         <a routerLink="/admin" (click)="closeMenu()" class="mobile-admin-link">🛡 Admin Panel</a>
       }
+      <a routerLink="/notifications" (click)="closeMenu()">Notifications</a>
       <a routerLink="/profile" (click)="closeMenu()">Profile</a>
       <button class="mobile-logout" (click)="logout(); closeMenu()">Logout</button>
     } @else {
@@ -222,6 +233,7 @@
 
   .user-menu { position: relative; }
   .user-menu:hover .dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+  .user-menu-wrapper { display: flex; align-items: center; gap: 4px; }
 
   .dropdown {
     position: absolute; top: calc(100% + 12px); right: 0;

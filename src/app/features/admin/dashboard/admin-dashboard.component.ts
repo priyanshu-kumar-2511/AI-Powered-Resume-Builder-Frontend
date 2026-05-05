@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { AdminApiService, PlatformAnalytics } from '../services/admin-api.service';
+import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/admin-api.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -95,6 +95,12 @@ import { AdminApiService, PlatformAnalytics } from '../services/admin-api.servic
                     PDF: {{ analytics.exportsByFormat['PDF'] }} &nbsp;·&nbsp;
                     DOCX: {{ analytics.exportsByFormat['DOCX'] }}
                   </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon" style="background:rgba(245,158,11,.12);color:#fde68a">💰</div>
+                  <div class="stat-value">$ {{ aiStats ? aiStats.totalCostEstimate.toFixed(2) : '—' }}</div>
+                  <div class="stat-label">AI Cost (USD)</div>
+                  <div class="stat-sub">{{ aiStats ? (aiStats.totalTokensUsed | number) + ' tokens' : 'Loading…' }}</div>
                 </div>
                 <div class="stat-card stat-card-wide">
                   <div class="stat-label" style="margin-bottom:12px">🏆 Most Used Templates</div>
@@ -272,6 +278,7 @@ export class AdminDashboardComponent implements OnInit {
   private router   = inject(Router);
 
   analytics: PlatformAnalytics | null = null;
+  aiStats:   AiUsageStats | null = null;
   loading    = true;
 
   get isDashboardRoot(): boolean {
@@ -279,19 +286,33 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   readonly navItems = [
-    { path: '/admin/users',         icon: '👥', label: 'User Management'  },
-    { path: '/admin/templates',     icon: '🎨', label: 'Templates'         },
-    { path: '/admin/analytics',     icon: '📊', label: 'Analytics'         },
-    { path: '/admin/notifications', icon: '📢', label: 'Broadcast'         }
+    { path: '/admin/users',      icon: '👥', label: 'User Management'   },
+    { path: '/admin/resumes',    icon: '📄', label: 'Resumes'           },
+    { path: '/admin/templates',  icon: '🎨', label: 'Templates'         },
+    { path: '/admin/analytics',  icon: '📊', label: 'Analytics'         },
+    { path: '/admin/ai-stats',   icon: '🤖', label: 'AI Usage'          },
+    { path: '/admin/subscriptions', icon: '💰', label: 'Subscriptions'    },
+    { path: '/admin/exports',    icon: '📦', label: 'Export Stats'      },
+    { path: '/admin/broadcast',  icon: '📢', label: 'Broadcast'         },
+    { path: '/admin/audit',      icon: '🕵️', label: 'Audit Logs'        },
   ];
 
   get adminName(): string { return this.auth.currentUser()?.fullName ?? 'Admin'; }
   get adminInitial(): string { return this.adminName.charAt(0).toUpperCase(); }
 
   ngOnInit(): void {
+    if (!this.isDashboardRoot) {
+      this.loading = false;
+      return;
+    }
+
     this.adminApi.getPlatformAnalytics().subscribe({
       next:  a  => { this.analytics = a; this.loading = false; },
       error: () => { this.loading = false; }
+    });
+    this.adminApi.getAiUsageStats().subscribe({
+      next:  s  => { this.aiStats = s; },
+      error: () => { this.aiStats = null; }
     });
   }
 
