@@ -18,8 +18,13 @@
           <span>Personal Info</span>
         </div>
         <div class="step-line" [class.done]="step > 1"></div>
-        <div class="step" [class.active]="step === 2">
-          <div class="step-dot">2</div>
+        <div class="step" [class.active]="step === 2" [class.done]="step > 2">
+          <div class="step-dot">{{ step > 2 ? '✓' : '2' }}</div>
+          <span>OTP Code</span>
+        </div>
+        <div class="step-line" [class.done]="step > 2"></div>
+        <div class="step" [class.active]="step === 3">
+          <div class="step-dot">3</div>
           <span>Credentials</span>
         </div>
       </div>
@@ -75,14 +80,47 @@
             }
           </div>
 
-          <button type="button" class="btn btn-primary btn-full" (click)="nextStep()">
-            Continue
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <button type="button" class="btn btn-primary btn-full" (click)="sendOtp()" [disabled]="loading">
+            @if (loading) { <span class="spinner"></span> Sending OTP... }
+            @else {
+              Send Verification OTP
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            }
           </button>
         }
 
-        <!-- Step 2: Credentials -->
+        <!-- Step 2: OTP Verification -->
         @if (step === 2) {
+          <div class="form-group text-center-wrapper">
+            <label class="form-label text-center" style="display: block; text-align: center;">Enter 6-Digit OTP</label>
+            <input formControlName="otp" type="text" class="form-control text-center" placeholder="123456" maxlength="6" style="letter-spacing: 0.5em; text-align: center; font-size: 1.25rem; font-weight: 700;">
+            @if (otp.invalid && otp.touched) {
+              <span class="form-error text-center" style="display: block; text-align: center;">Please enter a valid 6-digit OTP code</span>
+            }
+          </div>
+
+          <div class="otp-resend-container">
+            @if (resendCountdown > 0) {
+              <span class="resend-text">Resend OTP in <strong>{{ resendCountdown }}s</strong></span>
+            } @else {
+              <button type="button" class="btn-link" (click)="resendOtp()" [disabled]="loading">Resend OTP Code</button>
+            }
+          </div>
+
+          <div class="step2-actions" style="margin-top: 24px;">
+            <button type="button" class="btn btn-ghost" (click)="step = 1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Back
+            </button>
+            <button type="button" class="btn btn-primary" style="flex:1;justify-content:center" (click)="verifyOtp()" [disabled]="loading">
+              @if (loading) { <span class="spinner"></span> Verifying... }
+              @else { Verify & Continue }
+            </button>
+          </div>
+        }
+
+        <!-- Step 3: Credentials Selection -->
+        @if (step === 3) {
           <div class="form-group">
             <label class="form-label">Username</label>
             <input formControlName="username" type="text" class="form-control" placeholder="priya_sharma" autocomplete="username">
@@ -128,13 +166,13 @@
           <p class="pwd-hint">Use letters, numbers and symbols like &#64;$!%*?&amp;</p>
 
           <div class="step2-actions">
-            <button type="button" class="btn btn-ghost" (click)="step = 1">
+            <button type="button" class="btn btn-ghost" (click)="step = 2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Back
             </button>
             <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center" [disabled]="loading">
               @if (loading) { <span class="spinner"></span> Creating... }
-              @else { Create Account }
+              @else { Complete Registration }
             </button>
           </div>
         }
@@ -244,6 +282,31 @@
 .pwd-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; margin-top: -12px; }
 
 .step2-actions { display: flex; gap: 12px; }
+
+.otp-resend-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+.otp-resend-container .resend-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.otp-resend-container .btn-link {
+  background: none;
+  border: none;
+  color: var(--teal);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 0;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.otp-resend-container .btn-link:hover {
+  color: #fff;
+}
 
 /* Visual panel */
 .visual-glow {

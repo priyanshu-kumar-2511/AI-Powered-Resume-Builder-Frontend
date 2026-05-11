@@ -9,6 +9,7 @@ import { LivePreviewService } from '../services/live-preview.service';
 import { TemplateService } from '../../../core/services/template.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ResumeApiService } from '../../resume/services/resume-api.service';
+import { ResumeStateService } from '../../resume/services/resume-state.service';
 import { SectionListComponent } from '../section-list/section-list.component';
 import { SectionEditorComponent } from '../section-editor/section-editor.component';
 import { AddSectionComponent } from '../add-section/add-section.component';
@@ -17,7 +18,7 @@ import { LivePreviewComponent } from '../preview/live-preview.component';
 import { ContactEditorComponent } from '../editors/contact-editor.component';
 import { AiSidebarComponent } from '../../ai/sidebar/ai-sidebar.component';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
-import { ResumeSection, TemplateResponseDTO, UpdateResumeRequest } from '../../../shared/models/models';
+import { AddSectionRequest, ResumeSection, SectionType, TemplateResponseDTO, UpdateResumeRequest } from '../../../shared/models/models';
 import { ExportModalComponent } from '../../export/modal/export-modal.component';
 
 /**
@@ -50,6 +51,7 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private sectionApi = inject(SectionApiService);
   private resumeApi = inject(ResumeApiService);
+  private resumeState = inject(ResumeStateService);
   private templateService = inject(TemplateService);
   private auth = inject(AuthService);
   readonly builderState = inject(BuilderStateService);
@@ -162,6 +164,27 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
         }
       });
     this.loadResumeAndSections();
+
+    // Listen to font & primary color customization changes and autosave them
+    this.builderState.font$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(font => {
+        const resume = this.builderState.resumeSnapshot;
+        if (!resume) return;
+
+        const customizationsJson = JSON.stringify({
+          fontSize: font.fontSize,
+          fontFamily: font.fontFamily,
+          primaryColor: font.primaryColor
+        });
+
+        // Only save if it has actually changed from the loaded value to avoid saving on initial load
+        if (resume.customizations === customizationsJson) {
+          return;
+        }
+
+        this.autoSave.queueResumeCustomizations(this.resumeId, customizationsJson);
+      });
   }
 
   ngOnDestroy(): void {
@@ -283,14 +306,17 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.builderState.sections$.pipe(takeUntil(this.destroy$)).subscribe((sections: ResumeSection[]) => {
-      const found = sections.find((s: ResumeSection) => s.sectionType === sectionType);
-      if (found) {
-        this.selectedSection = found;
-        this.editingContact = false;
-        this.showAddSection = false;
-      }
-    }).unsubscribe();
+    const found = this.builderState.sectionsSnapshot.find((section) => section.sectionType === sectionType);
+    if (found) {
+      this.selectedSection = found;
+      this.editingContact = false;
+      this.showAddSection = false;
+      return;
+    }
+
+    if (this.isCreatableSectionType(sectionType)) {
+      this.createMissingSection(sectionType);
+    }
   }
 
   onContactSaved(): void {
@@ -360,7 +386,21 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
       .subscribe(updated => { this.builderState.updateSection(updated); this.selectedSection = updated; });
   }
 
-  onAtsScore(score: number): void { console.log('[AI] ATS score:', score); }
+  onAtsScore(score: number): void {
+    console.log('[AI] ATS score:', score);
+    this.resumeApi.updateAtsScore(this.resumeId, score)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: updatedResume => {
+          this.builderState.setResume(updatedResume);
+          this.resumeState.update(updatedResume);
+          console.log('[AI] Successfully persisted updated ATS score to DB:', score);
+        },
+        error: err => {
+          console.error('[AI] Failed to persist ATS score to DB:', err);
+        }
+      });
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -392,6 +432,73 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
       case 'PROJECTS': case 'CERTIFICATIONS': case 'LANGUAGES': case 'VOLUNTEER': case 'CUSTOM':
         return JSON.stringify({ text });
       default: return null;
+    }
+  }
+
+  private isCreatableSectionType(sectionType: string): sectionType is SectionType {
+    return [
+      'SUMMARY',
+      'EXPERIENCE',
+      'EDUCATION',
+      'SKILLS',
+      'CERTIFICATIONS',
+      'PROJECTS',
+      'LANGUAGES',
+      'VOLUNTEER',
+      'CUSTOM'
+    ].includes(sectionType);
+  }
+
+  private createMissingSection(sectionType: SectionType): void {
+    const payload: AddSectionRequest = {
+      resumeId: this.resumeId,
+      sectionType,
+      title: this.defaultSectionTitle(sectionType),
+      content: this.defaultSectionContent(sectionType),
+      displayOrder: this.builderState.sectionsSnapshot.length
+    };
+
+    this.sectionApi.addSection(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (section) => {
+          this.builderState.addSection(section);
+          this.selectedSection = section;
+          this.editingContact = false;
+          this.showAddSection = false;
+          this.showTemplates = false;
+          this.showSectionList = true;
+        },
+        error: () => {
+          this.error = `Could not create the ${sectionType.toLowerCase()} section. Please try again.`;
+        }
+      });
+  }
+
+  private defaultSectionTitle(type: SectionType): string {
+    switch (type) {
+      case 'SUMMARY': return 'Professional Summary';
+      case 'EXPERIENCE': return 'Work Experience';
+      case 'EDUCATION': return 'Education';
+      case 'SKILLS': return 'Skills';
+      case 'CERTIFICATIONS': return 'Certifications';
+      case 'PROJECTS': return 'Projects';
+      case 'LANGUAGES': return 'Languages';
+      case 'VOLUNTEER': return 'Volunteer Work';
+      case 'CUSTOM': return 'Additional Information';
+    }
+  }
+
+  private defaultSectionContent(type: SectionType): string {
+    switch (type) {
+      case 'SUMMARY':
+        return JSON.stringify({ text: '' });
+      case 'EXPERIENCE':
+      case 'EDUCATION':
+      case 'SKILLS':
+        return JSON.stringify([]);
+      default:
+        return JSON.stringify({ text: '' });
     }
   }
 

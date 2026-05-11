@@ -207,6 +207,7 @@ export class TemplateRenderService {
       font?: PreviewFont;
       primaryColor?: string;
       fitToPage?: boolean;
+      useDemoData?: boolean;
     }
   ): string | null {
     const layout = this.getLayout(template);
@@ -218,7 +219,12 @@ export class TemplateRenderService {
     const viewData = this.buildViewData(
       options?.sections ?? [],
       options?.profile ?? null,
-      options?.resume ?? null
+      options?.resume ?? null,
+      options?.useDemoData ?? (
+        !(options?.sections?.length) &&
+        !options?.profile &&
+        !options?.resume
+      )
     );
 
     let renderedBody = layout;
@@ -297,9 +303,10 @@ export class TemplateRenderService {
   buildViewData(
     sections: ResumeSection[] = [],
     profile: UserProfileResponse | null = null,
-    resume: Resume | null = null
+    resume: Resume | null = null,
+    useDemoData = true
   ): TemplateViewData {
-    const viewData = this.cloneDemoData();
+    const viewData = useDemoData ? this.cloneDemoData() : this.createEmptyViewData();
 
     if (this.hasText(profile?.fullName)) viewData.fullName = profile!.fullName.trim();
     if (this.hasText(profile?.email)) viewData.email = profile!.email.trim();
@@ -442,6 +449,32 @@ export class TemplateRenderService {
 
   private cloneDemoData(): TemplateViewData {
     return JSON.parse(JSON.stringify(this.demoData)) as TemplateViewData;
+  }
+
+  private createEmptyViewData(): TemplateViewData {
+    return {
+      fullName: '',
+      jobTitle: '',
+      email: '',
+      phone: '',
+      location: '',
+      linkedin: '',
+      github: '',
+      website: '',
+      summary: '',
+      skills: [],
+      technicalSkills: [],
+      softSkills: [],
+      expertise: [],
+      experience: [],
+      education: [],
+      projects: [],
+      certifications: [],
+      achievements: [],
+      additionalInfo: [],
+      references: [],
+      awards: []
+    };
   }
 
   private parseContent(content: string | null | undefined): unknown {

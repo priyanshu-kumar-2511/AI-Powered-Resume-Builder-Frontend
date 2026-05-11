@@ -41,7 +41,7 @@
               Premium
             </span>
           } @else {
-            <a routerLink="/pricing" class="upgrade-btn">Upgrade to Premium</a>
+            <a routerLink="/pricing" [queryParams]="{ returnUrl: router.url }" class="upgrade-btn">Upgrade to Premium</a>
           }
         </div>
 

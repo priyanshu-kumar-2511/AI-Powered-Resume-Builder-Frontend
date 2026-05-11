@@ -18,6 +18,7 @@ export class ResumeCardComponent {
   @Output() duplicate = new EventEmitter<Resume>();
   @Output() publish = new EventEmitter<Resume>();
   @Output() unpublish = new EventEmitter<Resume>();
+  @Output() toggleStatus = new EventEmitter<Resume>();
   @Output() delete = new EventEmitter<Resume>();
   @Output() viewDetails = new EventEmitter<Resume>();
 

@@ -1,5 +1,5 @@
 # ResumeAI: AI-Powered Resume Builder Platform (Frontend)
-**Current Branch:** `feature/7-Notification-UI`
+**Current Branch:** `feature/UC7-Notification-UI`
 
 ## 📌 Project Overview / Introduction
 
@@ -155,12 +155,13 @@ A restricted interface for platform administrators to oversee the entire ecosyst
 
 | Module | Route | Description |
 | :--- | :--- | :--- |
-| **User Management** | `/admin/users` | Comprehensive list of registered users with details and management actions. |
-| **Resume Oversight** | `/admin/resumes` | Monitor all resumes created on the platform with search and filter capabilities. |
-| **Template Editor** | `/admin/templates` | Create, edit, and manage the official template library. |
-| **AI & Export Analytics** | `/admin/analytics` | Visualize AI usage trends and document generation performance metrics. |
-| **Broadcast System** | `/admin/broadcast` | Dispatch platform-wide announcements to all users via the Notification Service. |
-| **Audit Logs** | `/admin/audit` | Track critical administrative actions for security and compliance. |
+| **Admin Dashboard** | `/admin` | **Centralized Hub:** Real-time stats for total users, resumes, AI calls, and platform costs. |
+| **User Management** | `/admin/users` | **Full Lifecycle Control:** View, suspend, and delete user accounts with premium status visibility. |
+| **AI Analytics** | `/admin/analytics` | **Deep Insights:** Breakdown of AI calls by model (Groq/Llama), total tokens consumed, and cost estimates. |
+| **Template Editor** | `/admin/templates` | **Library Management:** Create, edit, and categorize resume templates with live previews. |
+| **Subscription Oversight** | `/admin/subscriptions` | **Monetization Tracking:** Monitor active premium plans and Razorpay transaction history. |
+| **Broadcast System** | `/admin/broadcast` | **Mass Communication:** Dispatch platform-wide alerts to all active users via RabbitMQ. |
+| **Audit & Export Logs** | `/admin/audit` | **Compliance & Monitoring:** Detailed logs of administrative actions and document generation performance. |
 
 ---
 
@@ -241,6 +242,8 @@ src/
 - **Interactive Resume Builder:** Implemented a Canva-inspired real-time editor for seamless resume customization.
 - **AI-Powered Generation:** Added Groq-backed content generation for summaries and work experience.
 - **ATS Insights:** Integrated live ATS scoring to help users optimize their resumes for job applications.
+- **Admin Control Center:** Specialized dashboard for administrators to monitor platform health, AI costs, and user growth.
+- **Advanced Analytics:** Detailed visualization of AI token usage and export format distributions (PDF vs DOCX).
 - **Tech Stack Overview:** Built with Angular 17 (Standalone Components), SCSS Glassmorphism design, and Angular Signals for optimized performance.
 
 ---
@@ -267,3 +270,5 @@ src/
 3. **Template Detail Badge Fix**: Resolved a logic error where FREE templates were incorrectly showing a PREMIUM badge. Updated `template-detail.component.ts` to correctly evaluate the `tier` property from the template model.
 4. **Template Gallery Render Fix**: Resolved an Angular change detection bug in the Template Gallery where preview iframes remained blank. Replaced internal `Map` state tracking with plain Object references to ensure the UI properly updates when dynamically loaded HTML templates resolve.
 5. **Streamlined PDF Export**: Removed legacy, slow backend DOCX processing and optimized the export flow to utilize zero-latency, high-fidelity client-side PDF generation.
+
+--- 

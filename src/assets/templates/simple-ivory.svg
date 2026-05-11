@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#fffaf4"/>
+  <!-- Header -->
+  <text x="150" y="28" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#2b2118" text-anchor="middle">ANANYA SHARMA</text>
+  <text x="150" y="40" font-family="Georgia,serif" font-size="7" letter-spacing="2" fill="#7c6754" text-anchor="middle">UI/UX DESIGNER</text>
+  <line x1="20" y1="46" x2="280" y2="46" stroke="#d6c8b8" stroke-width="0.8"/>
+  <text x="150" y="56" font-family="Georgia,serif" font-size="6" fill="#6b5b4d" text-anchor="middle">ananya@email.com  |  +91-987-654-3210  |  Bangalore, India</text>
+  <line x1="20" y1="62" x2="280" y2="62" stroke="#d6c8b8" stroke-width="0.8"/>
+  <!-- Summary -->
+  <text x="20" y="76" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">PROFESSIONAL SUMMARY</text>
+  <line x1="20" y1="79" x2="280" y2="79" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="90" font-family="Georgia,serif" font-size="6.2" fill="#374151">Creative UI/UX Designer with 4+ years of experience crafting intuitive</text>
+  <text x="20" y="99" font-family="Georgia,serif" font-size="6.2" fill="#374151">digital experiences. Expert in Figma, Adobe XD, and design systems.</text>
+  <!-- Experience -->
+  <text x="20" y="115" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">EXPERIENCE</text>
+  <line x1="20" y1="118" x2="280" y2="118" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="129" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#2b2118">Senior UI/UX Designer</text>
+  <text x="280" y="129" font-family="Georgia,serif" font-size="6" fill="#7c6754" text-anchor="end">Jan 2022 – Present</text>
+  <text x="20" y="138" font-family="Georgia,serif" font-size="6.2" fill="#6b5b4d" font-style="italic">Infosys Limited, Bangalore</text>
+  <text x="26" y="148" font-family="Georgia,serif" font-size="6" fill="#374151">• Led redesign of mobile banking app, improving engagement by 38%</text>
+  <text x="26" y="157" font-family="Georgia,serif" font-size="6" fill="#374151">• Conducted 50+ user interviews and usability testing sessions</text>
+  <text x="26" y="166" font-family="Georgia,serif" font-size="6" fill="#374151">• Built and maintained a component library with 120+ UI elements</text>
+  <text x="20" y="179" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#2b2118">UI Designer</text>
+  <text x="280" y="179" font-family="Georgia,serif" font-size="6" fill="#7c6754" text-anchor="end">Jun 2020 – Dec 2021</text>
+  <text x="20" y="188" font-family="Georgia,serif" font-size="6.2" fill="#6b5b4d" font-style="italic">Wipro Technologies, Hyderabad</text>
+  <text x="26" y="198" font-family="Georgia,serif" font-size="6" fill="#374151">• Designed dashboards for enterprise SaaS clients using Figma</text>
+  <text x="26" y="207" font-family="Georgia,serif" font-size="6" fill="#374151">• Collaborated with developers to implement pixel-perfect interfaces</text>
+  <!-- Grid: Education + Skills -->
+  <line x1="20" y1="218" x2="280" y2="218" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="229" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">EDUCATION</text>
+  <line x1="20" y1="232" x2="145" y2="232" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="155" y="229" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">SKILLS</text>
+  <line x1="155" y1="232" x2="280" y2="232" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="242" font-family="Georgia,serif" font-size="6.5" font-weight="700" fill="#2b2118">B.Des in Visual Communication</text>
+  <text x="20" y="251" font-family="Georgia,serif" font-size="6" fill="#6b5b4d">NID Ahmedabad  |  2016–2020</text>
+  <text x="20" y="260" font-family="Georgia,serif" font-size="6" fill="#374151">GPA: 8.9 / 10.0</text>
+  <text x="155" y="242" font-family="Georgia,serif" font-size="6" fill="#374151">• Figma  &amp;  Adobe XD</text>
+  <text x="155" y="251" font-family="Georgia,serif" font-size="6" fill="#374151">• User Research  &amp;  Testing</text>
+  <text x="155" y="260" font-family="Georgia,serif" font-size="6" fill="#374151">• Wireframing  &amp;  Prototyping</text>
+  <text x="155" y="269" font-family="Georgia,serif" font-size="6" fill="#374151">• HTML/CSS  |  Tailwind CSS</text>
+  <!-- Projects -->
+  <text x="20" y="284" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">PROJECTS</text>
+  <line x1="20" y1="287" x2="280" y2="287" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="297" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#2b2118">MediTrack – Health Dashboard</text>
+  <text x="280" y="297" font-family="Georgia,serif" font-size="6" fill="#7c6754" text-anchor="end">2023</text>
+  <text x="26" y="306" font-family="Georgia,serif" font-size="6" fill="#374151">• Designed end-to-end health tracking app with 15K+ active users</text>
+  <text x="26" y="315" font-family="Georgia,serif" font-size="6" fill="#374151">• Achieved 4.7/5 app store rating through iterative design process</text>
+  <!-- Certifications -->
+  <text x="20" y="330" font-family="Georgia,serif" font-size="7.5" font-weight="700" fill="#6c4f3d" letter-spacing="1">CERTIFICATIONS</text>
+  <line x1="20" y1="333" x2="280" y2="333" stroke="#d6c8b8" stroke-width="0.6"/>
+  <text x="20" y="343" font-family="Georgia,serif" font-size="6" fill="#374151">• Google UX Design Certificate</text>
+  <text x="280" y="343" font-family="Georgia,serif" font-size="6" fill="#7c6754" text-anchor="end">2022</text>
+  <text x="20" y="352" font-family="Georgia,serif" font-size="6" fill="#374151">• Interaction Design Foundation – UX Research</text>
+  <text x="280" y="352" font-family="Georgia,serif" font-size="6" fill="#7c6754" text-anchor="end">2021</text>
+  <!-- FREE badge -->
+  <rect x="240" y="378" width="48" height="16" rx="8" fill="#00D4B4"/>
+  <text x="264" y="390" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000" text-anchor="middle">FREE</text>
+</svg>

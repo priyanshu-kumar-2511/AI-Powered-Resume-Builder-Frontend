@@ -43,6 +43,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/resume/public-gallery/public-gallery.component').then(m => m.PublicGalleryComponent)
   },
   {
+    path: 'resumes/public/:resumeId',
+    loadComponent: () => import('./features/resume/public-view/public-resume-view.component').then(m => m.PublicResumeViewComponent)
+  },
+  {
     path: 'builder/:resumeId',
     canActivate: [authGuard],
     loadComponent: () => import('./features/builder/layout/builder-layout.component').then(m => m.BuilderLayoutComponent)

@@ -30,118 +30,48 @@ import { AdminApiService, AiUsageStats } from '../services/admin-api.service';
 
       @if (!loading && stats) {
         <!-- Top KPIs -->
-        <div class="kpi-row">
-          <div class="kpi-card kpi-purple">
-            <div class="kpi-icon">🤖</div>
-            <div class="kpi-val">{{ stats.totalTokensUsed | number }}</div>
-            <div class="kpi-label">Total Tokens Used</div>
-          </div>
-          <div class="kpi-card kpi-green">
-            <div class="kpi-icon">💰</div>
-            <div class="kpi-val">$ {{ stats.totalCostEstimate.toFixed(4) }}</div>
-            <div class="kpi-label">Estimated Cost (USD)</div>
-          </div>
+        <div class="kpi-row single-kpi">
           <div class="kpi-card kpi-blue">
-            <div class="kpi-icon">📞</div>
+            <div class="kpi-icon">🤖</div>
             <div class="kpi-val">{{ totalCalls | number }}</div>
-            <div class="kpi-label">Total API Calls</div>
-          </div>
-          <div class="kpi-card kpi-yellow">
-            <div class="kpi-icon">⚡</div>
-            <div class="kpi-val">{{ avgTokensPerCall | number }}</div>
-            <div class="kpi-label">Avg Tokens / Call</div>
+            <div class="kpi-label">Total AI Calls Made</div>
           </div>
         </div>
 
         <!-- Model breakdown -->
-        <div class="two-col">
-          <!-- Calls by model -->
-          <div class="section-card">
-            <div class="section-title">📊 API Calls by Model</div>
-            <div class="bar-group">
-              @for (e of callEntries; track e.key) {
-                <div class="bar-item">
-                  <div class="bar-meta">
-                    <span class="bar-model">{{ e.key }}</span>
-                    <span class="bar-count">{{ e.value | number }} calls</span>
-                  </div>
-                  <div class="bar-track">
-                    <div class="bar-fill"
-                         [class.fill-gpt]="e.key.toLowerCase().includes('gpt')"
-                         [class.fill-claude]="e.key.toLowerCase().includes('claude')"
-                         [style.width.%]="pct(e.value, maxCalls)">
-                    </div>
-                  </div>
-                  <div class="bar-pct">{{ pct(e.value, maxCalls) }}%</div>
+        <div class="section-card">
+          <div class="section-title">📊 API Calls by Model</div>
+          <div class="bar-group">
+            @for (e of callEntries; track e.key) {
+              <div class="bar-item">
+                <div class="bar-meta">
+                  <span class="bar-model">{{ e.key }}</span>
+                  <span class="bar-count">{{ e.value | number }} calls</span>
                 </div>
-              }
-              @if (callEntries.length === 0) {
-                <div class="empty-msg">No model call data available.</div>
-              }
-            </div>
-          </div>
-
-          <!-- Tokens by model -->
-          <div class="section-card">
-            <div class="section-title">🔢 Token Usage by Model</div>
-            <div class="bar-group">
-              @for (e of tokenEntries; track e.key) {
-                <div class="bar-item">
-                  <div class="bar-meta">
-                    <span class="bar-model">{{ e.key }}</span>
-                    <span class="bar-count">{{ e.value | number }} tokens</span>
+                <div class="bar-track">
+                  <div class="bar-fill"
+                       [class.fill-gpt]="e.key.toLowerCase().includes('gpt')"
+                       [class.fill-claude]="e.key.toLowerCase().includes('claude')"
+                       [style.width.%]="pct(e.value, maxCalls)">
                   </div>
-                  <div class="bar-track">
-                    <div class="bar-fill"
-                         [class.fill-gpt]="e.key.toLowerCase().includes('gpt')"
-                         [class.fill-claude]="e.key.toLowerCase().includes('claude')"
-                         [style.width.%]="pct(e.value, maxTokens)">
-                    </div>
-                  </div>
-                  <div class="bar-pct">{{ pct(e.value, maxTokens) }}%</div>
                 </div>
-              }
-              @if (tokenEntries.length === 0) {
-                <div class="empty-msg">No token data available.</div>
-              }
-            </div>
-
-            <!-- Donut-style cost split -->
-            @if (tokenEntries.length >= 2) {
-              <div class="cost-split">
-                <div class="cs-title">Cost split estimate</div>
-                <div class="cs-bars">
-                  @for (e of tokenEntries; track e.key) {
-                    <div class="cs-segment"
-                         [class.cs-gpt]="e.key.toLowerCase().includes('gpt')"
-                         [class.cs-claude]="e.key.toLowerCase().includes('claude')"
-                         [style.flex]="e.value"
-                         [title]="e.key + ': ' + pct(e.value, maxTokens) + '%'">
-                    </div>
-                  }
-                </div>
-                <div class="cs-legend">
-                  @for (e of tokenEntries; track e.key) {
-                    <div class="cs-leg-item">
-                      <div class="cs-dot" [class.dot-gpt]="e.key.toLowerCase().includes('gpt')" [class.dot-claude]="e.key.toLowerCase().includes('claude')"></div>
-                      <span>{{ e.key }}</span>
-                    </div>
-                  }
-                </div>
+                <div class="bar-pct">{{ pct(e.value, maxCalls) }}%</div>
               </div>
+            }
+            @if (callEntries.length === 0) {
+              <div class="empty-msg">No model call data available.</div>
             }
           </div>
         </div>
 
         <!-- Top users table -->
         <div class="section-card">
-          <div class="section-title">🏆 Top Users by Token Consumption</div>
+          <div class="section-title">🏆 Top Users by Activity</div>
           <div class="users-table-wrap">
             <table class="users-table">
               <thead>
                 <tr>
-                  <th>#</th><th>User</th><th>Tokens Used</th>
-                  <th>Est. Cost</th><th>Usage Share</th>
+                  <th>#</th><th>User</th><th>Total Calls</th><th>Activity Share</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,17 +93,16 @@ import { AdminApiService, AiUsageStats } from '../services/admin-api.service';
                     <td>
                       <div class="tokens-cell">
                         <div class="token-bar-track">
-                          <div class="token-bar" [style.width.%]="pct(u.tokensUsed, maxUserTokens)"></div>
+                          <div class="token-bar" [style.width.%]="pct(u.callCount || 0, maxUserCalls)"></div>
                         </div>
-                        <span class="token-count">{{ u.tokensUsed | number }}</span>
+                        <span class="token-count">{{ (u.callCount || 0) | number }} calls</span>
                       </div>
                     </td>
-                    <td class="cost-cell">$ {{ (u.tokensUsed * 0.000002).toFixed(4) }}</td>
-                    <td class="share-cell">{{ pct(u.tokensUsed, stats.totalTokensUsed) }}%</td>
+                    <td class="share-cell">{{ pct(u.callCount || 0, totalCalls) }}%</td>
                   </tr>
                 }
                 @if (stats.topUsersByUsage.length === 0) {
-                  <tr><td colspan="5" class="empty-row">No user data available.</td></tr>
+                  <tr><td colspan="4" class="empty-row">No user data available.</td></tr>
                 }
               </tbody>
             </table>
@@ -282,24 +211,39 @@ export class AiUsageStatsComponent implements OnInit {
   loading  = true;
 
   get callEntries()  { return Object.entries(this.stats?.callsByModel  ?? {}).map(([key, value]) => ({ key, value })); }
-  get tokenEntries() { return Object.entries(this.stats?.tokensByModel ?? {}).map(([key, value]) => ({ key, value })); }
   get maxCalls()     { return Math.max(1, ...Object.values(this.stats?.callsByModel  ?? {})); }
-  get maxTokens()    { return Math.max(1, ...Object.values(this.stats?.tokensByModel ?? {})); }
-  get totalCalls()   { return Object.values(this.stats?.callsByModel ?? {}).reduce((a, b) => a + b, 0); }
-  get avgTokensPerCall(): number {
-    return this.totalCalls > 0 ? Math.round((this.stats?.totalTokensUsed ?? 0) / this.totalCalls) : 0;
-  }
-  get maxUserTokens(): number {
-    return Math.max(1, ...(this.stats?.topUsersByUsage ?? []).map(u => u.tokensUsed));
+  get totalCalls()   { return this.stats?.totalAiCalls ?? 0; }
+  get maxUserCalls(): number {
+    return Math.max(1, ...(this.stats?.topUsersByUsage ?? []).map(u => u.callCount || 0));
   }
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
-    this.adminApi.getAiUsageStats().subscribe({
-      next:  s  => { this.stats = s; this.loading = false; },
-      error: () => { this.stats = null; this.loading = false; }
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin({
+        stats: this.adminApi.getAiUsageStats(),
+        users: this.adminApi.getAllUsers()
+      }).subscribe({
+        next: ({ stats, users }) => {
+          if (stats.topUsersByUsage) {
+            stats.topUsersByUsage = stats.topUsersByUsage.map(u => {
+              const userMatch = users.find(user => user.userId.toString() === u.userId?.toString());
+              return {
+                ...u,
+                username: userMatch ? userMatch.username : `User ${u.userId}`
+              };
+            });
+          }
+          this.stats = stats;
+          this.loading = false;
+        },
+        error: () => {
+          this.stats = null;
+          this.loading = false;
+        }
+      });
     });
   }
 

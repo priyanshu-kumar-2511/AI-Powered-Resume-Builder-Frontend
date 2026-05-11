@@ -28,6 +28,33 @@ export class ProfileComponent implements OnInit {
   success   = '';
   editMode  = false;
 
+  private successTimeout: any;
+  private errorTimeout: any;
+
+  setSuccessMessage(msg: string): void {
+    this.success = msg;
+    if (this.successTimeout) {
+      clearTimeout(this.successTimeout);
+    }
+    if (msg) {
+      this.successTimeout = setTimeout(() => {
+        this.success = '';
+      }, 4000);
+    }
+  }
+
+  setErrorMessage(msg: string): void {
+    this.error = msg;
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+    if (msg) {
+      this.errorTimeout = setTimeout(() => {
+        this.error = '';
+      }, 4000);
+    }
+  }
+
   isOAuthUser = false;
 
   form = this.fb.group({
@@ -47,7 +74,7 @@ export class ProfileComponent implements OnInit {
         this.fetchSubscription();
       },
       error: () => {
-        this.error = 'Failed to load profile. Please refresh or log in again.';
+        this.setErrorMessage('Failed to load profile. Please refresh or log in again.');
         this.loading = false;
       }
     });
@@ -59,15 +86,15 @@ export class ProfileComponent implements OnInit {
 
   saveProfile() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving = true; this.error = ''; this.success = '';
+    this.saving = true; this.setErrorMessage(''); this.setSuccessMessage('');
 
     this.auth.updateProfile(this.form.value as any).subscribe({
       next: (res) => {
-        this.success = res.message || 'Profile updated successfully!';
+        this.setSuccessMessage(res.message || 'Profile updated successfully!');
         this.saving = false; this.editMode = false;
         this.auth.getProfile().subscribe(u => this.profile = u);
       },
-      error: (e) => { this.error = extractErrorMessage(e, 'Update failed.'); this.saving = false; }
+      error: (e) => { this.setErrorMessage(extractErrorMessage(e, 'Update failed.')); this.saving = false; }
     });
   }
 
@@ -90,7 +117,7 @@ export class ProfileComponent implements OnInit {
     
     this.paymentSvc.cancelSubscription().subscribe({
       next: (res) => {
-        this.success = res.message;
+        this.setSuccessMessage(res.message);
         this.auth.refreshToken().subscribe({
           next: () => {
             this.auth.getProfile().subscribe({
@@ -110,7 +137,29 @@ export class ProfileComponent implements OnInit {
           }
         });
       },
-      error: (e) => this.error = extractErrorMessage(e, 'Cancellation failed.')
+      error: (e) => this.setErrorMessage(extractErrorMessage(e, 'Cancellation failed.'))
+    });
+  }
+
+  deletingAccount = false;
+
+  deleteAccount() {
+    const confirmation = window.confirm(
+      '⚠️ WARNING: Are you sure you want to permanently delete your account?\n\nThis action is irreversible and all your resumes, templates, and subscription benefits will be lost forever.'
+    );
+    if (!confirmation) return;
+
+    this.deletingAccount = true;
+    this.auth.deleteAccount().subscribe({
+      next: (res) => {
+        this.deletingAccount = false;
+        alert('Your account has been deleted permanently. Redirecting to login...');
+        this.auth.logout();
+      },
+      error: (e) => {
+        this.deletingAccount = false;
+        this.setErrorMessage(extractErrorMessage(e, 'Failed to delete account. Please try again.'));
+      }
     });
   }
 

@@ -335,7 +335,8 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
     .role-pill.role-user  { background: rgba(148,163,184,0.1); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.08); }
     .role-toggle-btn { font-size: 0.7rem; width: 22px; height: 22px; padding: 0; }
 
-    .plan-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.75); font-size: 0.76rem; padding: 4px 8px; cursor: pointer; font-family: inherit; outline: none; }
+    .plan-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.75); font-size: 0.76rem; padding: 4px 8px; cursor: pointer; font-family: inherit; outline: none; color-scheme: dark; }
+    .plan-select option { background-color: #111520; color: rgba(255,255,255,0.8); }
     .plan-select:focus { border-color: rgba(0,212,180,0.4); }
 
     .status-pill { font-size: 0.66rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }

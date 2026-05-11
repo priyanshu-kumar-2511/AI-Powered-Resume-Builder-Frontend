@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#f8fafc"/>
+  <!-- Left sidebar -->
+  <rect x="0" y="0" width="82" height="400" fill="#f1f5f9"/>
+  <rect x="82" y="0" width="1" height="400" fill="#dbe3ea"/>
+  <!-- Sidebar: Name -->
+  <text x="41" y="30" font-family="'Segoe UI',Arial,sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">RAHUL</text>
+  <text x="41" y="41" font-family="'Segoe UI',Arial,sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">VERMA</text>
+  <text x="41" y="53" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#0f766e" text-anchor="middle" letter-spacing="0.5">FULL STACK DEV</text>
+  <!-- Sidebar: Contact -->
+  <text x="9" y="70" font-family="'Segoe UI',Arial,sans-serif" font-size="6.5" font-weight="700" fill="#0f766e">CONTACT</text>
+  <line x1="9" y1="73" x2="73" y2="73" stroke="#cbd5e1" stroke-width="0.6"/>
+  <text x="9" y="82" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">rahul@email.com</text>
+  <text x="9" y="91" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">+91-876-543-2100</text>
+  <text x="9" y="100" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">Mumbai, India</text>
+  <text x="9" y="109" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#0f766e">github.com/rahulv</text>
+  <!-- Sidebar: Skills -->
+  <text x="9" y="125" font-family="'Segoe UI',Arial,sans-serif" font-size="6.5" font-weight="700" fill="#0f766e">SKILLS</text>
+  <line x1="9" y1="128" x2="73" y2="128" stroke="#cbd5e1" stroke-width="0.6"/>
+  <text x="9" y="137" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• React / Next.js</text>
+  <text x="9" y="146" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• Node.js / Express</text>
+  <text x="9" y="155" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• Spring Boot</text>
+  <text x="9" y="164" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• PostgreSQL / Redis</text>
+  <text x="9" y="173" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• Docker / K8s</text>
+  <text x="9" y="182" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• TypeScript</text>
+  <text x="9" y="191" font-family="'Segoe UI',Arial,sans-serif" font-size="5.5" fill="#334155">• AWS / GCP</text>
+  <!-- Sidebar: Certifications -->
+  <text x="9" y="207" font-family="'Segoe UI',Arial,sans-serif" font-size="6.5" font-weight="700" fill="#0f766e">CERTIFICATIONS</text>
+  <line x1="9" y1="210" x2="73" y2="210" stroke="#cbd5e1" stroke-width="0.6"/>
+  <text x="9" y="219" font-family="'Segoe UI',Arial,sans-serif" font-size="5.2" fill="#334155">AWS Solutions</text>
+  <text x="9" y="228" font-family="'Segoe UI',Arial,sans-serif" font-size="5.2" fill="#334155">Architect – 2023</text>
+  <text x="9" y="240" font-family="'Segoe UI',Arial,sans-serif" font-size="5.2" fill="#334155">Google Cloud</text>
+  <text x="9" y="249" font-family="'Segoe UI',Arial,sans-serif" font-size="5.2" fill="#334155">Professional – 2022</text>
+  <!-- Main content -->
+  <!-- Summary -->
+  <text x="95" y="20" font-family="'Segoe UI',Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0f766e">SUMMARY</text>
+  <line x1="95" y1="23" x2="285" y2="23" stroke="#e2e8f0" stroke-width="0.7"/>
+  <text x="95" y="33" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#334155">Full Stack Developer with 5+ years building scalable web apps.</text>
+  <text x="95" y="42" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#334155">Passionate about clean code and cloud-native architectures.</text>
+  <!-- Experience -->
+  <text x="95" y="58" font-family="'Segoe UI',Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0f766e">EXPERIENCE</text>
+  <line x1="95" y1="61" x2="285" y2="61" stroke="#e2e8f0" stroke-width="0.7"/>
+  <text x="95" y="71" font-family="'Segoe UI',Arial,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Senior Full Stack Developer</text>
+  <text x="285" y="71" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Mar 2022 – Present</text>
+  <text x="95" y="80" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#0f766e">Tata Consultancy Services, Mumbai</text>
+  <text x="101" y="90" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Built microservices handling 2M+ daily requests using Spring Boot</text>
+  <text x="101" y="99" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Reduced API response time by 45% through Redis caching</text>
+  <text x="101" y="108" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Mentored team of 6 junior developers on best practices</text>
+  <text x="95" y="121" font-family="'Segoe UI',Arial,sans-serif" font-size="7" font-weight="700" fill="#0f172a">Software Engineer</text>
+  <text x="285" y="121" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">Jul 2019 – Feb 2022</text>
+  <text x="95" y="130" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#0f766e">Cognizant Technology Solutions, Pune</text>
+  <text x="101" y="140" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Developed React dashboards for insurance claims management</text>
+  <text x="101" y="149" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Integrated third-party payment APIs with 99.9% uptime</text>
+  <!-- Education -->
+  <text x="95" y="163" font-family="'Segoe UI',Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0f766e">EDUCATION</text>
+  <line x1="95" y1="166" x2="285" y2="166" stroke="#e2e8f0" stroke-width="0.7"/>
+  <text x="95" y="176" font-family="'Segoe UI',Arial,sans-serif" font-size="7" font-weight="700" fill="#0f172a">B.Tech – Computer Science</text>
+  <text x="285" y="176" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">2015 – 2019</text>
+  <text x="95" y="185" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b">IIT Bombay  |  CGPA: 8.7 / 10</text>
+  <!-- Projects -->
+  <text x="95" y="199" font-family="'Segoe UI',Arial,sans-serif" font-size="7.5" font-weight="700" fill="#0f766e">PROJECTS</text>
+  <line x1="95" y1="202" x2="285" y2="202" stroke="#e2e8f0" stroke-width="0.7"/>
+  <text x="95" y="212" font-family="'Segoe UI',Arial,sans-serif" font-size="7" font-weight="700" fill="#0f172a">CloudOps – DevOps Dashboard</text>
+  <text x="285" y="212" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">2023</text>
+  <text x="101" y="221" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Real-time infrastructure monitoring for 500+ cloud resources</text>
+  <text x="101" y="230" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Deployed on K8s with autoscaling and alerting pipelines</text>
+  <text x="95" y="243" font-family="'Segoe UI',Arial,sans-serif" font-size="7" font-weight="700" fill="#0f172a">ShopEase – E-Commerce Platform</text>
+  <text x="285" y="243" font-family="'Segoe UI',Arial,sans-serif" font-size="6" fill="#64748b" text-anchor="end">2022</text>
+  <text x="101" y="252" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Full-stack app with React frontend and Node.js backend</text>
+  <text x="101" y="261" font-family="'Segoe UI',Arial,sans-serif" font-size="5.8" fill="#334155">• Processed ₹2Cr+ in transactions in first 6 months</text>
+  <!-- FREE badge -->
+  <rect x="240" y="378" width="48" height="16" rx="8" fill="#00D4B4"/>
+  <text x="264" y="390" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000" text-anchor="middle">FREE</text>
+</svg>

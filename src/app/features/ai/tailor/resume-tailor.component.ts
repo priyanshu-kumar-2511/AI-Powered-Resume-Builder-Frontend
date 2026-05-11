@@ -111,10 +111,44 @@ export class ResumeTailorComponent {
       existingContent: this.resumeContent,
       jobDescription: this.jobDescription
     }).subscribe({
-      next: res => {
-        clearInterval(interval);
-        this.result  = res.content ?? '';
-        this.loading = false;
+      next: (res: any) => {
+        if (res && res.status === 'QUEUED') {
+          this.progressLabel = 'Background worker processing…';
+          const startTime = new Date().getTime();
+          
+          const pollInterval = setInterval(() => {
+            this.aiApi.getHistory(userId).subscribe({
+              next: history => {
+                const latest = history.find(h => 
+                  h.requestType === 'TAILOR_RESUME' && 
+                  new Date(h.timestamp).getTime() > startTime - 5000
+                );
+                if (latest && latest.response) {
+                  clearInterval(interval);
+                  clearInterval(pollInterval);
+                  this.result = latest.response;
+                  this.loading = false;
+                }
+              },
+              error: () => {}
+            });
+          }, 3000);
+
+          // Timeout after 60 seconds
+          setTimeout(() => {
+            clearInterval(interval);
+            clearInterval(pollInterval);
+            if (this.loading) {
+              this.error = 'Background processing took too long. Please check your history panel later.';
+              this.loading = false;
+            }
+          }, 60000);
+
+        } else {
+          clearInterval(interval);
+          this.result  = res.content ?? '';
+          this.loading = false;
+        }
       },
       error: err => {
         clearInterval(interval);

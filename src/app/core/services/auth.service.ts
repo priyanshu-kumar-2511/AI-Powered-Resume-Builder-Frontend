@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import {
   RegisterRequest,
   LoginRequest,
@@ -59,16 +59,22 @@ export class AuthService {
    * Replaces the stored JWT with the new one (which contains PREMIUM plan claim)
    * and updates the currentUser signal reactively so all plan-gated UI responds instantly.
    */
-  refreshTokenFromPayment(newToken: string): void {
-    localStorage.setItem(TOKEN_KEY, newToken);
-    this.isLoggedIn.set(true);
-    // Update subscriptionPlan reactively in currentUser signal
-    const user = this.currentUser();
-    if (user) {
-      this.currentUser.set({ ...user, subscriptionPlan: 'PREMIUM' as any });
+  refreshTokenFromPayment(newToken?: string | null): Observable<UserProfileResponse | null> {
+    const syncProfile$ = this.getProfile().pipe(
+      catchError(() => of(this.currentUser()))
+    );
+
+    this.applyOptimisticPremiumState();
+
+    if (this.isUsableJwtToken(newToken)) {
+      this.saveToken(newToken);
+      return syncProfile$;
     }
-    // Reload full profile to sync all fields
-    this.getProfile().subscribe();
+
+    return this.refreshToken().pipe(
+      switchMap(() => syncProfile$),
+      catchError(() => of(this.currentUser()))
+    );
   }
 
   /**
@@ -112,7 +118,21 @@ export class AuthService {
   // ── Auth endpoints ───────────────────────────────────────────────────────────
   
   /**
-   * Registers a new user with the backend.
+   * Initiates user registration (Step 1) by collecting details and sending OTP.
+   */
+  initiateRegistration(payload: { fullName: string; age: number; mobileNumber: string; email: string }): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${AUTH_API}/register/initiate`, payload);
+  }
+
+  /**
+   * Verifies the registration OTP (Step 2).
+   */
+  verifyRegistrationOtp(email: string, otp: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${AUTH_API}/register/verify-otp`, { identifier: email, otp });
+  }
+
+  /**
+   * Registers a new user with the backend (Step 3).
    * @param payload The user registration details.
    * @returns An observable emitting the backend's message response.
    */
@@ -172,6 +192,13 @@ export class AuthService {
    */
   updateProfile(payload: ProfileRequest): Observable<MessageResponse> {
     return this.http.put<MessageResponse>(`${AUTH_API}/profile`, payload);
+  }
+
+  /**
+   * Permanently deletes the currently logged-in user's account.
+   */
+  deleteAccount(): Observable<MessageResponse> {
+    return this.http.delete<MessageResponse>(`${AUTH_API}/profile`);
   }
 
   // ── Forgot password ──────────────────────────────────────────────────────────
@@ -324,6 +351,22 @@ export class AuthService {
   ): string | null {
     const value = claims?.[key];
     return typeof value === 'string' && value.trim() ? value : null;
+  }
+
+  private applyOptimisticPremiumState(): void {
+    this.isLoggedIn.set(true);
+    const user = this.currentUser();
+    if (user) {
+      this.currentUser.set({ ...user, subscriptionPlan: 'PREMIUM' as const });
+    }
+  }
+
+  private isUsableJwtToken(token: string | null | undefined): token is string {
+    return typeof token === 'string'
+      && token.trim().length > 0
+      && token !== 'undefined'
+      && token !== 'null'
+      && token.split('.').length === 3;
   }
 
   /**

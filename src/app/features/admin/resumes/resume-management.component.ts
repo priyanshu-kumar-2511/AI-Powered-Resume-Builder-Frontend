@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminApiService } from '../services/admin-api.service';
+import { AdminApiService, AdminUser } from '../services/admin-api.service';
+import { forkJoin } from 'rxjs';
 
 export interface AdminResume {
   resumeId: number;
@@ -255,8 +256,27 @@ export class ResumeManagementComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.adminApi.getAllResumes().subscribe({
-      next:  r  => { this.resumes = r; this.applyFilter(); this.loading = false; },
+    forkJoin({
+      resumes: this.adminApi.getAllResumes(),
+      users: this.adminApi.getAllUsers()
+    }).subscribe({
+      next: ({ resumes, users }) => {
+        // Build a map from userId -> user
+        const userMap = new Map<number, AdminUser>();
+        users.forEach((u: AdminUser) => userMap.set(u.userId, u));
+
+        // Enrich each resume with ownerName and ownerEmail
+        this.resumes = resumes.map((r: any) => {
+          const user = userMap.get(r.userId);
+          return {
+            ...r,
+            ownerName:  user?.fullName  || user?.username || `User #${r.userId}`,
+            ownerEmail: user?.username  || `user-${r.userId}`
+          };
+        });
+        this.applyFilter();
+        this.loading = false;
+      },
       error: () => this.loading = false
     });
   }

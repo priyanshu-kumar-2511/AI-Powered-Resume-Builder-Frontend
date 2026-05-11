@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
+import { Component, inject, OnDestroy } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
@@ -11,7 +11,7 @@ import { extractErrorMessage } from '../../../shared/utils/http-error.util';
   imports: [ReactiveFormsModule, RouterLink, CommonModule],
   templateUrl: './register.component.html'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnDestroy {
   private fb     = inject(FormBuilder);
   private auth   = inject(AuthService);
   private router = inject(Router);
@@ -21,6 +21,7 @@ export class RegisterComponent {
     age:          [null as number | null, [Validators.required, Validators.min(18), Validators.max(120)]],
     mobileNumber: ['', [Validators.required, Validators.pattern(/^\+91[0-9]{10}$/)]],
     email:        ['', [Validators.required, Validators.email]],
+    otp:          ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
     username:     ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
     password:     ['', [
       Validators.required,
@@ -32,7 +33,10 @@ export class RegisterComponent {
   error    = '';
   success  = '';
   showPwd  = false;
-  step     = 1; // 1 = personal, 2 = credentials
+  step     = 1; // 1 = Personal Details, 2 = OTP Verification, 3 = Credentials Selection
+
+  resendCountdown = 0;
+  private countdownInterval: any;
 
   get passwordStrength(): number {
     const pwd = this.password.value || '';
@@ -59,21 +63,81 @@ export class RegisterComponent {
     return 'strong';
   }
 
-  nextStep() {
+  sendOtp() {
     const controls = ['fullName', 'age', 'mobileNumber', 'email'];
     controls.forEach(c => this.form.get(c)!.markAsTouched());
     const valid = controls.every(c => this.form.get(c)!.valid);
-    if (valid) this.step = 2;
+    if (!valid) return;
+
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    const payload = {
+      fullName: this.fullName.value || '',
+      age: Number(this.age.value),
+      mobileNumber: this.mobileNumber.value || '',
+      email: this.email.value || ''
+    };
+
+    this.auth.initiateRegistration(payload).subscribe({
+      next: (res) => {
+        this.success = res.message || 'Verification OTP sent to your email';
+        this.loading = false;
+        this.step = 2;
+        this.startCountdown();
+      },
+      error: (e) => {
+        this.error = extractErrorMessage(e, 'Failed to send OTP. Please try again.');
+        this.loading = false;
+      }
+    });
+  }
+
+  verifyOtp() {
+    this.otp.markAsTouched();
+    if (this.otp.invalid) return;
+
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    this.auth.verifyRegistrationOtp(this.email.value || '', this.otp.value || '').subscribe({
+      next: (res) => {
+        this.success = res.message || 'OTP verified successfully!';
+        this.loading = false;
+        this.step = 3;
+      },
+      error: (e) => {
+        this.error = extractErrorMessage(e, 'Invalid or expired OTP. Please try again.');
+        this.loading = false;
+      }
+    });
   }
 
   submit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading = true; this.error = '';
+    const controls = ['username', 'password'];
+    controls.forEach(c => this.form.get(c)!.markAsTouched());
+    const valid = controls.every(c => this.form.get(c)!.valid);
+    if (!valid) return;
 
-    const payload = { ...this.form.value, age: Number(this.form.value.age) };
-    this.auth.register(payload as any).subscribe({
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    const payload = {
+      fullName: this.fullName.value || '',
+      age: Number(this.age.value),
+      mobileNumber: this.mobileNumber.value || '',
+      email: this.email.value || '',
+      username: this.username.value || '',
+      password: this.password.value || '',
+      otp: this.otp.value || ''
+    };
+
+    this.auth.register(payload).subscribe({
       next: (res) => {
-        this.success = res.message || 'Account created! Please sign in.';
+        this.success = res.message || 'Account created successfully! Redirecting to login...';
         this.loading = false;
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
@@ -84,10 +148,58 @@ export class RegisterComponent {
     });
   }
 
+  startCountdown() {
+    this.resendCountdown = 30;
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+    this.countdownInterval = setInterval(() => {
+      if (this.resendCountdown > 0) {
+        this.resendCountdown--;
+      } else {
+        clearInterval(this.countdownInterval);
+      }
+    }, 1000);
+  }
+
+  resendOtp() {
+    if (this.resendCountdown > 0) return;
+    
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    const payload = {
+      fullName: this.fullName.value || '',
+      age: Number(this.age.value),
+      mobileNumber: this.mobileNumber.value || '',
+      email: this.email.value || ''
+    };
+
+    this.auth.initiateRegistration(payload).subscribe({
+      next: (res) => {
+        this.success = 'OTP resent successfully!';
+        this.loading = false;
+        this.startCountdown();
+      },
+      error: (e) => {
+        this.error = extractErrorMessage(e, 'Failed to resend OTP. Please try again.');
+        this.loading = false;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
+
   get fullName()     { return this.form.get('fullName')!; }
   get age()          { return this.form.get('age')!; }
   get mobileNumber() { return this.form.get('mobileNumber')!; }
   get email()        { return this.form.get('email')!; }
+  get otp()          { return this.form.get('otp')!; }
   get username()     { return this.form.get('username')!; }
   get password()     { return this.form.get('password')!; }
 }

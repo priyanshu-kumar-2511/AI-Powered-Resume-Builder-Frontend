@@ -113,7 +113,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     {{/certifications}}
   </section>
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Times New Roman",Times,serif;max-width:780px;margin:0 auto;padding:36px 40px;color:#111;font-size:13px;line-height:1.55;background:#fff}.header{text-align:center;margin-bottom:14px}.name{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;font-size:12px;color:#333;border-top:1.5px solid #111;border-bottom:1.5px solid #111;padding:6px 0}.section{margin-bottom:16px}.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid #111;padding-bottom:3px;margin-bottom:10px}.summary-text{font-size:12.5px}.two-col-section{display:grid;grid-template-columns:1fr 1fr;gap:24px}.col .section-title{margin-top:0}.edu-item{margin-bottom:8px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:600}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:12px;color:#444}.exp-item,.project-item{margin-bottom:12px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700}.exp-role{font-style:italic;font-size:12.5px;margin:2px 0 5px}.exp-dates{font-size:12px;color:#444}.bullet-list{padding-left:18px;margin-top:4px}.bullet-list li{margin-bottom:3px;font-size:12.5px}.cert-row{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Times New Roman",Times,serif;max-width:780px;margin:0 auto;padding:36px 40px;color:#111;font-size:13px;line-height:1.55;background:#fff}.header{text-align:center;margin-bottom:14px}.name{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:8px;color:var(--primary,#111)}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;font-size:12px;color:#333;border-top:1.5px solid var(--primary,#111);border-bottom:1.5px solid var(--primary,#111);padding:6px 0}.section{margin-bottom:16px}.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary,#111);border-bottom:1.5px solid var(--primary,#111);padding-bottom:3px;margin-bottom:10px}.summary-text{font-size:12.5px}.two-col-section{display:grid;grid-template-columns:1fr 1fr;gap:24px}.col .section-title{margin-top:0}.edu-item{margin-bottom:8px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:600}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:12px;color:#444}.exp-item,.project-item{margin-bottom:12px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700}.exp-role{font-style:italic;font-size:12.5px;margin:2px 0 5px}.exp-dates{font-size:12px;color:#444}.bullet-list{padding-left:18px;margin-top:4px}.bullet-list li{margin-bottom:3px;font-size:12.5px}.cert-row{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}`
   },
   {
     templateId: 2,
@@ -195,7 +195,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     </div>
   </section>
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Open Sans",Arial,sans-serif;max-width:780px;margin:0 auto;padding:40px;color:#111;font-size:13px;line-height:1.6;background:#fff}.header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #111}.name{font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}.job-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#444;margin-bottom:8px}.contact-line{font-size:12.5px;color:#555}.section{margin-bottom:20px}.section-title-bar{background:#f0f0f0;padding:5px 10px;margin-bottom:12px}.section-title-bar h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#111}.exp-item,.edu-item{margin-bottom:14px}.exp-header,.edu-header{display:flex;justify-content:space-between;align-items:baseline}.exp-role{font-weight:700;font-size:13px}.exp-dates{font-size:12px;color:#555}.edu-institution{font-size:12.5px;color:#333;margin:3px 0}.bullet-list{padding-left:18px;margin-top:6px}.bullet-list li{margin-bottom:4px;font-size:12.5px;text-align:justify}.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}.skill-item{font-size:12.5px}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Open Sans",Arial,sans-serif;max-width:780px;margin:0 auto;padding:40px;color:#111;font-size:13px;line-height:1.6;background:#fff}.header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--primary,#111)}.name{font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}.job-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#444;margin-bottom:8px}.contact-line{font-size:12.5px;color:#555}.section{margin-bottom:20px}.section-title-bar{background:color-mix(in srgb,var(--primary,#111) 8%,transparent);padding:5px 10px;margin-bottom:12px}.section-title-bar h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary,#111)}.exp-item,.edu-item{margin-bottom:14px}.exp-header,.edu-header{display:flex;justify-content:space-between;align-items:baseline}.exp-role{font-weight:700;font-size:13px}.exp-dates{font-size:12px;color:#555}.edu-institution{font-size:12.5px;color:#333;margin:3px 0}.bullet-list{padding-left:18px;margin-top:6px}.bullet-list li{margin-bottom:4px;font-size:12.5px;text-align:justify}.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}.skill-item{font-size:12.5px}`
   },
   {
     templateId: 3,
@@ -295,7 +295,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     </section>
   </div>
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.creative-resume{display:grid;grid-template-columns:260px 1fr;min-height:100vh;font-family:"Outfit",sans-serif;font-size:13px;background:#fff}.sidebar{background:#111827;color:#fff;padding:36px 24px}.name{font-size:22px;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.2}.title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:28px}.side-section{margin-bottom:24px}.side-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#60a5fa;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px;margin-bottom:10px}.side-section p{font-size:12px;color:#d1d5db;margin-bottom:6px}.skills-list{list-style:none}.skills-list li{background:rgba(255,255,255,.06);margin-bottom:5px;padding:4px 10px;border-radius:4px;font-size:12px;color:#e5e7eb}.side-edu{margin-bottom:10px}.side-degree{display:block;font-size:12px;font-weight:600;color:#fff}.side-inst{display:block;font-size:11px;color:#9ca3af}.side-dates{font-size:11px;color:#6b7280}.main-content{padding:36px;background:#fff}.main-section{margin-bottom:22px}.main-section h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid #e5e7eb;padding-bottom:5px;margin-bottom:12px;color:#111}.expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12.5px;color:#374151}.exp-block{margin-bottom:14px}.exp-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}.exp-meta strong{font-size:13px;color:#111}.exp-dates{font-size:12px;color:#6b7280}.main-bullets{padding-left:16px}.main-bullets li{margin-bottom:4px;font-size:12.5px;color:#374151}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.creative-resume{display:grid;grid-template-columns:260px 1fr;min-height:100vh;font-family:"Outfit",sans-serif;font-size:13px;background:#fff}.sidebar{background:#111827;color:#fff;padding:36px 24px}.name{font-size:22px;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.2}.title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:28px}.side-section{margin-bottom:24px}.side-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--primary,#60a5fa);border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px;margin-bottom:10px}.side-section p{font-size:12px;color:#d1d5db;margin-bottom:6px}.skills-list{list-style:none}.skills-list li{background:rgba(255,255,255,.06);margin-bottom:5px;padding:4px 10px;border-radius:4px;font-size:12px;color:#e5e7eb}.side-edu{margin-bottom:10px}.side-degree{display:block;font-size:12px;font-weight:600;color:#fff}.side-inst{display:block;font-size:11px;color:#9ca3af}.side-dates{font-size:11px;color:#6b7280}.main-content{padding:36px;background:#fff}.main-section{margin-bottom:22px}.main-section h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid #e5e7eb;padding-bottom:5px;margin-bottom:12px;color:#111}.expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12.5px;color:#374151}.expertise-grid span{background:color-mix(in srgb,var(--primary,#60a5fa) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary,#60a5fa) 35%,transparent);border-radius:5px;padding:4px 8px;font-size:11px;font-weight:600;color:var(--primary,#1e40af);text-align:center;display:block}.exp-block{margin-bottom:14px}.exp-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}.exp-meta strong{font-size:13px;color:#111}.exp-dates{font-size:12px;color:#6b7280}.main-bullets{padding-left:16px}.main-bullets li{margin-bottom:4px;font-size:12.5px;color:#374151}`
   },
   {
     templateId: 4,
@@ -338,32 +338,35 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     {{/projects}}
   </section>
 
-  <div class="navy-grid">
-    <section class="section education">
-      <h2>Education</h2>
-      {{#education}}
-      <article class="navy-block">
-        <strong>{{degree}}</strong>
-        <div>{{institution}}</div>
-        <div class="navy-muted">{{startYear}} - {{endYear}}</div>
-      </article>
-      {{/education}}
-    </section>
+  <section class="section education">
+    <h2>Education</h2>
+    {{#education}}
+    <article class="navy-block">
+      <strong>{{degree}}</strong>
+      <div>{{institution}}</div>
+      <div class="navy-muted">{{startYear}} - {{endYear}}</div>
+    </article>
+    {{/education}}
+  </section>
 
-    <section class="section skills">
-      <h2>Skills</h2>
-      <ul class="navy-list">{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
-      <h2 class="extra-title">Awards</h2>
-      <ul class="navy-list">{{#awards}}<li>{{name}}</li>{{/awards}}</ul>
+  <section class="section skills">
+    <h2>Skills</h2>
+    <ul class="navy-list">{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
+  </section>
 
-      <h2 class="extra-title" style="margin-top:16px">Certifications</h2>
-      <ul class="navy-list">
-        {{#certifications}}<li><strong>{{name}}</strong> <span class="navy-muted">{{date}}</span></li>{{/certifications}}
-      </ul>
-    </section>
-  </div>
+  <section class="section awards">
+    <h2>Awards</h2>
+    <ul class="navy-list">{{#awards}}<li>{{name}}</li>{{/awards}}</ul>
+  </section>
+
+  <section class="section certifications">
+    <h2>Certifications</h2>
+    <ul class="navy-list">
+      {{#certifications}}<li><strong>{{name}}</strong> <span class="navy-muted">{{date}}</span></li>{{/certifications}}
+    </ul>
+  </section>
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{max-width:820px;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 40px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:34px;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:11px;color:#cbd5e1}.section{padding:0 38px;margin-bottom:22px}.section h2,.extra-title{margin:0 0 12px;font-size:12px;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.navy-muted{color:#64748b;font-size:11px}.navy-list{margin:0;padding-left:18px}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{max-width:820px;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 40px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:34px;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:11px;color:#cbd5e1}.section{padding:0 38px;margin-bottom:22px}.section h2{margin:0 0 12px;font-size:12px;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-muted{color:#64748b;font-size:11px}.navy-list{margin:0;padding-left:18px}`
   },
   {
     templateId: 5,
@@ -532,6 +535,206 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
 </div>`,
     cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:"DM Sans",Arial,sans-serif}.teal-resume{max-width:820px;margin:0 auto;padding:40px;background:#fff}.teal-header{padding-bottom:14px;border-bottom:2px solid var(--primary,#111);margin-bottom:16px}.teal-name{margin:0 0 4px;font-size:28px;letter-spacing:.04em;text-transform:uppercase;color:var(--primary,#111)}.teal-role{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#4b5563}.teal-contact{font-size:11px;color:#6b7280}.teal-intro{margin:0 0 20px;font-size:11.5px;color:#374151}.teal-grid{display:grid;grid-template-columns:1fr 220px;gap:28px}.section{margin-bottom:20px}.section h2{margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--primary,#0d9488);padding-bottom:5px;color:var(--primary,#0d9488)}.teal-pills{display:flex;flex-wrap:wrap;gap:8px}.teal-pills span{border:1px solid color-mix(in srgb,var(--primary,#0d9488) 35%, white);background:color-mix(in srgb,var(--primary,#0d9488) 10%, white);border-radius:999px;padding:4px 10px;font-size:10.5px;color:var(--primary,#0d9488)}.teal-row{display:flex;justify-content:space-between;gap:12px}.teal-block{margin-bottom:12px}.teal-block ul,.achievements ul,.additional ul{margin:6px 0 0;padding-left:18px}.teal-block li,.achievements li,.additional li{margin-bottom:4px;font-size:11px}`
+  },
+  {
+    templateId: 7,
+    name: 'Simple Ivory',
+    htmlLayout: `<div class="ivory-resume">
+  <header class="ivory-header" data-section="CONTACT">
+    <h1>{{fullName}}</h1>
+    <p>{{jobTitle}}</p>
+    <div class="ivory-contact">{{email}} | {{phone}} | {{location}}</div>
+  </header>
+
+  <section class="section summary" data-section="SUMMARY">
+    <h2>Professional Summary</h2>
+    <p>{{{summary}}}</p>
+  </section>
+
+  <section class="section experience" data-section="EXPERIENCE">
+    <h2>Experience</h2>
+    {{#experience}}
+    <article class="ivory-block">
+      <div class="ivory-row">
+        <strong>{{role}}, {{company}}</strong>
+        <span>{{startDate}} - {{endDate}}</span>
+      </div>
+      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+    </article>
+    {{/experience}}
+  </section>
+
+  <div class="ivory-grid">
+    <section class="section education" data-section="EDUCATION">
+      <h2>Education</h2>
+      {{#education}}
+      <article class="ivory-block">
+        <strong>{{degree}}</strong>
+        <div>{{institution}}</div>
+        <span>{{startYear}} - {{endYear}}</span>
+      </article>
+      {{/education}}
+    </section>
+
+    <section class="section skills" data-section="SKILLS">
+      <h2>Skills</h2>
+      <ul class="plain-list">{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
+    </section>
+  </div>
+
+  <section class="section projects" data-section="PROJECTS">
+    <h2>Projects</h2>
+    {{#projects}}
+    <article class="ivory-block">
+      <div class="ivory-row">
+        <strong>{{title}}</strong>
+        <span>{{dates}}</span>
+      </div>
+      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+    </article>
+    {{/projects}}
+  </section>
+
+  <section class="section certifications" data-section="CERTIFICATIONS">
+    <h2>Certifications</h2>
+    <ul class="plain-list">{{#certifications}}<li>{{name}} <span>{{date}}</span></li>{{/certifications}}</ul>
+  </section>
+</div>`,
+    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#1f2937;font-family:Georgia,"Times New Roman",serif}.ivory-resume{max-width:820px;margin:0 auto;padding:42px;background:#fffaf4}.ivory-header{text-align:center;padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--primary,#d6c8b8)}.ivory-header h1{margin:0;font-size:31px;color:var(--primary,#2b2118)}.ivory-header p{margin:6px 0 8px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--primary,#2b2118) 70%,#2b2118)}.ivory-contact{font-size:11px;color:color-mix(in srgb,var(--primary,#6b5b4d) 60%,#2b2118)}.section{margin-bottom:22px}.section h2{margin:0 0 12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary,#6c4f3d);border-bottom:1px solid color-mix(in srgb,var(--primary,#6c4f3d) 30%,transparent);padding-bottom:5px}.section p,.section li,.section div,.section span{font-size:12.2px}.ivory-block{margin-bottom:12px}.ivory-row{display:flex;justify-content:space-between;gap:12px}.ivory-row span,.certifications span{color:color-mix(in srgb,var(--primary,#7c6b5b) 50%,#2b2118);font-size:11px}.ivory-block ul,.plain-list{margin:6px 0 0;padding-left:18px}.ivory-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}`
+  },
+  {
+    templateId: 8,
+    name: 'Clean Columns',
+    htmlLayout: `<div class="columns-resume">
+  <aside class="columns-side">
+    <section class="side-card" data-section="CONTACT">
+      <h1>{{fullName}}</h1>
+      <p>{{jobTitle}}</p>
+      <div>{{email}}</div>
+      <div>{{phone}}</div>
+      <div>{{location}}</div>
+      <div>{{linkedin}}</div>
+    </section>
+
+    <section class="side-card skills" data-section="SKILLS">
+      <h2>Skills</h2>
+      <ul>{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
+    </section>
+
+    <section class="side-card certifications" data-section="CERTIFICATIONS">
+      <h2>Certifications</h2>
+      <ul>{{#certifications}}<li>{{name}}</li>{{/certifications}}</ul>
+    </section>
+  </aside>
+
+  <main class="columns-main">
+    <section class="main-card summary" data-section="SUMMARY">
+      <h2>Summary</h2>
+      <p>{{{summary}}}</p>
+    </section>
+
+    <section class="main-card experience" data-section="EXPERIENCE">
+      <h2>Experience</h2>
+      {{#experience}}
+      <article class="entry">
+        <div class="entry-top">
+          <strong>{{role}}</strong>
+          <span>{{startDate}} - {{endDate}}</span>
+        </div>
+        <div class="entry-sub">{{company}}</div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </article>
+      {{/experience}}
+    </section>
+
+    <section class="main-card education" data-section="EDUCATION">
+      <h2>Education</h2>
+      {{#education}}
+      <article class="entry">
+        <div class="entry-top">
+          <strong>{{degree}}</strong>
+          <span>{{startYear}} - {{endYear}}</span>
+        </div>
+        <div class="entry-sub">{{institution}}</div>
+      </article>
+      {{/education}}
+    </section>
+
+    <section class="main-card projects" data-section="PROJECTS">
+      <h2>Projects</h2>
+      {{#projects}}
+      <article class="entry">
+        <div class="entry-top">
+          <strong>{{title}}</strong>
+          <span>{{dates}}</span>
+        </div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </article>
+      {{/projects}}
+    </section>
+  </main>
+</div>`,
+    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#0f172a;font-family:"Segoe UI",Arial,sans-serif}.columns-resume{display:grid;grid-template-columns:220px 1fr;max-width:860px;margin:0 auto;background:#fff}.columns-side{background:#f8fafc;border-right:1px solid #dbe3ea;padding:28px 20px}.columns-main{padding:28px 30px}.side-card,.main-card{margin-bottom:22px}.side-card h1{margin:0 0 4px;font-size:24px}.side-card p{margin:0 0 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#475569}.side-card h2,.main-card h2{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--primary,#0f766e)}.side-card ul,.main-card ul{margin:6px 0 0;padding-left:18px}.side-card li,.main-card li,.side-card div,.main-card p,.entry-sub,.entry span{font-size:11.5px}.entry{margin-bottom:12px}.entry-top{display:flex;justify-content:space-between;gap:12px}.entry-sub{margin-top:2px;color:#475569}.entry span{color:#64748b}.main-card{padding-bottom:14px;border-bottom:1px solid #e2e8f0}`
+  },
+  {
+    templateId: 9,
+    name: 'Minimal Mono',
+    htmlLayout: `<div class="mono-resume">
+  <header class="mono-header" data-section="CONTACT">
+    <div>
+      <h1>{{fullName}}</h1>
+      <p>{{jobTitle}}</p>
+    </div>
+    <div class="mono-contact">
+      <span>{{email}}</span>
+      <span>{{phone}}</span>
+      <span>{{location}}</span>
+    </div>
+  </header>
+
+  <section class="mono-section summary" data-section="SUMMARY">
+    <h2>Summary</h2>
+    <p>{{{summary}}}</p>
+  </section>
+
+  <section class="mono-section skills" data-section="SKILLS">
+    <h2>Skills</h2>
+    <div class="mono-tags">{{#skills}}<span>{{name}}</span>{{/skills}}</div>
+  </section>
+
+  <section class="mono-section experience" data-section="EXPERIENCE">
+    <h2>Experience</h2>
+    {{#experience}}
+    <article class="mono-item">
+      <div class="mono-top"><strong>{{role}} / {{company}}</strong><span>{{startDate}} - {{endDate}}</span></div>
+      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+    </article>
+    {{/experience}}
+  </section>
+
+  <div class="mono-grid">
+    <section class="mono-section education" data-section="EDUCATION">
+      <h2>Education</h2>
+      {{#education}}
+      <article class="mono-item">
+        <div class="mono-top"><strong>{{degree}}</strong><span>{{startYear}} - {{endYear}}</span></div>
+        <div>{{institution}}</div>
+      </article>
+      {{/education}}
+    </section>
+
+    <section class="mono-section projects" data-section="PROJECTS">
+      <h2>Projects</h2>
+      {{#projects}}
+      <article class="mono-item">
+        <div class="mono-top"><strong>{{title}}</strong><span>{{dates}}</span></div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </article>
+      {{/projects}}
+    </section>
+  </div>
+</div>`,
+    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111827;font-family:"Courier New",monospace}.mono-resume{max-width:840px;margin:0 auto;padding:34px;background:#fff}.mono-header{display:flex;justify-content:space-between;gap:18px;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--primary,#111827)}.mono-header h1{margin:0;font-size:28px;letter-spacing:.06em}.mono-header p{margin:6px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:#4b5563}.mono-contact{display:flex;flex-direction:column;gap:4px;font-size:11px;text-align:right;color:#374151}.mono-section{margin-bottom:20px}.mono-section h2{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--primary,#111827);background:color-mix(in srgb,var(--primary,#111827) 8%,transparent);padding:6px 8px}.mono-tags{display:flex;flex-wrap:wrap;gap:8px}.mono-tags span{border:1px solid color-mix(in srgb,var(--primary,#111827) 30%,transparent);padding:4px 8px;font-size:11px}.mono-item{margin-bottom:12px}.mono-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}.mono-top span{font-size:11px;color:#6b7280}.mono-item div,.mono-item li,.mono-section p{font-size:11.5px}.mono-item ul{margin:4px 0 0;padding-left:18px}.mono-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}`
   }
 ];
 

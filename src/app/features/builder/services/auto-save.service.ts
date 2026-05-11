@@ -4,6 +4,7 @@ import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
 import { ResumeSection, UpdateSectionRequest } from '../../../shared/models/models';
 import { SectionApiService } from './section-api.service';
 import { BuilderStateService } from './builder-state.service';
+import { ResumeApiService } from '../../resume/services/resume-api.service';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -15,8 +16,10 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export class AutoSaveService {
   private sectionApi = inject(SectionApiService);
   private builderState = inject(BuilderStateService);
+  private resumeApi = inject(ResumeApiService);
 
   private saveQueue$ = new Subject<{ sectionId: number; payload: UpdateSectionRequest }>();
+  private resumeSaveQueue$ = new Subject<{ resumeId: number; customizations: string }>();
   private statusSubject = new BehaviorSubject<SaveStatus>('idle');
   private lastSavedSubject = new BehaviorSubject<Date | null>(null);
 
@@ -55,6 +58,23 @@ export class AutoSaveService {
       this.statusSubject.next('saved');
       this.lastSavedSubject.next(new Date());
     });
+
+    this.resumeSaveQueue$.pipe(
+      tap(() => this.statusSubject.next('saving')),
+      debounceTime(1000),
+      switchMap(({ resumeId, customizations }) =>
+        this.resumeApi.update(resumeId, { customizations }).pipe(
+          catchError(() => {
+            this.statusSubject.next('error');
+            return EMPTY;
+          })
+        )
+      )
+    ).subscribe(updatedResume => {
+      this.builderState.setResume(updatedResume);
+      this.statusSubject.next('saved');
+      this.lastSavedSubject.next(new Date());
+    });
   }
 
   /**
@@ -65,6 +85,16 @@ export class AutoSaveService {
    */
   queueSave(sectionId: number, payload: UpdateSectionRequest): void {
     this.saveQueue$.next({ sectionId, payload });
+  }
+
+  /**
+   * Pushes a resume customizations update into the auto-save queue.
+   * If multiple saves are queued within 1 second, only the final one is executed (debounced).
+   * @param resumeId The ID of the resume to update
+   * @param customizations The JSON string containing styling customizations
+   */
+  queueResumeCustomizations(resumeId: number, customizations: string): void {
+    this.resumeSaveQueue$.next({ resumeId, customizations });
   }
 
   /**

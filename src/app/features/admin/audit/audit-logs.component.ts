@@ -15,6 +15,7 @@ export interface AuditLog {
   afterState: string | null;
   ipAddress: string;
   timestamp: string;
+  entityName?: string;
 }
 
 type ActionCategory = 'ALL' | 'USER' | 'TEMPLATE' | 'RESUME' | 'SUBSCRIPTION' | 'AUTH';
@@ -108,11 +109,10 @@ type ActionCategory = 'ALL' | 'USER' | 'TEMPLATE' | 'RESUME' | 'SUBSCRIPTION' | 
                     </span>
                   </td>
 
-                  <!-- Entity -->
                   <td>
                     <div class="entity-cell">
                       <span class="entity-type">{{ log.entityType }}</span>
-                      <span class="entity-id">#{{ log.entityId }}</span>
+                      <span class="entity-id">{{ log.entityName || '#' + log.entityId }}</span>
                     </div>
                   </td>
 
@@ -293,9 +293,30 @@ export class AuditLogsComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.adminApi.getAuditLogs().subscribe({
-      next:  l  => { this.logs = l; this.applyFilter(); this.loading = false; },
-      error: () => { this.logs = []; this.filtered = []; this.loading = false; }
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin({
+        logs: this.adminApi.getAuditLogs(),
+        users: this.adminApi.getAllUsers()
+      }).subscribe({
+        next: ({ logs, users }) => {
+          this.logs = logs.map(l => {
+            if (l.entityType === 'USER' && l.entityId) {
+              const userMatch = users.find(u => u.userId.toString() === l.entityId.toString());
+              if (userMatch) {
+                return { ...l, entityName: userMatch.username };
+              }
+            }
+            return l;
+          });
+          this.applyFilter();
+          this.loading = false;
+        },
+        error: () => {
+          this.logs = [];
+          this.filtered = [];
+          this.loading = false;
+        }
+      });
     });
   }
 

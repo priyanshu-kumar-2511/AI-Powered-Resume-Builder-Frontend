@@ -41,11 +41,11 @@ export interface PlatformAnalytics {
 }
 
 export interface AiUsageStats {
-  totalTokensUsed: number;
-  totalCostEstimate: number;
+  totalAiCalls: number;
+  totalTokensUsed: number; // Keep for fallback, will be 0
+  totalCostEstimate: number; // Keep for fallback, will be 0
   callsByModel: Record<string, number>;
-  tokensByModel: Record<string, number>;
-  topUsersByUsage: { userId: number; username: string; tokensUsed: number }[];
+  topUsersByUsage: { userId: string; username: string; callCount: number }[];
 }
 
 export interface UserDetailStats {
@@ -133,6 +133,13 @@ export class AdminApiService {
   /** Re-activate a previously deactivated template by updating it */
   activateTemplate(id: number): Observable<AdminTemplate> {
     return this.http.put<AdminTemplate>(`${API_BASE}/templates/${id}`, { isActive: true });
+  }
+
+  /** Extract template HTML/CSS and Thumbnail from an uploaded PDF resume */
+  extractTemplateFromPdf(file: File): Observable<{ thumbnailUrl: string, htmlLayout: string, cssStyles: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ thumbnailUrl: string, htmlLayout: string, cssStyles: string }>(`${API_BASE}/ai/templates/extract-from-pdf`, formData);
   }
 
   // ── Analytics ────────────────────────────────────────────────────────────

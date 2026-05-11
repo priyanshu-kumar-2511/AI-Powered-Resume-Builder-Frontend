@@ -105,6 +105,21 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
                   </select>
                 </div>
               </div>
+              <!-- AI Auto-extraction -->
+              <div class="form-row">
+                <label class="form-label">Auto-Extract via AI (Optional)</label>
+                <div class="ai-upload-box" [class.extracting]="aiExtracting">
+                  @if (aiExtracting) {
+                    <div class="ai-loader">🤖 AI is scanning PDF and writing HTML...</div>
+                  } @else {
+                    <input type="file" accept="application/pdf" (change)="onPdfUpload($event)" id="pdf-upload" class="hidden-input">
+                    <label for="pdf-upload" class="upload-label">
+                      <span>📄 Upload PDF Resume to Auto-Fill Template</span>
+                    </label>
+                  }
+                </div>
+              </div>
+
               <div class="form-row">
                 <label class="form-label">Thumbnail URL</label>
                 <input class="form-input" [(ngModel)]="form.thumbnailUrl" placeholder="https://…">
@@ -204,6 +219,13 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
 
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-surface); border: 1px solid var(--teal); color: var(--teal); padding: 12px 24px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; z-index: 2000; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
     .toast.toast-err { border-color: #ef4444; color: #f87171; }
+
+    .ai-upload-box { background: rgba(0,212,180,0.05); border: 1px dashed rgba(0,212,180,0.4); border-radius: 8px; padding: 16px; text-align: center; transition: all 0.2s; }
+    .ai-upload-box:hover:not(.extracting) { background: rgba(0,212,180,0.1); border-color: var(--teal); }
+    .hidden-input { display: none; }
+    .upload-label { cursor: pointer; color: var(--teal); font-size: 0.85rem; font-weight: 600; display: block; width: 100%; }
+    .ai-loader { color: var(--gold); font-size: 0.85rem; font-weight: 600; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
   `]
 })
 export class AdminTemplatesComponent implements OnInit {
@@ -218,6 +240,7 @@ export class AdminTemplatesComponent implements OnInit {
   editTarget:  AdminTemplate | null = null;
   toast        = '';
   toastErr     = false;
+  aiExtracting = false;
 
   form: TemplateCreateRequest & { thumbnailUrl?: string } = this.blankForm();
 
@@ -238,7 +261,38 @@ export class AdminTemplatesComponent implements OnInit {
     this.formError = '';
     this.showForm = true;
   }
-  closeForm(): void { this.showForm = false; }
+  closeForm(): void { this.showForm = false; this.aiExtracting = false; }
+
+  onPdfUpload(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      this.formError = 'Please upload a valid PDF file.';
+      return;
+    }
+
+    this.aiExtracting = true;
+    this.formError = '';
+    this.adminApi.extractTemplateFromPdf(file).subscribe({
+      next: (res) => {
+        this.form.thumbnailUrl = res.thumbnailUrl;
+        this.form.htmlLayout = res.htmlLayout;
+        
+        if (res.cssStyles && res.cssStyles.trim().length > 0) {
+          this.form.cssStyles = res.cssStyles;
+        } else if (!this.form.cssStyles) {
+          this.form.cssStyles = "body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; }";
+        }
+        
+        this.aiExtracting = false;
+        this.showToast('AI template extraction complete!');
+      },
+      error: () => {
+        this.aiExtracting = false;
+        this.formError = 'Failed to extract template from PDF. Please check the AI service logs.';
+      }
+    });
+  }
 
   saveForm(): void {
     if (!this.form.name || !this.form.htmlLayout || !this.form.cssStyles) {

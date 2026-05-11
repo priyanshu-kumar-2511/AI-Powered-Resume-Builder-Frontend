@@ -92,12 +92,20 @@ export class BuilderStateService {
 
   // ── Resume ────────────────────────────────────────────────────────────────
   
-  /**
-   * Sets the core resume metadata.
-   * @param resume The resume object or null
-   */
   setResume(resume: Resume | null): void {
     this.resumeSubject.next(resume);
+    if (resume?.customizations) {
+      try {
+        const parsed = JSON.parse(resume.customizations);
+        this.fontSubject.next({
+          fontSize: parsed.fontSize ?? this.defaultPreviewStyle.fontSize,
+          fontFamily: parsed.fontFamily ?? this.defaultPreviewStyle.fontFamily,
+          primaryColor: parsed.primaryColor ?? this.defaultPreviewStyle.primaryColor
+        });
+      } catch (e) {
+        console.error('Failed to parse customizations from resume:', e);
+      }
+    }
   }
 
   // ── User Profile ──────────────────────────────────────────────────────────

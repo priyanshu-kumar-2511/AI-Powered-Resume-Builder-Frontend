@@ -101,4 +101,14 @@ export class ResumeApiService {
   incrementViewCount(resumeId: number): Observable<void> {
     return this.http.put<void>(`${RESUME_API}/${resumeId}/view-count`, {});
   }
+
+  /**
+   * Updates the ATS score of a specific resume.
+   * @param resumeId The ID of the resume
+   * @param atsScore The new ATS score
+   * @returns Observable with the updated Resume
+   */
+  updateAtsScore(resumeId: number, atsScore: number): Observable<Resume> {
+    return this.http.put<Resume>(`${RESUME_API}/${resumeId}/ats-score`, { atsScore });
+  }
 }

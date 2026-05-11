@@ -83,11 +83,18 @@
       </div>
     }
 
-    @if (actionMessage) {
-      <div class="alert" [class]="actionMessage.includes('wrong') || actionMessage.includes('failed') ? 'alert-error' : 'alert-success'">
-        {{ actionMessage }}
-      </div>
-    }
+    <!-- Floating Premium Toast Notifications -->
+    <div class="toast-container">
+      @if (actionMessage) {
+        <div class="toast-card" [class]="actionMessage.includes('wrong') || actionMessage.includes('failed') ? 'toast-error' : 'toast-success'">
+          <div class="toast-icon">
+            {{ actionMessage.includes('wrong') || actionMessage.includes('failed') ? '⚠️' : '✓' }}
+          </div>
+          <div class="toast-content">{{ actionMessage }}</div>
+          <button class="toast-close" (click)="actionMessage = ''">&times;</button>
+        </div>
+      }
+    </div>
 
     @if (loading) {
       <div class="grid-3">
@@ -125,6 +132,7 @@
             (duplicate)="duplicateResume($event)"
             (publish)="togglePublish($event)"
             (unpublish)="togglePublish($event)"
+            (toggleStatus)="toggleResumeStatus($event)"
             (delete)="deleteResume($event)" />
         }
       </div>
@@ -272,5 +280,88 @@
 @media (max-width: 600px) {
   .stats-row { grid-template-columns: 1fr 1fr; }
   .hero-title { font-size: 1.9rem; }
+}
+
+/* Floating Toast Notification Styles */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 420px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.toast-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-content {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 0;
+  margin-left: 8px;
+  font-family: Arial, sans-serif;
+}
+.toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>

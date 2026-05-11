@@ -134,10 +134,42 @@ export class TranslateResumeComponent {
       targetLanguage: this.targetLanguage,
       existingContent: this.resumeContent
     }).subscribe({
-      next: res => {
-        this.loading  = false;
-        this.success  = true;
-        this.translationCreated.emit(res.content ?? '');
+      next: (res: any) => {
+        if (res && res.status === 'QUEUED') {
+          const startTime = new Date().getTime();
+          
+          const pollInterval = setInterval(() => {
+            this.aiApi.getHistory(userId).subscribe({
+              next: history => {
+                const latest = history.find(h => 
+                  h.requestType === 'TRANSLATE_RESUME' && 
+                  new Date(h.timestamp).getTime() > startTime - 5000
+                );
+                if (latest && latest.response) {
+                  clearInterval(pollInterval);
+                  this.loading  = false;
+                  this.success  = true;
+                  this.translationCreated.emit(latest.response);
+                }
+              },
+              error: () => {}
+            });
+          }, 3000);
+
+          // Timeout after 60 seconds
+          setTimeout(() => {
+            clearInterval(pollInterval);
+            if (this.loading) {
+              this.error = 'Background translation took too long. Please check your history panel later.';
+              this.loading = false;
+            }
+          }, 60000);
+
+        } else {
+          this.loading  = false;
+          this.success  = true;
+          this.translationCreated.emit(res.content ?? '');
+        }
       },
       error: err => {
         this.error   = err?.error?.message ?? 'Translation failed. Please try again.';

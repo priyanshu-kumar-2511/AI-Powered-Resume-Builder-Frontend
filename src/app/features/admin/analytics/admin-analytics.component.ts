@@ -104,17 +104,13 @@ import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/ad
             AI Engine Performance
           </div>
           <div class="stats-row">
-            <div class="kpi kpi-purple">
-              <div class="kpi-val">{{ ai.totalTokensUsed | number }}</div>
-              <div class="kpi-label">Total Tokens</div>
-            </div>
-            <div class="kpi kpi-yellow">
-              <div class="kpi-val">$ {{ ai.totalCostEstimate.toFixed(2) }}</div>
-              <div class="kpi-label">Est. Cost</div>
+            <div class="kpi kpi-blue">
+              <div class="kpi-val">{{ ai.totalAiCalls | number }}</div>
+              <div class="kpi-label">Total AI Calls Made</div>
             </div>
           </div>
 
-          <div class="two-col-stats">
+          <div class="one-col-stats">
             <div>
               <div class="sub-title">Calls by Model</div>
               @for (entry of modelCallEntries; track entry.key) {
@@ -127,22 +123,10 @@ import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/ad
                 </div>
               }
             </div>
-            <div>
-              <div class="sub-title">Tokens by Model</div>
-              @for (entry of modelTokenEntries; track entry.key) {
-                <div class="bar-row">
-                  <span class="bar-label">{{ entry.key }}</span>
-                  <div class="bar-track">
-                    <div class="bar-fill bar-fill-yellow" [style.width.%]="barPct(entry.value, maxModelToken)"></div>
-                  </div>
-                  <span class="bar-count">{{ entry.value | number }}</span>
-                </div>
-              }
-            </div>
           </div>
 
           <!-- Usage Graph -->
-          <div class="sub-title" style="margin-top:20px">AI Activity Trend (Last 7 Days)</div>
+          <div class="sub-title" style="margin-top:20px">AI Activity Trend (Last 7 Days - Calls)</div>
           <div class="graph-wrap">
             <svg viewBox="0 0 400 150" class="trend-svg">
               <!-- Grid lines -->
@@ -166,21 +150,21 @@ import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/ad
               @for (p of chartPoints; track p.x) {
                 <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" fill="#8b5cf6" stroke="#111520" stroke-width="2" />
               }
-
+ 
               <!-- Labels -->
               @for (p of chartPoints; track p.x) {
                 <text [attr.x]="p.x" y="145" text-anchor="middle" class="chart-text">{{ p.label }}</text>
               }
             </svg>
           </div>
-
-          <div class="sub-title" style="margin-top:20px">Top Users by Token Usage</div>
+ 
+          <div class="sub-title" style="margin-top:20px">Top Users by Activity</div>
           <div class="user-rank-list">
             @for (u of ai.topUsersByUsage.slice(0,10); track u.userId; let i = $index) {
               <div class="user-rank-row">
                 <span class="rank-num">{{ i + 1 }}</span>
                 <span class="rank-name">{{ u.username }}</span>
-                <span class="rank-count">{{ u.tokensUsed | number }} tokens</span>
+                <span class="rank-count">{{ u.callCount | number }} calls</span>
               </div>
             }
           </div>
@@ -250,40 +234,57 @@ export class AdminAnalyticsComponent implements OnInit {
   get exportEntries() { return Object.entries(this.platform?.exportsByFormat ?? {}).map(([key,value]) => ({key, value})); }
   get maxExport()     { return Math.max(1, ...Object.values(this.platform?.exportsByFormat ?? {})); }
   get modelCallEntries() { return Object.entries(this.ai?.callsByModel ?? {}).map(([key,value]) => ({key, value})); }
-  get modelTokenEntries(){ return Object.entries(this.ai?.tokensByModel ?? {}).map(([key,value]) => ({key, value})); }
   get maxModelCall()  { return Math.max(1, ...Object.values(this.ai?.callsByModel ?? {})); }
-  get maxModelToken() { return Math.max(1, ...Object.values(this.ai?.tokensByModel ?? {})); }
-
+ 
   ngOnInit(): void {
     this.adminApi.getPlatformAnalytics().subscribe({
       next:  p  => { this.platform = p; this.loadingPlatform = false; },
       error: () => this.loadingPlatform = false
     });
-    this.adminApi.getAiUsageStats().subscribe({
-      next:  a  => { this.ai = a; this.loadingAi = false; this.generateChartData(); },
-      error: () => this.loadingAi = false
+    
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin({
+        aiStats: this.adminApi.getAiUsageStats(),
+        users: this.adminApi.getAllUsers()
+      }).subscribe({
+        next: ({ aiStats, users }) => {
+          if (aiStats.topUsersByUsage) {
+            aiStats.topUsersByUsage = aiStats.topUsersByUsage.map(u => {
+              const userMatch = users.find(user => user.userId.toString() === u.userId?.toString());
+              return {
+                ...u,
+                username: userMatch ? userMatch.username : `User ${u.userId}`
+              };
+            });
+          }
+          this.ai = aiStats; 
+          this.loadingAi = false; 
+          this.generateChartData();
+        },
+        error: () => this.loadingAi = false
+      });
     });
   }
-
+ 
   // ── Chart Logic ──────────────────────────────────────────────────────────
   
   chartPoints: {x: number, y: number, label: string}[] = [];
   chartLinePath = '';
   chartAreaPath = '';
-
+ 
   private generateChartData(): void {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // Mock daily usage values based on total tokens
-    const base = (this.ai?.totalTokensUsed ?? 5000) / 10;
+    // Mock daily usage values based on total calls
+    const base = (this.ai?.totalAiCalls ?? 100) / 7;
     const values = [base*0.8, base*1.2, base*0.9, base*1.5, base*1.1, base*0.7, base*1.3];
-    const maxVal = Math.max(...values, 100);
+    const maxVal = Math.max(...values, 10);
     
     this.chartPoints = values.map((v, i) => ({
       x: (i * (400 / 6)),
       y: 130 - (v / maxVal * 100),
       label: days[i]
     }));
-
+ 
     this.chartLinePath = 'M' + this.chartPoints.map(p => `${p.x},${p.y}`).join(' L');
     this.chartAreaPath = this.chartLinePath + ` L400,130 L0,130 Z`;
   }

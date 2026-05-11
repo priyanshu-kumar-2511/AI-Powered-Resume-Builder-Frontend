@@ -9,6 +9,7 @@ export interface RegisterRequest {
   email: string;
   username: string;
   password: string;
+  otp?: string;
 }
 
 /**
@@ -125,6 +126,7 @@ export interface Resume {
   viewCount: number;
   createdAt: string;
   updatedAt: string;
+  customizations?: string;
 }
 
 export interface CreateResumeRequest {
@@ -141,6 +143,7 @@ export interface UpdateResumeRequest {
   language?: string;
   templateId?: number | null;
   status?: ResumeStatus;
+  customizations?: string;
 }
 
 // ── Misc ──────────────────────────────────────────────────────────────────────

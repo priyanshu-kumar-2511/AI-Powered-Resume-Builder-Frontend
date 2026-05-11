@@ -113,7 +113,7 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
 
   duplicateResume(resume: Resume): void {
     if (this.freePlanLimitReached) {
-      this.actionMessage = 'Free plan users can keep up to 3 resumes. Upgrade to duplicate more.';
+      this.showActionMessage('Free plan users can keep up to 3 resumes. Upgrade to duplicate more.');
       return;
     }
 
@@ -122,7 +122,7 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
       this.resumeApi.duplicate(resume.resumeId),
       (createdResume) => {
         this.resumeState.add(createdResume);
-        this.actionMessage = `"${resume.title}" duplicated successfully.`;
+        this.showActionMessage(`"${resume.title}" duplicated successfully.`);
       }
     );
   }
@@ -137,9 +137,11 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
       request$,
       (updatedResume) => {
         this.resumeState.update(updatedResume);
-        this.actionMessage = resume.isPublic
-          ? `"${resume.title}" has been removed from the public gallery.`
-          : `"${resume.title}" is now visible in the public gallery.`;
+        this.showActionMessage(
+          resume.isPublic
+            ? `"${resume.title}" has been removed from the public gallery.`
+            : `"${resume.title}" is now visible in the public gallery.`
+        );
       }
     );
   }
@@ -151,7 +153,7 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.busyResumeId = resume.resumeId;
-    this.actionMessage = '';
+    this.showActionMessage('');
 
     this.resumeApi.delete(resume.resumeId)
       .pipe(takeUntil(this.destroy$))
@@ -159,11 +161,11 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
         next: () => {
           this.resumeState.remove(resume.resumeId);
           this.busyResumeId = null;
-          this.actionMessage = `"${resume.title}" has been deleted.`;
+          this.showActionMessage(`"${resume.title}" has been deleted.`);
         },
         error: () => {
           this.busyResumeId = null;
-          this.actionMessage = 'Delete failed. Please try again.';
+          this.showActionMessage('Delete failed. Please try again.');
         }
       });
   }
@@ -172,13 +174,33 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
     return templateId ? (this.templateMap.get(templateId) ?? null) : null;
   }
 
+  toggleResumeStatus(resume: Resume): void {
+    const nextStatus = resume.status === 'COMPLETE' ? 'DRAFT' : 'COMPLETE';
+    this.busyResumeId = resume.resumeId;
+    this.showActionMessage('');
+
+    this.resumeApi.update(resume.resumeId, { status: nextStatus })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedResume) => {
+          this.resumeState.update(updatedResume);
+          this.busyResumeId = null;
+          this.showActionMessage(`"${resume.title}" marked as ${nextStatus === 'COMPLETE' ? 'complete' : 'draft'} successfully.`);
+        },
+        error: () => {
+          this.busyResumeId = null;
+          this.showActionMessage('Something went wrong. Please try again.');
+        }
+      });
+  }
+
   private runAction(
     resumeId: number,
     request$: ReturnType<ResumeApiService['duplicate']>,
     onSuccess: (resume: Resume) => void
   ): void {
     this.busyResumeId = resumeId;
-    this.actionMessage = '';
+    this.showActionMessage('');
 
     request$
       .pipe(takeUntil(this.destroy$))
@@ -189,8 +211,22 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.busyResumeId = null;
-          this.actionMessage = 'Something went wrong. Please try again.';
+          this.showActionMessage('Something went wrong. Please try again.');
         }
       });
+  }
+
+  private messageTimeout: any;
+
+  showActionMessage(message: string): void {
+    this.actionMessage = message;
+    if (this.messageTimeout) {
+      clearTimeout(this.messageTimeout);
+    }
+    if (message) {
+      this.messageTimeout = setTimeout(() => {
+        this.actionMessage = '';
+      }, 4000);
+    }
   }
 }

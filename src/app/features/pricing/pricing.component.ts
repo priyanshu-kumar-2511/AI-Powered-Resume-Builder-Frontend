@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, NgZone } from '@angular/core';
 import { CommonModule }   from '@angular/common';
-import { Router }         from '@angular/router';
+import { FormsModule }    from '@angular/forms';
+import { Router, ActivatedRoute }         from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { PaymentService, BillingCycle, CreateOrderResponse } from '../../core/services/payment.service';
 import { AuthService }    from '../../core/services/auth.service';
@@ -11,7 +12,7 @@ declare const Razorpay: new (options: object) => { open(): void };
 @Component({
   selector: 'app-pricing',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, FormsModule],
   template: `
     <app-navbar />
 
@@ -111,6 +112,8 @@ declare const Razorpay: new (options: object) => { open(): void };
           }
         </div>
       </div>
+
+
 
       <!-- Trust Badges -->
       <div class="trust-strip">
@@ -366,21 +369,89 @@ declare const Razorpay: new (options: object) => { open(): void };
       .faq-grid { grid-template-columns: 1fr; }
       .plans-grid { gap: 16px; }
     }
+
+    /* UPI Custom Dialog */
+    .upi-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    .upi-dialog {
+      background: #1a1f2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 32px 28px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+    .upi-dialog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .upi-logo { height: 32px; object-fit: contain; }
+    .upi-close { background: none; border: none; color: rgba(255,255,255,0.4); font-size: 1.2rem; cursor: pointer; padding: 4px; }
+    .upi-close:hover { color: #fff; }
+    .upi-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin: 0 0 6px; }
+    .upi-sub { color: rgba(255,255,255,0.45); font-size: 0.85rem; margin: 0 0 24px; }
+    .upi-input-wrap { margin-bottom: 8px; }
+    .upi-input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 14px 16px;
+      color: #fff; font-size: 1rem; font-family: 'Outfit', sans-serif;
+      outline: none; transition: border 0.2s;
+    }
+    .upi-input:focus { border-color: #00d4b4; }
+    .upi-input::placeholder { color: rgba(255,255,255,0.25); }
+    .upi-test-hint { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin: 8px 0 16px; }
+    .upi-code {
+      color: #00d4b4; font-weight: 600; cursor: pointer; text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .upi-pay-btn {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #00d4b4, #00b89c);
+      color: #000; font-size: 1rem; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: all 0.2s; margin-top: 16px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .upi-pay-btn:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(0,212,180,0.35); transform: translateY(-1px); }
+    .upi-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .upi-or { text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; margin: 20px 0 12px; }
+    .upi-alt-btn {
+      width: 100%; padding: 11px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6); font-size: 0.9rem;
+      border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .upi-alt-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
   `]
 })
 export class PricingComponent implements OnInit {
   private paymentSvc = inject(PaymentService);
   private authSvc    = inject(AuthService);
   private router     = inject(Router);
+  private ngZone     = inject(NgZone);
+  private route      = inject(ActivatedRoute);
 
   cycle: BillingCycle = 'MONTHLY';
   currentPlan: 'FREE' | 'PREMIUM' = 'FREE';
-  loading  = false;
-  errorMsg = '';
+  loading     = false;
+  errorMsg    = '';
   paymentHint = '';
+  returnUrl   = '/dashboard';
+  private pendingOrder: CreateOrderResponse | null = null;
 
   ngOnInit(): void {
     this.currentPlan = this.authSvc.getCurrentPlan();
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      }
+    });
   }
 
   setCycle(c: BillingCycle): void { this.cycle = c; }
@@ -404,11 +475,8 @@ export class PricingComponent implements OnInit {
     });
   }
 
-  private openRazorpay(order: CreateOrderResponse): void {
-    this.paymentHint = this.buildPaymentHint(order.keyId);
-    this.prepareTestUpiShortcut(order.keyId);
-
-    const options = {
+  private openRazorpayWithUpi(order: CreateOrderResponse, upiId: string): void {
+    const options: Record<string, unknown> = {
       key:         order.keyId,
       amount:      order.amountInPaise,
       currency:    order.currency,
@@ -416,11 +484,84 @@ export class PricingComponent implements OnInit {
       description: `Premium ${order.billingCycle === 'YEARLY' ? 'Yearly' : 'Monthly'} Plan`,
       order_id:    order.orderId,
       theme:       { color: '#00d4b4' },
+      prefill: {
+        method: 'upi',
+        vpa:    upiId
+      },
       handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
-        this.verifyPayment(response, order.billingCycle);
+        this.ngZone.run(() => {
+          this.verifyPayment(response, order.billingCycle);
+        });
       },
       modal: {
-        ondismiss: () => { this.loading = false; }
+        ondismiss: () => {
+          this.ngZone.run(() => {
+            this.loading = false;
+          });
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  }
+
+  private openRazorpay(order: CreateOrderResponse): void {
+    this.paymentHint = this.buildPaymentHint(order.keyId);
+    this.prepareTestUpiShortcut(order.keyId);
+
+    const isTestMode = order.keyId.startsWith('rzp_test_');
+
+    const options: Record<string, unknown> = {
+      key:         order.keyId,
+      amount:      order.amountInPaise,
+      currency:    order.currency,
+      name:        'ResumeAI',
+      description: `Premium ${order.billingCycle === 'YEARLY' ? 'Yearly' : 'Monthly'} Plan`,
+      order_id:    order.orderId,
+      theme:       { color: '#00d4b4' },
+      prefill: {
+        method: 'upi',
+        vpa:    isTestMode ? 'success@razorpay' : '',
+        contact: '',
+        email:   ''
+      },
+      config: {
+        display: {
+          blocks: {
+            upi_id: {
+              name: 'UPI ID / VPA',
+              instruments: [{
+                method: 'upi',
+                flows: ['collect']
+              }]
+            },
+            other: {
+              name: 'Other Methods',
+              instruments: [
+                { method: 'card' },
+                { method: 'netbanking' },
+                { method: 'wallet' }
+              ]
+            }
+          },
+          sequence: ['block.upi_id', 'block.other'],
+          preferences: {
+            show_default_blocks: true
+          }
+        }
+      },
+      handler: (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+        this.ngZone.run(() => {
+          this.verifyPayment(response, order.billingCycle);
+        });
+      },
+      modal: {
+        ondismiss: () => {
+          this.ngZone.run(() => {
+            this.loading = false;
+          });
+        }
       }
     };
 
@@ -446,10 +587,11 @@ export class PricingComponent implements OnInit {
       next: (res) => {
         this.loading = false;
         if (res.success) {
-          this.authSvc.refreshTokenFromPayment(res.newToken);
           this.currentPlan = 'PREMIUM';
-          this.router.navigate(['/dashboard'], {
-            queryParams: { upgraded: 'true', source: 'simulated-payment' }
+          this.authSvc.refreshTokenFromPayment(res.newToken).subscribe(() => {
+            this.router.navigate([this.returnUrl], {
+              queryParams: { upgraded: 'true', source: 'simulated-payment' }
+            });
           });
         } else {
           this.errorMsg = res.message || 'Simulated payment failed.';
@@ -480,10 +622,12 @@ export class PricingComponent implements OnInit {
         if (res.success) {
           this.errorMsg = '';
           this.paymentHint = '';
-          this.authSvc.refreshTokenFromPayment(res.newToken);
           this.currentPlan = 'PREMIUM';
-          const dashboardUrl = `${window.location.origin}/dashboard?upgraded=true`;
-          window.location.assign(dashboardUrl);
+          this.authSvc.refreshTokenFromPayment(res.newToken).subscribe(() => {
+            this.router.navigate([this.returnUrl], {
+              queryParams: { upgraded: 'true' }
+            });
+          });
         } else {
           this.errorMsg = res.message || 'Payment verification failed.';
         }

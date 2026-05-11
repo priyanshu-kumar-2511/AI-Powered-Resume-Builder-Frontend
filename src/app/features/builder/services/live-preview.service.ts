@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { combineLatest, Subscription } from 'rxjs';
+import { combineLatest, Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Resume, ResumeSection, Template, UserProfileResponse } from '../../../shared/models/models';
 import { TemplateRenderService } from '../../../shared/services/template-render.service';
@@ -20,6 +20,8 @@ type PreviewStyle = {
 export class LivePreviewService implements OnDestroy {
   private builderState = inject(BuilderStateService);
   private templateRenderer = inject(TemplateRenderService);
+
+  readonly afterRender$ = new Subject<void>();
 
   private iframeRef: HTMLIFrameElement | null = null;
   private sub: Subscription | null = null;
@@ -111,6 +113,7 @@ export class LivePreviewService implements OnDestroy {
     doc.open();
     doc.write(html);
     doc.close();
+    this.afterRender$.next();
   }
 
   private buildHtml(
@@ -126,7 +129,8 @@ export class LivePreviewService implements OnDestroy {
       profile,
       resume,
       font,
-      primaryColor: primaryColor ?? font.primaryColor
+      primaryColor: primaryColor ?? font.primaryColor,
+      useDemoData: false
     });
 
     if (renderedTemplate) {
@@ -147,6 +151,7 @@ export class LivePreviewService implements OnDestroy {
     :root {
       --font-family: '${font.fontFamily}', sans-serif;
       --font-size: ${font.fontSize}px;
+      --primary: ${font.primaryColor};
     }
     body {
       font-family: var(--font-family) !important;
