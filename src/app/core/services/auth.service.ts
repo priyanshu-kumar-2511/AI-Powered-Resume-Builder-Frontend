@@ -118,7 +118,8 @@ export class AuthService {
   // ── Auth endpoints ───────────────────────────────────────────────────────────
   
   /**
-   * Initiates user registration (Step 1) by collecting details and sending OTP.
+   * Initiates user registration (Step 1).
+   * Sends user details to backend to trigger an OTP email.
    */
   initiateRegistration(payload: { fullName: string; age: number; mobileNumber: string; email: string }): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${AUTH_API}/register/initiate`, payload);
@@ -141,9 +142,8 @@ export class AuthService {
   }
 
   /**
-   * Authenticates a user and saves the returned JWT token.
-   * @param payload The login credentials (username, password).
-   * @returns An observable emitting the login response (including token).
+   * Authenticates a user and persists the JWT token in local storage.
+   * Updates the global isLoggedIn reactive signal.
    */
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http
@@ -173,8 +173,8 @@ export class AuthService {
   // ── Profile ──────────────────────────────────────────────────────────────────
   
   /**
-   * Fetches the current user's profile from the backend and updates the signal.
-   * @returns An observable emitting the user profile data.
+   * Fetches the full profile of the authenticated user.
+   * If claims (roles/plan) in the token differ from the profile, it triggers an auto-refresh.
    */
   getProfile(): Observable<UserProfileResponse> {
     return this.http
@@ -277,11 +277,10 @@ export class AuthService {
     );
   }
 
-  // ── OAuth2 ───────────────────────────────────────────────────────────────────
+  // ── OAuth2 (Social Login) ────────────────────────────────────────────────────
   /**
-   * Initiates Google OAuth2 login flow by redirecting the browser to the backend OAuth endpoint.
-   * FIX: Backend OAuth2SuccessHandler redirects to /login?token=... not /login-success.
-   * The LoginComponent.ngOnInit() picks up the `token` query param on /login.
+   * Redirects user to Google's consent screen.
+   * Token is received via URL query parameter upon redirect back to /login.
    */
   loginWithGoogle(): void {
     const oauthOrigin = GATEWAY_ORIGIN || window.location.origin;

@@ -2,6 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../services/admin-api.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
+import { TemplateRenderService } from '../../../shared/services/template-render.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-admin-templates',
@@ -29,7 +32,7 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
           @for (t of templates; track t.templateId) {
             <div class="tpl-card" [class.inactive]="!t.isActive">
               <!-- Preview -->
-              <div class="tpl-preview">
+              <div class="tpl-preview" (click)="openPreview(t)" title="Click to preview full size">
                 @if (t.thumbnailUrl) {
                   <img [src]="t.thumbnailUrl" [alt]="t.name" class="tpl-thumb">
                 } @else {
@@ -62,6 +65,9 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
                     Activate
                   </button>
                 }
+                <button class="tpl-btn tpl-btn-danger" (click)="deleteTemplate(t)" [disabled]="busy === t.templateId" title="Delete Template">
+                  🗑️
+                </button>
               </div>
             </div>
           }
@@ -152,6 +158,27 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
       @if (toast) {
         <div class="toast" [class.toast-err]="toastErr">{{ toast }}</div>
       }
+
+      <!-- Full Page Preview Modal -->
+      @if (previewTarget && previewUrl) {
+        <div class="preview-backdrop" (click)="closePreview()">
+          <div class="preview-modal" (click)="$event.stopPropagation()">
+            <div class="preview-header">
+              <div class="header-info">
+                <h2 class="preview-title">{{ previewTarget.name }}</h2>
+                <span class="preview-tag">{{ previewTarget.category }} • {{ previewTarget.tier }}</span>
+              </div>
+              <div class="header-actions">
+                <button class="preview-edit-btn" (click)="openEditFromPreview()">✏️ Edit Layout</button>
+                <button class="preview-close-btn" (click)="closePreview()">✕</button>
+              </div>
+            </div>
+            <div class="preview-frame-container">
+              <iframe [src]="previewUrl" class="preview-iframe"></iframe>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -195,6 +222,8 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
     .tpl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .tpl-btn-warn:hover:not(:disabled) { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
     .tpl-btn-ok:hover:not(:disabled) { background: var(--teal-subtle); border-color: var(--teal); color: var(--teal); }
+    .tpl-btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+    .tpl-btn-danger { flex: 0 0 40px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
 
     /* Modal */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
@@ -226,10 +255,82 @@ import { AdminApiService, AdminTemplate, TemplateCreateRequest } from '../servic
     .upload-label { cursor: pointer; color: var(--teal); font-size: 0.85rem; font-weight: 600; display: block; width: 100%; }
     .ai-loader { color: var(--gold); font-size: 0.85rem; font-weight: 600; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+    /* Preview Modal */
+    .tpl-preview { cursor: zoom-in; }
+    .preview-backdrop { position: fixed; inset: 0; background: radial-gradient(circle at center, rgba(31,41,55,0.95) 0%, rgba(17,24,39,0.98) 100%); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .preview-modal { width: 100%; max-width: 1200px; height: 98vh; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7); animation: scaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
+    .preview-header { background: #1e293b; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+    .header-info { display: flex; flex-direction: column; gap: 4px; }
+    .preview-title { font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; font-family: var(--font-display); letter-spacing: -0.02em; }
+    .preview-tag { font-size: 0.8rem; color: var(--teal); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+    
+    .header-actions { display: flex; gap: 16px; align-items: center; }
+    .preview-edit-btn { background: var(--teal); color: #000; border: none; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,212,180,0.3); }
+    .preview-edit-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,212,180,0.4); }
+    .preview-close-btn { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 14px; font-size: 1.4rem; cursor: pointer; display: grid; place-items: center; transition: all 0.3s; }
+    .preview-close-btn:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: rgba(239,68,68,0.3); transform: rotate(90deg); }
+    
+    .preview-frame-container { 
+      flex: 1; 
+      background: #0f172a; 
+      background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+      overflow: hidden; 
+      padding: 20px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      /* Hide scrollbars for all browsers */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .preview-frame-container::-webkit-scrollbar {
+      display: none;
+    }
+    .preview-iframe { 
+      /* Render at full A4 resolution for perfect layout */
+      width: 210mm; 
+      height: 297mm;
+      /* Visual zoom to fit screen without affecting logical resolution */
+      zoom: 0.65;
+      border: none; 
+      background: #fff; 
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05); 
+      flex-shrink: 0;
+      pointer-events: none;
+      user-select: none;
+      border-radius: 4px;
+      transform-origin: top center;
+    }
+
+    /* Adjust zoom for different screen heights */
+    @media (max-height: 900px) {
+      .preview-iframe { zoom: 0.6; }
+    }
+    @media (max-height: 800px) {
+      .preview-iframe { zoom: 0.55; }
+    }
+    @media (max-height: 700px) {
+      .preview-iframe { zoom: 0.45; }
+    }
+
+    /* Responsive scaling for small screens */
+    @media (max-width: 900px) {
+      .preview-iframe { transform: scale(0.8); }
+    }
+    @media (max-width: 700px) {
+      .preview-iframe { transform: scale(0.6); }
+    }
   `]
 })
 export class AdminTemplatesComponent implements OnInit {
   private adminApi = inject(AdminApiService);
+  private confirmService = inject(ConfirmService);
+  private renderService = inject(TemplateRenderService);
+  private sanitizer = inject(DomSanitizer);
 
   templates:   AdminTemplate[] = [];
   loading      = true;
@@ -241,6 +342,9 @@ export class AdminTemplatesComponent implements OnInit {
   toast        = '';
   toastErr     = false;
   aiExtracting = false;
+
+  previewTarget: AdminTemplate | null = null;
+  previewUrl: SafeResourceUrl | null = null;
 
   form: TemplateCreateRequest & { thumbnailUrl?: string } = this.blankForm();
 
@@ -334,6 +438,135 @@ export class AdminTemplatesComponent implements OnInit {
       next:  () => { t.isActive = true; this.busy = null; this.showToast(`"${t.name}" activated`); },
       error: () => { this.busy = null; this.showToast('Activation failed', true); }
     });
+  }
+
+  async deleteTemplate(t: AdminTemplate): Promise<void> {
+    const confirmed = await this.confirmService.ask({
+      title: 'Delete Template',
+      message: `Are you sure you want to permanently delete "${t.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      type: 'danger'
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    this.busy = t.templateId;
+    this.adminApi.deleteTemplate(t.templateId).subscribe({
+      next: () => {
+        this.templates = this.templates.filter(tpl => tpl.templateId !== t.templateId);
+        this.busy = null;
+        this.showToast(`"${t.name}" deleted permanently`);
+      },
+      error: () => {
+        this.busy = null;
+        this.showToast('Failed to delete template', true);
+      }
+    });
+  }
+
+  openPreview(t: AdminTemplate): void {
+    this.previewTarget = t;
+    const demoData = {
+      personalInfo: {
+        fullName: 'Priyanshu Kumar',
+        jobTitle: 'Senior Full Stack Developer',
+        email: 'priyanshu@example.com',
+        mobileNumber: '+91 9876543210',
+        location: 'Patna, Bihar',
+        linkedin: 'linkedin.com/in/priyanshu',
+        github: 'github.com/priyanshu',
+        website: 'priyanshu.dev'
+      },
+      summary: 'Passionate software engineer with 5+ years of experience in building scalable web applications. Expert in Angular, Node.js, and Cloud architectures.',
+      sections: [
+        {
+          title: 'Experience',
+          sectionType: 'EXPERIENCE',
+          content: JSON.stringify({
+            items: [
+              {
+                title: 'Senior Software Engineer',
+                subtitle: 'Tech Innovators Inc.',
+                startDate: 'Jan 2021',
+                endDate: 'Present',
+                isCurrent: true,
+                bullets: [
+                  'Led a team of 5 developers to build a high-performance analytics dashboard.',
+                  'Optimized database queries reducing latency by 40%.',
+                  'Implemented CI/CD pipelines increasing deployment frequency by 2x.'
+                ]
+              },
+              {
+                title: 'Full Stack Developer',
+                subtitle: 'Creative Solutions',
+                startDate: 'June 2018',
+                endDate: 'Dec 2020',
+                isCurrent: false,
+                bullets: [
+                  'Developed multiple client-facing websites using Angular and Firebase.',
+                  'Integrated third-party APIs for payment processing and messaging.'
+                ]
+              }
+            ]
+          })
+        },
+        {
+          title: 'Education',
+          sectionType: 'EDUCATION',
+          content: JSON.stringify({
+            items: [
+              {
+                title: 'B.Tech in Computer Science',
+                subtitle: 'National Institute of Technology',
+                startDate: '2014',
+                endDate: '2018',
+                isCurrent: false,
+                bullets: ['Graduated with 8.5 CGPA', 'Core Member of Coding Club']
+              }
+            ]
+          })
+        },
+        {
+          title: 'Skills',
+          sectionType: 'SKILLS',
+          content: JSON.stringify({
+            items: [
+              { title: 'Frontend', bullets: ['Angular', 'React', 'TypeScript', 'SCSS'] },
+              { title: 'Backend', bullets: ['Node.js', 'Spring Boot', 'PostgreSQL', 'Redis'] },
+              { title: 'Tools', bullets: ['Docker', 'AWS', 'Git', 'Jenkins'] }
+            ]
+          })
+        }
+      ]
+    };
+
+    let html = this.renderService.renderDocument(t as any, { useDemoData: true });
+    if (!html) return;
+
+    // Inject style to hide scrollbars inside the iframe for a cleaner look
+    html = html.replace('</head>', '<style>body { overflow: hidden !important; }</style></head>');
+
+    const blob = new Blob([html], { type: 'text/html' });
+    this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(blob));
+  }
+
+  closePreview(): void {
+    if (this.previewUrl) {
+      // Clean up URL to avoid memory leaks
+      const url = (this.previewUrl as any).changingThisBreaksApplicationSecurity;
+      if (url) URL.revokeObjectURL(url);
+    }
+    this.previewTarget = null;
+    this.previewUrl = null;
+  }
+
+  openEditFromPreview(): void {
+    if (this.previewTarget) {
+      const t = this.previewTarget;
+      this.closePreview();
+      this.openEdit(t);
+    }
   }
 
   private blankForm(): TemplateCreateRequest {

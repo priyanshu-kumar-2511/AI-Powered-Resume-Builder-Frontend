@@ -73,6 +73,13 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
   // Export modal flag
   showExportModal = false;
 
+  // A4 Warning Dismissal
+  warningDismissed = false;
+
+  dismissWarning(): void {
+    this.warningDismissed = true;
+  }
+
   // ── Font controls (wired to BuilderStateService) ──────────────────────────
 
   get currentFont() { return this.builderState.fontSnapshot; }
@@ -299,23 +306,51 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
    * Automatically opens the corresponding section editor in the left sidebar.
    * @param sectionType The resolved section type from the iframe DOM
    */
-  onSectionClickFromPreview(sectionType: string): void {
-    if (sectionType === 'CONTACT') {
+  onSectionClickFromPreview(hint: string): void {
+    if (hint === 'CONTACT') {
       this.selectedSection = null;
       this.editingContact = true;
       return;
     }
 
-    const found = this.builderState.sectionsSnapshot.find((section) => section.sectionType === sectionType);
+    const sections = this.builderState.sectionsSnapshot;
+    const lowHint = hint.toLowerCase();
+    
+    // 1. Try to find by EXACT Title match (most specific)
+    let found = sections.find(s => s.title.toLowerCase() === lowHint);
+
+    // 2. Try to find by PARTIAL Title match (e.g. "Skills" matches "Technical Skills")
+    if (!found) {
+      found = sections.find(s => 
+        s.title.toLowerCase().includes(lowHint) || 
+        lowHint.includes(s.title.toLowerCase())
+      );
+    }
+
+    // 3. Try to find by SectionType (if hint contains keywords)
+    if (!found) {
+      const typeMap: Record<string, SectionType> = {
+        'SUMMARY': 'SUMMARY', 'EXPERIENCE': 'EXPERIENCE', 'EDUCATION': 'EDUCATION',
+        'SKILLS': 'SKILLS', 'PROJECTS': 'PROJECTS', 'CERTIFICATIONS': 'CERTIFICATIONS',
+        'LANGUAGES': 'LANGUAGES', 'VOLUNTEER': 'VOLUNTEER', 'CUSTOM': 'CUSTOM'
+      };
+      
+      for (const [key, type] of Object.entries(typeMap)) {
+        if (lowHint.includes(key.toLowerCase())) {
+          found = sections.find(s => s.sectionType === type);
+          if (found) break;
+        }
+      }
+    }
+
     if (found) {
       this.selectedSection = found;
       this.editingContact = false;
       this.showAddSection = false;
-      return;
-    }
-
-    if (this.isCreatableSectionType(sectionType)) {
-      this.createMissingSection(sectionType);
+      this.showSectionList = true;
+    } else {
+      // If still not found, just open the add section panel
+      this.openAddSection();
     }
   }
 
@@ -336,7 +371,14 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
   onSummaryAccepted(text: string): void {
     const summary = this.builderState.sectionsSnapshot.find(s => s.sectionType === 'SUMMARY');
     if (!summary) return;
-    this.sectionApi.updateSection(summary.sectionId, { content: JSON.stringify({ text }) })
+    
+    let fontSize = 12;
+    try {
+      const parsed = JSON.parse(summary.content || '{}');
+      if (parsed.fontSize) fontSize = parsed.fontSize;
+    } catch {}
+
+    this.sectionApi.updateSection(summary.sectionId, { content: JSON.stringify({ text, fontSize }) })
       .pipe(takeUntil(this.destroy$))
       .subscribe(updated => { this.builderState.updateSection(updated); this.selectedSection = updated; });
   }
@@ -347,14 +389,22 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
       : this.builderState.sectionsSnapshot.find(s => s.sectionType === 'EXPERIENCE');
     if (!target) return;
 
-    let data: any[] = [];
-    try { data = JSON.parse(target.content || '[]'); } catch { data = []; }
-    if (!Array.isArray(data) || data.length === 0) {
-      data = [{ company: '', role: '', startDate: '', endDate: '', isCurrent: false, bullets: [bullet] }];
+    let data: any = { items: [], fontSize: 12 };
+    try { 
+      const parsed = JSON.parse(target.content || '[]'); 
+      if (Array.isArray(parsed)) {
+        data.items = parsed;
+      } else {
+        data = parsed;
+      }
+    } catch { data = { items: [], fontSize: 12 }; }
+
+    if (data.items.length === 0) {
+      data.items = [{ company: '', role: '', startDate: '', endDate: '', isCurrent: false, bullets: [bullet] }];
     } else {
-      const last = { ...data[data.length - 1] };
+      const last = { ...data.items[data.items.length - 1] };
       last.bullets = [...(last.bullets || []), bullet];
-      data[data.length - 1] = last;
+      data.items[data.items.length - 1] = last;
     }
 
     this.sectionApi.updateSection(target.sectionId, { content: JSON.stringify(data) })
@@ -365,21 +415,40 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
   onSkillAdded(skill: string): void {
     const skillsSection = this.builderState.sectionsSnapshot.find(s => s.sectionType === 'SKILLS');
     if (!skillsSection) return;
-    let skills: string[] = [];
+    
+    let technical: string[] = [];
+    let soft: string[] = [];
+    let fontSize = 12;
+
     try {
       const parsed = JSON.parse(skillsSection.content || '[]');
-      skills = Array.isArray(parsed) ? parsed.map(String)
-        : Object.values(parsed as Record<string, unknown>).flatMap(v => Array.isArray(v) ? v.map(String) : []);
-    } catch { skills = []; }
-    if (!skills.includes(skill)) skills.push(skill);
-    this.sectionApi.updateSection(skillsSection.sectionId, { content: JSON.stringify(skills) })
+      if (Array.isArray(parsed)) {
+        technical = parsed;
+      } else {
+        technical = parsed.technical || [];
+        soft = parsed.soft || [];
+        fontSize = parsed.fontSize || 12;
+      }
+    } catch { }
+
+    if (!technical.includes(skill)) technical.push(skill);
+    
+    const payload = { technical, soft, fontSize };
+    this.sectionApi.updateSection(skillsSection.sectionId, { content: JSON.stringify(payload) })
       .pipe(takeUntil(this.destroy$))
       .subscribe(updated => this.builderState.updateSection(updated));
   }
 
   onImprovedContent(text: string): void {
     if (!this.selectedSection) return;
-    const content = this.serializeImprovedSection(this.selectedSection, text);
+    
+    let fontSize = 12;
+    try {
+      const parsed = JSON.parse(this.selectedSection.content || '{}');
+      if (parsed.fontSize) fontSize = parsed.fontSize;
+    } catch {}
+
+    const content = this.serializeImprovedSection(this.selectedSection, text, fontSize);
     if (content === null) return;
     this.sectionApi.updateSection(this.selectedSection.sectionId, { content })
       .pipe(takeUntil(this.destroy$))
@@ -405,32 +474,62 @@ export class BuilderLayoutComponent implements OnInit, OnDestroy {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private stringifySectionForAi(section: ResumeSection): string {
-    let parsed: unknown;
-    try { parsed = JSON.parse(section.content || 'null'); } catch { return section.content || ''; }
+    let parsed: any;
+    try { 
+      parsed = JSON.parse(section.content || 'null'); 
+    } catch { 
+      return section.content || ''; 
+    }
+    
+    if (!parsed) return '';
+
     switch (section.sectionType) {
-      case 'SUMMARY': return typeof parsed === 'object' && parsed !== null ? String((parsed as any).text ?? '') : '';
-      case 'EXPERIENCE': return Array.isArray(parsed) ? parsed.map((e: any) => {
-        const header = [e.role, e.company].filter(Boolean).join(' at ');
-        const bullets = Array.isArray(e.bullets) ? e.bullets.map((b: string) => `- ${b}`).join('\n') : '';
-        return [header, bullets].filter(Boolean).join('\n');
-      }).join('\n\n') : '';
-      case 'EDUCATION': return Array.isArray(parsed) ? parsed.map((e: any) => [e.degree, e.fieldOfStudy, e.institution].filter(Boolean).join(' - ')).join('\n') : '';
-      case 'SKILLS':
+      case 'SUMMARY': 
+        return typeof parsed === 'object' ? String(parsed.text ?? '') : String(parsed);
+      
+      case 'EXPERIENCE': {
+        const items = Array.isArray(parsed) ? parsed : (parsed.items || (parsed.text ? [parsed] : []));
+        return items.map((e: any) => {
+          if (typeof e === 'string') return e;
+          const header = [e.role, e.company].filter(Boolean).join(' at ');
+          const bullets = Array.isArray(e.bullets) ? e.bullets.map((b: string) => `- ${b}`).join('\n') : (e.text || '');
+          return [header, bullets].filter(Boolean).join('\n');
+        }).join('\n\n');
+      }
+
+      case 'EDUCATION': {
+        const items = Array.isArray(parsed) ? parsed : (parsed.items || (parsed.text ? [parsed] : []));
+        return items.map((e: any) => {
+          if (typeof e === 'string') return e;
+          return [e.degree, e.fieldOfStudy, e.institution].filter(Boolean).join(' - ');
+        }).join('\n');
+      }
+
+      case 'SKILLS': {
         if (Array.isArray(parsed)) return parsed.join(', ');
-        if (parsed && typeof parsed === 'object') return Object.values(parsed as Record<string, unknown>).flatMap(v => Array.isArray(v) ? v.map(String) : []).join(', ');
-        return '';
+        if (typeof parsed === 'object') {
+          const tech = Array.isArray(parsed.technical) ? parsed.technical : [];
+          const soft = Array.isArray(parsed.soft) ? parsed.soft : [];
+          if (tech.length || soft.length) return [...tech, ...soft].join(', ');
+          return parsed.text ?? JSON.stringify(parsed);
+        }
+        return String(parsed);
+      }
+
       default:
-        if (parsed && typeof parsed === 'object') { const o = parsed as any; return o.text ?? o.html ?? ''; }
-        return typeof parsed === 'string' ? parsed : '';
+        if (typeof parsed === 'object') {
+          return parsed.text ?? parsed.html ?? (parsed.items ? JSON.stringify(parsed.items) : JSON.stringify(parsed));
+        }
+        return String(parsed);
     }
   }
 
-  private serializeImprovedSection(section: ResumeSection, text: string): string | null {
+  private serializeImprovedSection(section: ResumeSection, text: string, fontSize: number): string | null {
     switch (section.sectionType) {
-      case 'SUMMARY': return JSON.stringify({ text });
-      case 'SKILLS': return JSON.stringify(text.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean));
+      case 'SUMMARY': return JSON.stringify({ text, fontSize });
+      case 'SKILLS': return JSON.stringify({ technical: text.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean), soft: [], fontSize });
       case 'PROJECTS': case 'CERTIFICATIONS': case 'LANGUAGES': case 'VOLUNTEER': case 'CUSTOM':
-        return JSON.stringify({ text });
+        return JSON.stringify({ text, fontSize });
       default: return null;
     }
   }

@@ -28,6 +28,7 @@ export class ExperienceEditorComponent implements OnChanges {
   private destroy$   = new Subject<void>();
 
   form = new FormArray<FormGroup>([]);
+  fontSizeControl = new FormControl(12, { nonNullable: true });
   saving = false;
   saveError = '';
 
@@ -37,20 +38,33 @@ export class ExperienceEditorComponent implements OnChanges {
     this.destroy$.next();
     this.saveError = '';
 
-    let data: ExperienceEntry[] = [];
+    let data: any = null;
     try { data = JSON.parse(this.section.content || '[]'); } catch { data = []; }
-    if (!Array.isArray(data)) data = [];
+    
+    let items: ExperienceEntry[] = [];
+    let fontSize = 12;
 
-    this.form = new FormArray(data.map(e => this.buildEntry(e)));
+    if (Array.isArray(data)) {
+      items = data;
+    } else if (data && typeof data === 'object') {
+      items = data.items || [];
+      fontSize = data.fontSize || 12;
+    }
 
-    this.form.valueChanges.pipe(
+    this.fontSizeControl.setValue(fontSize, { emitEvent: false });
+    this.form = new FormArray(items.map(e => this.buildEntry(e)));
+
+    const update$ = new Subject<void>();
+    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+
+    update$.pipe(
       debounceTime(800),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-      switchMap(val => {
-        this.saving = true;
-        this.saveError = '';
+      switchMap(() => {
+        this.saving = true; this.saveError = '';
+        const payload = { items: this.form.value, fontSize: this.fontSizeControl.value };
         return this.sectionApi.updateSection(this.section.sectionId, {
-          content: JSON.stringify(val)
+          content: JSON.stringify(payload)
         }).pipe(
           catchError(() => { this.saving = false; this.saveError = 'Save failed.'; return EMPTY; })
         );

@@ -49,7 +49,12 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     // Coordinate click listener injection precisely with afterRender$ notifications
     this.livePreview.afterRender$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.injectClickListeners();
+      this.checkHeight();
     });
+
+    // Check height periodically or on specific events
+    const resizeObserver = new ResizeObserver(() => this.checkHeight());
+    this.destroy$.subscribe(() => resizeObserver.disconnect());
 
     this.builderState.sections$.pipe(takeUntil(this.destroy$)).subscribe((s: ResumeSection[]) => {
       this.sections = s;
@@ -163,51 +168,33 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     const classes = Array.from(element.classList).map((cls) => cls.toLowerCase());
     const text = (element.textContent || '').toLowerCase();
     const heading = this.extractSectionHeading(element);
+    const lowHeading = heading.toLowerCase();
 
+    // 1. Check for Contact/Header specifically by Class or explicit Heading
     if (
       classes.some((cls) => ['contact', 'header', 'sidebar-panel', 'ats-header', 'corp-header', 'navy-header', 'timeline-header', 'teal-header'].includes(cls)) ||
-      /contact/.test(heading)
+      /contact|profile|personal info/.test(lowHeading)
     ) {
       return 'CONTACT';
     }
 
-    if (classes.some((cls) => cls.includes('summary')) || /about me|summary|professional summary|profile|career objective/.test(`${heading} ${text}`)) {
+    // 2. Return the heading as the primary hint if found
+    if (heading) {
+      return heading.toUpperCase();
+    }
+
+    // 3. Fallback to keyword matching if no clear heading
+    if (classes.some((cls) => cls.includes('summary')) || /about me|summary|professional summary|profile|career objective/.test(text)) {
       return 'SUMMARY';
     }
-
-    if (classes.some((cls) => cls.includes('experience')) || /work experience|professional experience|experience/.test(`${heading} ${text}`)) {
+    if (classes.some((cls) => cls.includes('experience')) || /work experience|professional experience/.test(text)) {
       return 'EXPERIENCE';
     }
-
-    if (classes.some((cls) => cls.includes('education')) || /education/.test(`${heading} ${text}`)) {
+    if (classes.some((cls) => cls.includes('education')) || /education/.test(text)) {
       return 'EDUCATION';
     }
-
-    if (
-      classes.some((cls) => cls.includes('skills') || cls.includes('expertise')) ||
-      /skills|key skills|technical skills|soft skills|area of expertise|expertise/.test(`${heading} ${text}`)
-    ) {
+    if (classes.some((cls) => cls.includes('skills') || cls.includes('expertise')) || /skills|key skills|technical skills|soft skills/.test(text)) {
       return 'SKILLS';
-    }
-
-    if (classes.some((cls) => cls.includes('projects')) || /projects?/.test(`${heading} ${text}`)) {
-      return 'PROJECTS';
-    }
-
-    if (classes.some((cls) => cls.includes('languages')) || /languages?/.test(`${heading} ${text}`)) {
-      return 'LANGUAGES';
-    }
-
-    if (classes.some((cls) => cls.includes('certifications')) || /certifications?/.test(`${heading} ${text}`)) {
-      return 'CERTIFICATIONS';
-    }
-
-    if (/additional information|additional details|achievements?/.test(`${heading} ${text}`)) {
-      return 'CUSTOM';
-    }
-
-    if (classes.some((cls) => cls.includes('references')) || /references?/.test(`${heading} ${text}`)) {
-      return 'CONTACT';
     }
 
     return null;
@@ -218,9 +205,30 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     return (heading?.textContent || '').trim().toLowerCase();
   }
 
+  private checkHeight(): void {
+    try {
+      const doc = this.iframeEl?.contentDocument;
+      if (!doc || !doc.body) return;
+      
+      const height = doc.documentElement.scrollHeight;
+      const A4_HEIGHT_PX = 1123; // approx 297mm at 96dpi
+      
+      // Add a small 5px tolerance buffer to account for browser measurement inconsistencies
+      // This prevents the warning from showing when the resume visually fits on one page
+      const isOver = height > (A4_HEIGHT_PX + 5); 
+      window.parent.postMessage({ type: 'HEIGHT_CHECK', isOver, height }, '*');
+      this.builderState.setOverA4Height(isOver);
+    } catch { }
+  }
+
   private onIframeMessage = (event: MessageEvent): void => {
     if (event.data?.type === 'SECTION_CLICK' && event.data.sectionType) {
       this.sectionClicked.emit(event.data.sectionType as string);
+    } else if (event.data?.type === 'HEIGHT_CHECK') {
+      this.isOverA4 = event.data.isOver;
+      this.builderState.setOverA4Height(event.data.isOver);
     }
   };
+
+  isOverA4 = false;
 }

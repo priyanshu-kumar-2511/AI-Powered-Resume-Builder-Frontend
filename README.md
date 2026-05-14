@@ -259,6 +259,28 @@ src/
 | **Build Tool** | Angular CLI |
 | **HTTP Client** | Typed HttpClient with JWT Interceptors |
 | **Routing** | Lazy-loaded Standalone Routes |
+| **Testing** | Jasmine & Karma (Unit Testing, Code Coverage) |
+
+---
+
+## 📊 Test Coverage & Quality Assurance
+
+The frontend maintains a robust and highly stable test suite utilizing **Jasmine** and **Karma** to guarantee reliability across complex UI interactions and business logic. 
+
+- **Test Frameworks:** Jasmine (BDD testing framework) and Karma (Test runner).
+- **Branch Coverage Standard:** The project aggressively maintains high test branch coverage (80%+) across critical application modules, including `TemplateRenderService`, `BuilderStateService`, `AuthService`, and complex components like `PricingComponent`.
+- **Mocking Strategy:** Employs robust, isolated mocking strategies (e.g., function-based constructor mocks) to prevent flakiness in third-party integrations (like Razorpay) and asynchronous API calls.
+
+### Running Tests
+To execute the unit test suite and generate a coverage report:
+```bash
+# Run tests in watch mode with Karma
+ng test
+
+# Generate Code Coverage Report
+ng test --no-watch --code-coverage
+```
+The generated HTML coverage report will be accessible in the `coverage/` directory.
 
 ---
 
@@ -271,4 +293,112 @@ src/
 4. **Template Gallery Render Fix**: Resolved an Angular change detection bug in the Template Gallery where preview iframes remained blank. Replaced internal `Map` state tracking with plain Object references to ensure the UI properly updates when dynamically loaded HTML templates resolve.
 5. **Streamlined PDF Export**: Removed legacy, slow backend DOCX processing and optimized the export flow to utilize zero-latency, high-fidelity client-side PDF generation.
 
---- 
+---
+
+## 🏗 System Architecture Diagram
+
+```mermaid
+flowchart TB
+    Client((Angular Frontend)) -->|REST API| Gateway[API Gateway :8080]
+    
+    subgraph Infrastructure Layer
+        Registry[Eureka Discovery :8761]
+        Config[Config Server :8888]
+        Admin[Spring Boot Admin :9090]
+    end
+    
+    subgraph Core Business Services
+        Gateway --> Auth[Auth Service :8081]
+        Gateway --> Resume[Resume Service :8084]
+        Gateway --> Section[Section Service :8085]
+        Gateway --> Template[Template Service :8082]
+    end
+    
+    subgraph Auxiliary Feature Services
+        Gateway --> Export[Export Service :8086]
+        Gateway --> AI[AI Service :8087]
+        Gateway --> Payment[Payment Service :8083]
+        Gateway --> Notif[Notification Service :8088]
+    end
+
+    %% Database Connections
+    Auth --> AuthDB[(Auth DB)]
+    Resume --> ResDB[(Resume DB)]
+    Section --> SecDB[(Section DB)]
+    Template --> TempDB[(Template DB)]
+    Template -.-> Redis[(Redis Cache)]
+    Payment --> PayDB[(Payment DB)]
+    Notif --> NotifDB[(Notification DB)]
+```
+
+---
+
+## 🔐 Sequence Diagram: JWT Authentication Flow
+
+Security is handled via stateless JSON Web Tokens (JWT). The frontend stores this token and attaches it as a Bearer token to all subsequent API requests.
+
+```mermaid
+sequenceDiagram
+    participant Client as Angular Frontend
+    participant Gateway as API Gateway
+    participant Auth as Auth Service
+    participant Service as Protected Service (e.g., Resume Service)
+    
+    %% Authentication Phase
+    Note over Client,Auth: Phase 1: Authentication (Login)
+    Client->>Gateway: POST /api/auth/login {email, password}
+    Gateway->>Auth: Route Request to Auth Service
+    Auth->>Auth: Validate Credentials against Auth DB
+    Auth->>Auth: Generate Signed JWT (Payload: UserID, Role)
+    Auth-->>Gateway: Return 200 OK + JWT
+    Gateway-->>Client: Return JWT
+    Client->>Client: Store JWT securely (LocalStorage/Session)
+    
+    %% Authorization Phase
+    Note over Client,Service: Phase 2: Authorization (Accessing Data)
+    Client->>Gateway: GET /api/resumes (Header: Authorization: Bearer <JWT>)
+    Gateway->>Service: Route Request with Header intact
+    
+    Note over Service: JwtAuthenticationFilter intercepts request
+    Service->>Service: Validate JWT Signature mathematically (Shared Secret)
+    Service->>Service: Extract Security Context (ID, Role)
+    
+    alt Token Invalid / Expired / Tampered
+        Service-->>Gateway: 401 Unauthorized
+        Gateway-->>Client: 401 Unauthorized (Triggers Logout)
+    else Token Valid
+        Service->>Service: Process Business Logic
+        Service-->>Gateway: Return 200 OK + Payload Data
+        Gateway-->>Client: Render Data in UI
+    end
+```
+
+---
+
+## 🚀 Future Enhancements & Scalability Roadmap
+
+1. **AI Cover Letter Generator:** Expand `ai-service` to generate targeted cover letters based on Job Description URLs.
+2. **LinkedIn OAuth & Profile Import:** Auto-populate Resume Sections instantly via the LinkedIn Profile API.
+3. **Advanced ATS Scoring:** Semantic matching engine to provide precise Match Percentage Scores against pasted job descriptions.
+4. **Cloud Object Storage:** Migrate to AWS S3 for profile images, PDF backups, and template thumbnails.
+5. **WebSockets for Live Collaboration:** Real-time collaborative editing using STOMP over SockJS.
+
+---
+
+## 🐳 Docker Deployment & Containerization
+
+The frontend application is also fully containerized and integrated into the broader microservices architecture. 
+
+### Running via Docker
+You can build and run the frontend entirely within a Docker container using the centralized `docker-compose.yml` located in the backend root directory (if configured to include the frontend), or by building the `Dockerfile` directly:
+
+```bash
+# Build the Docker image
+docker build -t airesume-frontend .
+
+# Run the container
+docker run -p 4200:80 airesume-frontend
+```
+
+### Nginx Integration
+The production Docker build uses **Nginx** (`nginx.conf`) to serve the compiled Angular static files. This provides high-performance asset delivery, automated routing fallback (to `index.html` for single-page applications), and proxy capabilities for routing API calls seamlessly to the API Gateway.

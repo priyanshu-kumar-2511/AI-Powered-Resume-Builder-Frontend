@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnDestroy, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { LivePreviewService } from '../../builder/services/live-preview.service';
+import { BuilderStateService } from '../../builder/services/builder-state.service';
 
 
 type Step = 'form' | 'exporting' | 'done' | 'error';
@@ -132,7 +134,7 @@ type Step = 'form' | 'exporting' | 'done' | 'error';
               <div class="em-desc-row"><span class="em-desc-icon em-ok">✓</span> Exports directly from your resume preview</div>
             </div>
 
-            <button type="button" class="em-export-btn" [disabled]="submitting" (click)="submitExport()">
+            <button type="button" class="em-export-btn" [class.warning]="isOverA4" [disabled]="submitting" (click)="submitExport()">
               @if (submitting) {
                 <div class="em-btn-spinner"></div> Preparing...
               } @else {
@@ -140,9 +142,20 @@ type Step = 'form' | 'exporting' | 'done' | 'error';
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Export as PDF
+                {{ isOverA4 ? (confirmedOverHeight ? 'Export Anyway' : 'Continue to Export') : 'Export as PDF' }}
               }
             </button>
+
+            @if (isOverA4 && !confirmedOverHeight) {
+              <div class="em-a4-alert">
+                <strong>⚠️ Page Limit Warning</strong>
+                <p>Your resume exceeds A4 size. It may be split into 2 pages or cut off. Please confirm to proceed.</p>
+                <label class="em-confirm-check">
+                  <input type="checkbox" (change)="confirmedOverHeight = $any($event.target).checked">
+                  I understand and want to proceed
+                </label>
+              </div>
+            }
 
             @if (errorMsg) {
               <div class="em-error">{{ errorMsg }}</div>
@@ -297,18 +310,38 @@ type Step = 'form' | 'exporting' | 'done' | 'error';
     .em-another-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
     .em-retry-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border-radius: 8px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; font-size: 0.78rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
     .em-retry-btn:hover { background: rgba(239,68,68,0.14); }
+
+    .em-a4-alert {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .em-a4-alert strong { display: block; font-size: 0.8rem; color: #f59e0b; margin-bottom: 4px; }
+    .em-a4-alert p { font-size: 0.72rem; color: rgba(255,255,255,0.5); margin: 0 0 10px; line-height: 1.4; }
+    .em-confirm-check { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: rgba(255,255,255,0.8); cursor: pointer; }
+    .em-confirm-check input { width: 14px; height: 14px; cursor: pointer; }
+
+    .em-export-btn.warning {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
   `]
 })
-export class ExportModalComponent implements OnDestroy {
+export class ExportModalComponent implements OnInit, OnDestroy {
   @Input({ required: true }) resumeId!: number;
   @Output() close = new EventEmitter<void>();
 
   private livePreview = inject(LivePreviewService);
+  private builderState = inject(BuilderStateService);
+  private destroy$ = new Subject<void>();
 
   step: Step = 'form';
   submitting = false;
   errorMsg = '';
   currentStep = 'QUEUED';
+  isOverA4 = false;
+  confirmedOverHeight = false;
 
   readonly steps = [
     { key: 'QUEUED', label: 'Queued' },
@@ -317,6 +350,12 @@ export class ExportModalComponent implements OnDestroy {
   ];
 
   private readonly order = ['QUEUED', 'PROCESSING', 'COMPLETED'];
+
+  ngOnInit(): void {
+    this.builderState.isOverA4Height$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(over => this.isOverA4 = over);
+  }
 
   isStepDone(key: string): boolean {
     if (this.step === 'error') return false;
@@ -327,6 +366,12 @@ export class ExportModalComponent implements OnDestroy {
 
   submitExport(): void {
     if (this.submitting) return;
+    
+    if (this.isOverA4 && !this.confirmedOverHeight) {
+      // Just visually nudge the user to check the box
+      return;
+    }
+
     this.exportPdfClientSide();
   }
 
@@ -420,5 +465,8 @@ export class ExportModalComponent implements OnDestroy {
     }
   }
 
-  ngOnDestroy(): void { }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

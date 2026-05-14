@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { BuilderStateService } from '../services/builder-state.service';
 import { SectionApiService } from '../services/section-api.service';
 import { ResumeSection } from '../../../shared/models/models';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-section-list',
@@ -19,6 +20,7 @@ export class SectionListComponent implements OnInit, OnDestroy {
 
   private builderState = inject(BuilderStateService);
   private sectionApi   = inject(SectionApiService);
+  private confirmService = inject(ConfirmService);
   private destroy$     = new Subject<void>();
 
   sections: ResumeSection[] = [];
@@ -58,6 +60,24 @@ export class SectionListComponent implements OnInit, OnDestroy {
         this.togglingId = null;
       },
       error: () => { this.togglingId = null; }
+    });
+  }
+  
+  async deleteSection(event: Event, section: ResumeSection): Promise<void> {
+    event.stopPropagation();
+    const confirmed = await this.confirmService.ask({
+      title: 'Delete Section',
+      message: `Are you sure you want to delete the "${section.title}" section?`,
+      confirmText: 'Delete',
+      type: 'danger'
+    });
+    if (!confirmed) return;
+    
+    this.sectionApi.deleteSection(section.sectionId).subscribe({
+      next: () => {
+        this.builderState.removeSection(section.sectionId);
+        this.sectionDeleted.emit(section.sectionId);
+      }
     });
   }
 

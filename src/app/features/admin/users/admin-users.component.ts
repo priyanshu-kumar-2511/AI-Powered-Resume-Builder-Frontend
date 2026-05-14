@@ -16,8 +16,17 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
           <h1 class="page-title">User Management</h1>
           <p class="page-sub">{{ filtered.length }} of {{ users.length }} users</p>
         </div>
-        <input class="search-input" placeholder="Search by name, email or username…"
-               [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()">
+        <div class="header-controls">
+          <div class="date-filters">
+            <input type="date" class="date-input" [(ngModel)]="dateFrom"
+                   (ngModelChange)="applyFilter()" title="Joined from">
+            <span class="date-sep">→</span>
+            <input type="date" class="date-input" [(ngModel)]="dateTo"
+                   (ngModelChange)="applyFilter()" title="Joined up to">
+          </div>
+          <input class="search-input" placeholder="Search by name, email or username…"
+                 [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()">
+        </div>
       </div>
 
       <!-- Filter bar -->
@@ -74,7 +83,11 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
                               (click)="$event.stopPropagation(); confirmRoleChange(user)"
                               [disabled]="busy === user.userId"
                               [title]="isAdmin(user) ? 'Demote to User' : 'Promote to Admin'">
-                        {{ isAdmin(user) ? '⬇' : '⬆' }}
+                        @if (isAdmin(user)) {
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+                        } @else {
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11l-5-5-5 5M17 18l-5-5-5 5"/></svg>
+                        }
                       </button>
                     </div>
                   </td>
@@ -231,7 +244,15 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
 
             <div class="detail-body">
               @if (loadingDetail) {
-                <div class="detail-loader">Fetching user activity...</div>
+                <div class="skeleton-wrap">
+                  <div class="skel-bar"></div>
+                  <div class="skel-row"></div>
+                  <div class="skel-row" style="width: 80%"></div>
+                  <div class="skel-list">
+                    <div class="skel-item"></div>
+                    <div class="skel-item"></div>
+                  </div>
+                </div>
               } @else {
                 <!-- Stats grid -->
                 <div class="detail-stats">
@@ -246,6 +267,25 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
                   <div class="d-stat">
                     <div class="d-stat-val">{{ detailTarget.subscriptionPlan }}</div>
                     <div class="d-stat-lbl">Current Plan</div>
+                  </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="detail-section">
+                  <h4 class="detail-sec-title">Account Information</h4>
+                  <div class="detail-info-grid">
+                    <div class="di-row">
+                      <span class="di-label">Member Since</span>
+                      <span class="di-val">{{ formatDate(detailTarget.createdAt) }}</span>
+                    </div>
+                    @if (detailTarget.subscriptionPlan === 'PREMIUM') {
+                      <div class="di-row">
+                        <span class="di-label">Premium Expires</span>
+                        <span class="di-val text-gold">
+                          {{ detailTarget.premiumExpiresAt ? formatDate(detailTarget.premiumExpiresAt) : 'Never' }}
+                        </span>
+                      </div>
+                    }
                   </div>
                 </div>
 
@@ -301,8 +341,14 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
     .page-title { font-size: 1.4rem; font-weight: 800; color: rgba(255,255,255,0.9); margin: 0 0 4px; }
     .page-sub { font-size: 0.78rem; color: rgba(255,255,255,0.3); margin: 0; }
+    .header-controls { display: flex; align-items: center; gap: 12px; }
     .search-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.8); padding: 8px 14px; font-size: 0.82rem; min-width: 260px; outline: none; font-family: inherit; }
     .search-input:focus { border-color: rgba(0,212,180,0.4); }
+
+    .date-filters { display: flex; align-items: center; gap: 6px; }
+    .date-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; color: rgba(255,255,255,0.7); padding: 6px 10px; font-size: 0.76rem; font-family: inherit; outline: none; cursor: pointer; }
+    .date-input:focus { border-color: rgba(0,212,180,0.4); }
+    .date-sep { color: rgba(255,255,255,0.25); font-size: 0.8rem; }
 
     .filter-bar { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
     .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.4); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
@@ -333,7 +379,8 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
     .role-pill { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
     .role-pill.role-admin { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
     .role-pill.role-user  { background: rgba(148,163,184,0.1); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.08); }
-    .role-toggle-btn { font-size: 0.7rem; width: 22px; height: 22px; padding: 0; }
+    .role-toggle-btn { font-size: 0.7rem; width: 24px; height: 24px; padding: 0; display: grid; place-items: center; color: rgba(255,255,255,0.4); }
+    .role-toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
     .plan-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.75); font-size: 0.76rem; padding: 4px 8px; cursor: pointer; font-family: inherit; outline: none; color-scheme: dark; }
     .plan-select option { background-color: #111520; color: rgba(255,255,255,0.8); }
@@ -398,9 +445,21 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
     .close-modal-btn:hover { color: #fff; }
 
     .detail-body { padding: 24px; overflow-y: auto; flex: 1; }
-    .detail-loader { text-align: center; color: rgba(255,255,255,0.3); padding: 40px; font-size: 0.85rem; }
+    
+    /* Skeleton Shimmer */
+    .skeleton-wrap { padding: 20px; }
+    .skel-bar { height: 60px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 20px; position: relative; overflow: hidden; }
+    .skel-row { height: 14px; background: rgba(255,255,255,0.03); border-radius: 4px; margin-bottom: 12px; position: relative; overflow: hidden; }
+    .skel-list { margin-top: 30px; }
+    .skel-item { height: 50px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 10px; position: relative; overflow: hidden; }
+    .skel-bar::after, .skel-row::after, .skel-item::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+      transform: translateX(-100%); animation: shimmer-wave 1.5s infinite;
+    }
+    @keyframes shimmer-wave { 100% { transform: translateX(100%); } }
 
-    .detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    .detail-stats { display: flex; gap: 12px; margin-bottom: 24px; }
     .d-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; text-align: center; }
     .d-stat-val { font-size: 1.2rem; font-weight: 800; color: #fff; }
     .d-stat-lbl { font-size: 0.65rem; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-top: 2px; }
@@ -415,6 +474,12 @@ type ModalType = 'delete' | 'suspend' | 'role' | 'detail' | null;
     .di-empty { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.2); padding: 12px; }
 
     .ai-list .detail-item { border-left: 3px solid #8b5cf6; }
+
+    .detail-info-grid { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
+    .di-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+    .di-label { color: rgba(255,255,255,0.35); }
+    .di-val { color: rgba(255,255,255,0.8); font-weight: 600; }
+    .text-gold { color: #f59e0b !important; }
   `]
 })
 export class AdminUsersComponent implements OnInit {
@@ -428,6 +493,8 @@ export class AdminUsersComponent implements OnInit {
   toastErr = false;
   searchQuery = '';
   activeFilter = 'ALL';
+  dateFrom = '';
+  dateTo = '';
 
   // Modal state
   activeModal: ModalType = null;
@@ -485,6 +552,16 @@ export class AdminUsersComponent implements OnInit {
       case 'PREMIUM': list = list.filter(u => u.subscriptionPlan === 'PREMIUM'); break;
       case 'ADMIN': list = list.filter(u => this.isAdmin(u)); break;
     }
+
+    if (this.dateFrom) {
+      const from = new Date(this.dateFrom).getTime();
+      list = list.filter(u => new Date(u.createdAt).getTime() >= from);
+    }
+    if (this.dateTo) {
+      const to = new Date(this.dateTo).getTime() + 86_400_000;
+      list = list.filter(u => new Date(u.createdAt).getTime() <= to);
+    }
+
     this.filtered = list;
   }
 

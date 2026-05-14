@@ -32,10 +32,12 @@ export class SectionEditorComponent implements OnChanges {
 
   deleting = false;
   deleteError = '';
+  showConfirmDelete = false;
 
   ngOnChanges(): void {
     this.deleteError = '';
     this.deleting = false;
+    this.showConfirmDelete = false;
   }
 
   onUpdated(section: ResumeSection): void {
@@ -44,7 +46,10 @@ export class SectionEditorComponent implements OnChanges {
   }
 
   deleteSection(): void {
-    if (!confirm(`Delete "${this.section.title}"? This cannot be undone.`)) return;
+    if (!this.showConfirmDelete) {
+      this.showConfirmDelete = true;
+      return;
+    }
 
     this.deleting = true;
     this.deleteError = '';
@@ -56,8 +61,13 @@ export class SectionEditorComponent implements OnChanges {
       },
       error: () => {
         this.deleting = false;
+        this.showConfirmDelete = false;
         this.deleteError = 'Could not delete section. Please try again.';
       }
     });
+  }
+
+  cancelDelete(): void {
+    this.showConfirmDelete = false;
   }
 }

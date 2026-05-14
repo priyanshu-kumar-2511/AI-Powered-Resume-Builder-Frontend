@@ -17,6 +17,16 @@ import { ResumeSection } from '../../../shared/models/models';
         </span>
       </div>
 
+      <!-- Section Styling (Font Size) -->
+      <div class="section-styling">
+        <label class="style-label">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Section Font Size:
+        </label>
+        <input type="range" min="8" max="24" [formControl]="fontSizeControl" class="style-slider">
+        <span class="style-val">{{ fontSizeControl.value }}px</span>
+      </div>
+
       <!-- Technical Skills Section -->
       <div class="skill-category">
         <div class="category-header">
@@ -81,6 +91,30 @@ import { ResumeSection } from '../../../shared/models/models';
     <style>
     .skills-editor { display: flex; flex-direction: column; gap: 20px; }
     .editor-top-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: -10px; }
+
+    /* Section Styling */
+    .section-styling {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: -8px;
+    }
+    .style-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .style-slider {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.1); outline: none;
+      -webkit-appearance: none; cursor: pointer;
+    }
+    .style-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--teal);
+      box-shadow: 0 0 10px rgba(0,212,180,0.4);
+    }
+    .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+
     .save-hint { font-size: 0.75rem; color: var(--text-muted); }
     .save-hint.saving { color: var(--teal); }
     .save-hint.error  { color: #ef4444; }
@@ -161,14 +195,14 @@ export class SkillsEditorComponent implements OnChanges {
 
   private sectionApi = inject(SectionApiService);
   private destroy$   = new Subject<void>();
-  private save$      = new Subject<{ technical: string[], soft: string[] }>();
-
   technicalSkills: string[] = [];
   softSkills: string[]      = [];
   techInputControl          = new FormControl('', { nonNullable: true });
   softInputControl          = new FormControl('', { nonNullable: true });
+  fontSizeControl           = new FormControl(12, { nonNullable: true });
   saving                    = false;
   saveError                 = '';
+  private save$             = new Subject<void>();
 
   ngOnChanges(): void {
     this.destroy$.next();
@@ -176,22 +210,22 @@ export class SkillsEditorComponent implements OnChanges {
 
     try {
       const parsed = JSON.parse(this.section.content || '{}');
-      
-      if (Array.isArray(parsed)) {
-        // Legacy array support: default all to technical skills
-        this.technicalSkills = parsed;
+      let fontSize = 12;
+      let skillData: any = parsed;
+
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && (parsed.technical || parsed.soft || parsed.fontSize)) {
+        fontSize = parsed.fontSize || 12;
+        skillData = parsed;
+      }
+
+      this.fontSizeControl.setValue(fontSize, { emitEvent: false });
+
+      if (Array.isArray(skillData)) {
+        this.technicalSkills = skillData;
         this.softSkills = [];
-      } else if (parsed && typeof parsed === 'object') {
-        if (parsed['technical'] || parsed['soft']) {
-          this.technicalSkills = Array.isArray(parsed['technical']) ? parsed['technical'] : [];
-          this.softSkills = Array.isArray(parsed['soft']) ? parsed['soft'] : [];
-        } else {
-          // Fallback if structured randomly
-          this.technicalSkills = Object.values(parsed as Record<string, unknown>)
-            .flatMap(value => Array.isArray(value) ? value.map(String) : [])
-            .filter((skill, index, arr) => skill.trim().length > 0 && arr.indexOf(skill) === index);
-          this.softSkills = [];
-        }
+      } else if (skillData && typeof skillData === 'object') {
+        this.technicalSkills = Array.isArray(skillData['technical']) ? skillData['technical'] : [];
+        this.softSkills = Array.isArray(skillData['soft']) ? skillData['soft'] : [];
       } else {
         this.technicalSkills = [];
         this.softSkills = [];
@@ -201,14 +235,20 @@ export class SkillsEditorComponent implements OnChanges {
       this.softSkills = [];
     }
 
+    this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.save$.next());
+
     this.save$.pipe(
       debounceTime(600),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-      switchMap(skillsObj => {
+      switchMap(() => {
         this.saving = true;
         this.saveError = '';
+        const payload = { 
+          technical: this.technicalSkills, 
+          soft: this.softSkills, 
+          fontSize: this.fontSizeControl.value 
+        };
         return this.sectionApi.updateSection(this.section.sectionId, {
-          content: JSON.stringify(skillsObj)
+          content: JSON.stringify(payload)
         }).pipe(
           catchError(() => {
             this.saving = false;
@@ -218,7 +258,7 @@ export class SkillsEditorComponent implements OnChanges {
         );
       }),
       takeUntil(this.destroy$)
-    ).subscribe(updated => {
+    ).subscribe((updated: ResumeSection) => {
       this.saving = false;
       this.saved.emit(updated);
     });
@@ -246,7 +286,7 @@ export class SkillsEditorComponent implements OnChanges {
     }
     
     control.reset();
-    this.save$.next({ technical: this.technicalSkills, soft: this.softSkills });
+    this.save$.next();
   }
 
   removeSkill(type: 'technical' | 'soft', index: number): void {
@@ -255,6 +295,6 @@ export class SkillsEditorComponent implements OnChanges {
     } else {
       this.softSkills = this.softSkills.filter((_, i) => i !== index);
     }
-    this.save$.next({ technical: this.technicalSkills, soft: this.softSkills });
+    this.save$.next();
   }
 }

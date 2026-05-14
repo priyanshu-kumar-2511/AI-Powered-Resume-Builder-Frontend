@@ -17,7 +17,7 @@ export class LandingComponent {
   features = [
     { icon: '🤖', title: 'AI-Powered Content', desc: 'Let our AI craft compelling bullet points and summaries tailored to your experience and target role.' },
     { icon: '🎨', title: 'Stunning Templates', desc: 'Choose from a curated library of ATS-optimised designs across five style categories.' },
-    { icon: '📊', title: 'Job Match Score', desc: 'Instantly see how well your resume matches any job description with detailed gap analysis.' },
+    { icon: '🚀', title: 'ATS Score Checker', desc: 'Get your resume analyzed against standard ATS algorithms to ensure you never miss an opportunity.' },
     { icon: '📄', title: 'One-Click Export', desc: 'Download your resume as a pixel-perfect PDF, ready to send to any employer.' },
     { icon: '🔔', title: 'Smart Notifications', desc: 'Stay informed with reminders to update your resume and alerts on job market trends.' },
     { icon: '🔒', title: 'Secure & Private', desc: 'Your data is encrypted and never shared. Full control over visibility and access.' }

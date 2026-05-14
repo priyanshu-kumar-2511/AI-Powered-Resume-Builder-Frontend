@@ -3,9 +3,14 @@ import { Template } from '../models/models';
 
 describe('Template Fallbacks Resolver', () => {
 
-  it('should return null if template is null or undefined', () => {
-    expect(resolveTemplateFallback(null)).toBeNull();
-    expect(resolveTemplateFallback(undefined)).toBeNull();
+  it('should return default fallback if template is null or undefined', () => {
+    const resultNull = resolveTemplateFallback(null);
+    expect(resultNull).not.toBeNull();
+    expect(resultNull?.name).toBe('Classic ATS');
+    
+    const resultUndef = resolveTemplateFallback(undefined);
+    expect(resultUndef).not.toBeNull();
+    expect(resultUndef?.name).toBe('Classic ATS');
   });
 
   it('should resolve by templateId', () => {

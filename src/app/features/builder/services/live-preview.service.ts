@@ -9,6 +9,7 @@ type PreviewStyle = {
   fontSize: number;
   fontFamily: string;
   primaryColor: string;
+  contactFontSize: number;
 };
 
 /**
@@ -91,7 +92,8 @@ export class LivePreviewService implements OnDestroy {
     const mergedFont = {
       fontSize: font.fontSize,
       fontFamily: overrides?.fontFamily ?? font.fontFamily,
-      primaryColor: overrides?.primaryColor ?? font.primaryColor
+      primaryColor: overrides?.primaryColor ?? font.primaryColor,
+      contactFontSize: font.contactFontSize
     };
 
     return this.buildHtml(sections, template, resume, profile, mergedFont, mergedFont.primaryColor) || null;
@@ -204,14 +206,20 @@ export class LivePreviewService implements OnDestroy {
       case 'SUMMARY':
         return `<div class="section summary"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
 
-      case 'EXPERIENCE': {
+      case 'EXPERIENCE':
+      case 'PROJECTS':
+      case 'CERTIFICATIONS': {
         const entries: any[] = Array.isArray(parsed) ? parsed : [];
+        if (entries.length === 0 && !Array.isArray(parsed)) {
+          // Fallback to rich text if not an array (legacy or markdown mode)
+          return `<div class="section generic"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
+        }
         const items = entries.map((entry) => `
           <div class="exp-entry">
-            <div class="exp-header">${entry.role || ''}</div>
-            <div class="exp-company">${entry.company || ''}</div>
-            <div class="exp-dates">${entry.startDate || ''} - ${entry.isCurrent ? 'Present' : (entry.endDate || '')}</div>
-            <ul>${(entry.bullets || []).map((bullet: any) => `<li>${typeof bullet === 'string' ? bullet : bullet.text || ''}</li>`).join('')}</ul>
+            <div class="exp-header">${entry.title || entry.role || ''}</div>
+            <div class="exp-company">${entry.subtitle || entry.company || ''}</div>
+            <div class="exp-dates">${entry.startDate || ''}${entry.startDate && (entry.isCurrent || entry.endDate) ? ' — ' : ''}${entry.isCurrent ? 'Present' : (entry.endDate || '')}</div>
+            <ul>${(entry.bullets || []).filter((b: any) => !!b).map((bullet: any) => `<li>${typeof bullet === 'string' ? bullet : bullet.text || ''}</li>`).join('')}</ul>
           </div>`).join('');
         return `<div class="section experience"><h2>${section.title}</h2>${items}</div>`;
       }
@@ -241,6 +249,20 @@ export class LivePreviewService implements OnDestroy {
         }
         const chips = allSkills.map((skill) => `<span class="skill-chip">${skill}</span>`).join('');
         return `<div class="section skills"><h2>${section.title}</h2><div class="skill-chips">${chips || '<span style="color:#94a3b8;font-size:10px">No skills added yet</span>'}</div></div>`;
+      }
+
+      case 'CUSTOM': {
+        if (Array.isArray(parsed)) {
+          const items = parsed.map((entry) => `
+            <div class="exp-entry">
+              <div class="exp-header">${entry.title || ''}</div>
+              <div class="exp-company">${entry.subtitle || ''}</div>
+              <div class="exp-dates">${entry.startDate || ''}${entry.startDate && (entry.isCurrent || entry.endDate) ? ' — ' : ''}${entry.isCurrent ? 'Present' : (entry.endDate || '')}</div>
+              <ul>${(entry.bullets || []).filter((b: any) => !!b).map((bullet: any) => `<li>${bullet}</li>`).join('')}</ul>
+            </div>`).join('');
+          return `<div class="section custom-structured"><h2>${section.title}</h2>${items}</div>`;
+        }
+        return `<div class="section generic"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
       }
 
       default:

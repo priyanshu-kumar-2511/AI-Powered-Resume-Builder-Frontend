@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { BuilderStateService } from './builder-state.service';
-import { Resume, ResumeSection, Template } from '../../../shared/models/models';
 
 describe('BuilderStateService', () => {
   let service: BuilderStateService;
@@ -12,141 +11,136 @@ describe('BuilderStateService', () => {
     service = TestBed.inject(BuilderStateService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('should initialize with default state', () => {
+    expect(service.resumeSnapshot).toBeNull();
+    expect(service.sectionsSnapshot).toEqual([]);
+    expect(service.fontSnapshot.fontSize).toBe(11);
   });
 
-  describe('Sections Management', () => {
-    const mockSection1: ResumeSection = {
-      sectionId: 1, resumeId: 10, sectionType: 'SUMMARY', title: 'Summary',
-      content: '', displayOrder: 1, isVisible: true, aiGenerated: false,
-      createdAt: '', updatedAt: ''
-    };
-    const mockSection2: ResumeSection = {
-      sectionId: 2, resumeId: 10, sectionType: 'EXPERIENCE', title: 'Experience',
-      content: '', displayOrder: 0, isVisible: true, aiGenerated: false,
-      createdAt: '', updatedAt: ''
-    };
-
-    it('should set and sort sections', () => {
-      service.setSections([mockSection1, mockSection2]);
-      const current = service.sectionsSnapshot;
-      expect(current.length).toBe(2);
-      expect(current[0].sectionId).toBe(2); // displayOrder 0 comes first
-      expect(current[1].sectionId).toBe(1);
-    });
-
-    it('should add a section and maintain sort', () => {
-      service.setSections([mockSection1]);
-      service.addSection(mockSection2);
-      
-      const current = service.sectionsSnapshot;
-      expect(current.length).toBe(2);
-      expect(current[0].sectionId).toBe(2);
-    });
-
-    it('should update an existing section', () => {
-      service.setSections([mockSection1]);
-      const updatedSection = { ...mockSection1, title: 'Updated Summary' };
-      
-      service.updateSection(updatedSection);
-      
-      const current = service.sectionsSnapshot;
-      expect(current[0].title).toBe('Updated Summary');
-    });
-
-    it('should remove a section by id', () => {
-      service.setSections([mockSection1, mockSection2]);
-      service.removeSection(1);
-      
-      const current = service.sectionsSnapshot;
-      expect(current.length).toBe(1);
-      expect(current[0].sectionId).toBe(2);
-    });
-
-    it('should reorder sections based on array of ids', () => {
-      service.setSections([mockSection1, mockSection2]);
-      
-      // Order them as 1 then 2
-      service.reorderSections([1, 2]);
-      
-      const current = service.sectionsSnapshot;
-      expect(current[0].sectionId).toBe(1);
-      expect(current[0].displayOrder).toBe(0);
-      expect(current[1].sectionId).toBe(2);
-      expect(current[1].displayOrder).toBe(1);
-    });
+  it('should set sections and sort them', () => {
+    const sections = [
+      { sectionId: 2, displayOrder: 1 } as any,
+      { sectionId: 1, displayOrder: 0 } as any
+    ];
+    service.setSections(sections);
+    expect(service.sectionsSnapshot[0].sectionId).toBe(1);
+    expect(service.sectionsSnapshot[1].sectionId).toBe(2);
   });
 
-  describe('Resume Management', () => {
-    it('should set resume state', () => {
-      const mockResume: Resume = {
-        resumeId: 1, userId: 1, title: 'Test', targetJobTitle: 'Dev',
-        templateId: null, atsScore: 0, status: 'DRAFT', language: 'en',
-        isPublic: false, viewCount: 0, createdAt: '', updatedAt: ''
-      };
-      
-      service.setResume(mockResume);
-      expect(service.resumeSnapshot).toEqual(mockResume);
-    });
+  it('should add a section', () => {
+    service.addSection({ sectionId: 3, displayOrder: 2 } as any);
+    expect(service.sectionsSnapshot.length).toBe(1);
   });
 
-  describe('Template Management', () => {
-    it('should set template state', () => {
-      const mockTemplate: Template = {
-        templateId: 1, name: 'Basic', description: 'Desc',
-        thumbnailUrl: '', category: 'PROFESSIONAL', tier: 'FREE',
-        usageCount: 0, htmlLayout: '', cssStyles: '', isActive: true,
-        createdAt: '', updatedAt: ''
-      };
-      
-      service.setTemplate(mockTemplate);
-      expect(service.templateSnapshot).toEqual(mockTemplate);
-    });
+  it('should update a section', () => {
+    service.setSections([{ sectionId: 1, content: 'old', displayOrder: 0 } as any]);
+    service.updateSection({ sectionId: 1, content: 'new', displayOrder: 0 } as any);
+    expect(service.sectionsSnapshot[0].content).toBe('new');
   });
 
-  describe('Font Controls', () => {
-    it('should set font size within bounds', () => {
-      service.setFontSize(20);
-      expect(service.fontSnapshot.fontSize).toBe(20);
-
-      service.setFontSize(5); // Below min
-      expect(service.fontSnapshot.fontSize).toBe(6);
-
-      service.setFontSize(40); // Above max
-      expect(service.fontSnapshot.fontSize).toBe(32);
-    });
-
-    it('should increase font size', () => {
-      service.setFontSize(12);
-      service.increaseFontSize();
-      expect(service.fontSnapshot.fontSize).toBe(13);
-    });
-
-    it('should decrease font size', () => {
-      service.setFontSize(12);
-      service.decreaseFontSize();
-      expect(service.fontSnapshot.fontSize).toBe(11);
-    });
-
-    it('should set font family', () => {
-      service.setFontFamily('Roboto');
-      expect(service.fontSnapshot.fontFamily).toBe('Roboto');
-    });
+  it('should remove a section', () => {
+    service.setSections([{ sectionId: 1, displayOrder: 0 } as any]);
+    service.removeSection(1);
+    expect(service.sectionsSnapshot.length).toBe(0);
   });
 
-  describe('Reset', () => {
-    it('should clear all state', () => {
-      service.setSections([{ sectionId: 1 } as ResumeSection]);
-      service.setResume({ resumeId: 1 } as Resume);
-      service.setTemplate({ templateId: 1 } as Template);
-      
-      service.reset();
-      
-      expect(service.sectionsSnapshot.length).toBe(0);
-      expect(service.resumeSnapshot).toBeNull();
-      expect(service.templateSnapshot).toBeNull();
-      // Note: Font state is not cleared in reset() currently
-    });
+  it('should reorder sections', () => {
+    service.setSections([
+      { sectionId: 1, displayOrder: 0 } as any,
+      { sectionId: 2, displayOrder: 1 } as any
+    ]);
+    service.reorderSections([2, 1]);
+    expect(service.sectionsSnapshot[0].sectionId).toBe(2);
+    expect(service.sectionsSnapshot[0].displayOrder).toBe(0);
+    expect(service.sectionsSnapshot[1].sectionId).toBe(1);
+    expect(service.sectionsSnapshot[1].displayOrder).toBe(1);
+  });
+
+  it('should handle font size changes within bounds', () => {
+    service.setFontSize(35); // Max 32
+    expect(service.fontSnapshot.fontSize).toBe(32);
+    
+    service.setFontSize(2); // Min 6
+    expect(service.fontSnapshot.fontSize).toBe(6);
+    
+    service.increaseFontSize();
+    expect(service.fontSnapshot.fontSize).toBe(7);
+  });
+
+  it('should parse customizations from resume', () => {
+    const customizations = JSON.stringify({ fontSize: 14, fontFamily: 'Roboto', primaryColor: '#ff0000' });
+    service.setResume({ customizations } as any);
+    expect(service.fontSnapshot.fontSize).toBe(14);
+    expect(service.fontSnapshot.fontFamily).toBe('Roboto');
+  });
+
+  it('should reset state', () => {
+    service.setSections([{ sectionId: 1 } as any]);
+    service.reset();
+    expect(service.sectionsSnapshot.length).toBe(0);
+    expect(service.resumeSnapshot).toBeNull();
+  });
+
+  it('should decrease font size and clamp at minimum 6', () => {
+    service.setFontSize(7);
+    service.decreaseFontSize();
+    expect(service.fontSnapshot.fontSize).toBe(6);
+    service.decreaseFontSize(); // already at 6, stays 6
+    expect(service.fontSnapshot.fontSize).toBe(6);
+  });
+
+  it('should guard setPrimaryColor against empty string', () => {
+    const before = service.fontSnapshot.primaryColor;
+    service.setPrimaryColor('');
+    expect(service.fontSnapshot.primaryColor).toBe(before);
+  });
+
+  it('should update primary color and font family', () => {
+    service.setPrimaryColor('#abcdef');
+    expect(service.fontSnapshot.primaryColor).toBe('#abcdef');
+    service.setFontFamily('Roboto');
+    expect(service.fontSnapshot.fontFamily).toBe('Roboto');
+  });
+
+  it('should handle setResume with null (no customizations parse)', () => {
+    service.setResume(null);
+    expect(service.resumeSnapshot).toBeNull();
+    // Font should stay at defaults
+    expect(service.fontSnapshot.fontSize).toBe(11);
+  });
+
+  it('should handle setResume with invalid JSON customizations gracefully', () => {
+    spyOn(console, 'error');
+    const badResume = { customizations: '{invalid json}', resumeId: 1 } as any;
+    expect(() => service.setResume(badResume)).not.toThrow();
+    // Font stays at default since JSON.parse threw
+    expect(service.fontSnapshot.fontSize).toBe(11);
+  });
+
+  it('should handle setResume with partial customizations (use defaults for missing)', () => {
+    const partialCustom = JSON.stringify({ fontSize: 16 }); // no fontFamily or primaryColor
+    service.setResume({ customizations: partialCustom, resumeId: 2 } as any);
+    expect(service.fontSnapshot.fontSize).toBe(16);
+    expect(service.fontSnapshot.fontFamily).toBe('Inter'); // default
+    expect(service.fontSnapshot.primaryColor).toBe('#00d4b4'); // default
+  });
+
+  it('should skip unknown ids in reorderSections', () => {
+    service.setSections([
+      { sectionId: 1, displayOrder: 0 } as any,
+      { sectionId: 2, displayOrder: 1 } as any
+    ]);
+    service.reorderSections([2, 99, 1]); // 99 doesn't exist
+    expect(service.sectionsSnapshot.length).toBe(2);
+    expect(service.sectionsSnapshot[0].sectionId).toBe(2);
+  });
+
+  it('should set user profile and template', () => {
+    service.setUserProfile({ userId: 5, fullName: 'Test' } as any);
+    expect(service.userProfileSnapshot?.userId).toBe(5);
+    service.setTemplate({ templateId: 3 } as any);
+    expect(service.templateSnapshot?.templateId).toBe(3);
+    service.setTemplate(null);
+    expect(service.templateSnapshot).toBeNull();
   });
 });

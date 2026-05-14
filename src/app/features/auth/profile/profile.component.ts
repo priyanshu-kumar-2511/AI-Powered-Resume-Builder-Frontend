@@ -7,6 +7,7 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { UserProfileResponse } from '../../../shared/models/models';
 import { extractErrorMessage } from '../../../shared/utils/http-error.util';
 import { PaymentService, SubscriptionStatusResponse } from '../../../core/services/payment.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-profile',
@@ -18,6 +19,7 @@ export class ProfileComponent implements OnInit {
   private fb   = inject(FormBuilder);
   auth         = inject(AuthService);
   private paymentSvc = inject(PaymentService);
+  private confirmService = inject(ConfirmService);
 
   profile: UserProfileResponse | null = null;
   subscription: SubscriptionStatusResponse | null = null;
@@ -112,8 +114,14 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  cancelSubscription() {
-    if (!confirm('Are you sure you want to cancel Premium? Your Premium access will end immediately.')) return;
+  async cancelSubscription() {
+    const confirmed = await this.confirmService.ask({
+      title: 'Cancel Premium',
+      message: 'Are you sure you want to cancel Premium? Your Premium access will end immediately.',
+      confirmText: 'Yes, Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
     
     this.paymentSvc.cancelSubscription().subscribe({
       next: (res) => {
@@ -143,17 +151,24 @@ export class ProfileComponent implements OnInit {
 
   deletingAccount = false;
 
-  deleteAccount() {
-    const confirmation = window.confirm(
-      '⚠️ WARNING: Are you sure you want to permanently delete your account?\n\nThis action is irreversible and all your resumes, templates, and subscription benefits will be lost forever.'
-    );
+  async deleteAccount() {
+    const confirmation = await this.confirmService.ask({
+      title: 'Delete Account',
+      message: '⚠️ WARNING: Are you sure you want to permanently delete your account? This action is irreversible and all your resumes, templates, and subscription benefits will be lost forever.',
+      confirmText: 'Delete Permanently',
+      type: 'danger'
+    });
     if (!confirmation) return;
 
     this.deletingAccount = true;
     this.auth.deleteAccount().subscribe({
-      next: (res) => {
+      next: async (res) => {
         this.deletingAccount = false;
-        alert('Your account has been deleted permanently. Redirecting to login...');
+        await this.confirmService.alert(
+          'Account Deleted',
+          'Your account has been deleted permanently. Redirecting to login...',
+          'info'
+        );
         this.auth.logout();
       },
       error: (e) => {

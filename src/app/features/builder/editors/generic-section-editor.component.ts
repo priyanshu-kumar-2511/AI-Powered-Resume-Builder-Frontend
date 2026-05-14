@@ -1,9 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, inject } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { EMPTY, Observable, Subject, catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 import { SectionApiService } from '../services/section-api.service';
-import { ResumeSection } from '../../../shared/models/models';
+import { ResumeSection, SectionType } from '../../../shared/models/models';
+import { ConfirmService } from '../../../shared/services/confirm.service';
+
+interface StructuredEntry {
+  title: string;
+  subtitle: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
+  bullets: string[];
+}
+
+type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
 
 @Component({
   selector: 'app-generic-section-editor',
@@ -12,31 +24,123 @@ import { ResumeSection } from '../../../shared/models/models';
   template: `
     <div class="generic-editor">
       <div class="editor-top-row">
-        <span class="save-hint" [class.saving]="saving" [class.error]="saveError">
-          {{ saving ? 'Saving...' : saveError ? 'Save failed' : 'Autosave on' }}
-        </span>
-        <span class="char-count" [class.over]="textControl.value.length > 2000">
-          {{ textControl.value.length }} / 2000
-        </span>
+        <div class="top-left">
+          <span class="save-hint" [class.saving]="saving" [class.error]="saveError">
+            {{ saving ? 'Saving...' : saveError ? 'Save failed' : 'Autosave on' }}
+          </span>
+        </div>
+
+        <div class="mode-toggle">
+          <button type="button" class="mode-btn" [class.active]="mode === 'STRUCTURED'" (click)="setMode('STRUCTURED')">Structured</button>
+          <button type="button" class="mode-btn" [class.active]="mode === 'DESCRIPTION'" (click)="setMode('DESCRIPTION')">Describe</button>
+        </div>
       </div>
 
-      <div class="toolbar-row">
-        <button type="button" class="fmt-btn" title="Bold"      (click)="wrap('**','**')"><b>B</b></button>
-        <button type="button" class="fmt-btn" title="Italic"    (click)="wrap('*','*')"><i>I</i></button>
-        <button type="button" class="fmt-btn" title="Bullet"    (click)="insertBullet()">• List</button>
-        <button type="button" class="fmt-btn" title="Heading"   (click)="wrap('### ','')">H3</button>
+      <!-- Section Styling (Font Size) -->
+      <div class="section-styling">
+        <label class="style-label">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Section Font Size:
+        </label>
+        <input type="range" min="8" max="24" [formControl]="fontSizeControl" class="style-slider">
+        <span class="style-val">{{ fontSizeControl.value }}px</span>
       </div>
 
-      <textarea
-        #editorArea
-        class="generic-textarea"
-        [formControl]="textControl"
-        [placeholder]="placeholder"
-        rows="10"></textarea>
+      <!-- ── DESCRIPTION MODE (Markdown) ── -->
+      @if (mode === 'DESCRIPTION') {
+        <div class="description-editor anim-fade">
+          <div class="toolbar-row">
+            <button type="button" class="fmt-btn" title="Bold"      (click)="wrap('**','**')"><b>B</b></button>
+            <button type="button" class="fmt-btn" title="Italic"    (click)="wrap('*','*')"><i>I</i></button>
+            <button type="button" class="fmt-btn" title="Bullet"    (click)="insertBullet()">• List</button>
+            <button type="button" class="fmt-btn" title="Heading"   (click)="wrap('### ','')">H3</button>
+            <span class="char-count" [class.over]="textControl.value.length > 2000">
+              {{ textControl.value.length }} / 2000
+            </span>
+          </div>
 
-      <p class="format-hint">
-        Supports Markdown: **bold**, *italic*, bullet points with <code>-</code>, headings with <code>###</code>.
-      </p>
+          <textarea
+            #editorArea
+            class="generic-textarea"
+            [formControl]="textControl"
+            [placeholder]="placeholder"
+            rows="12"></textarea>
+
+          <p class="format-hint">
+            Supports Markdown: **bold**, *italic*, bullet points with <code>-</code>, headings with <code>###</code>.
+          </p>
+        </div>
+      }
+
+      <!-- ── STRUCTURED MODE (Entries) ── -->
+      @if (mode === 'STRUCTURED') {
+        <div class="structured-editor anim-fade">
+          <div class="entry-actions">
+             <button type="button" class="add-entry-btn" (click)="addEntry()">+ Add Entry</button>
+          </div>
+
+          @if (!entries.length) {
+            <div class="empty-entries">No entries yet. Click "+ Add Entry" to start.</div>
+          }
+
+          <div class="entry-list">
+            @for (entryCtrl of structuredForm.controls; track i; let i = $index) {
+              <div class="entry-card" [formGroup]="asFormGroup(entryCtrl)">
+                <div class="entry-card-header">
+                  <span class="entry-index">Entry {{ i + 1 }}</span>
+                  <button type="button" class="entry-remove" (click)="removeEntry(i)">Remove</button>
+                </div>
+
+                <div class="entry-fields">
+                  <div class="field-row">
+                    <div class="field-group">
+                      <label class="field-label">{{ getLabel('title') }} *</label>
+                      <input class="field-input" formControlName="title" [placeholder]="getPlaceholder('title')" />
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">{{ getLabel('subtitle') }}</label>
+                      <input class="field-input" formControlName="subtitle" [placeholder]="getPlaceholder('subtitle')" />
+                    </div>
+                  </div>
+
+                  <div class="field-row">
+                    <div class="field-group">
+                      <label class="field-label">{{ getLabel('startDate') }}</label>
+                      <input class="field-input" formControlName="startDate" placeholder="e.g. Jan 2023" />
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">{{ getLabel('endDate') }}</label>
+                      <input class="field-input" formControlName="endDate" placeholder="e.g. Present"
+                             [class.disabled-input]="asFormGroup(entryCtrl).get('isCurrent')?.value" />
+                    </div>
+                  </div>
+
+                  <label class="current-chk">
+                    <input type="checkbox" formControlName="isCurrent" />
+                    {{ getLabel('isCurrent') }}
+                  </label>
+
+                  <div class="entry-bullets">
+                    <div class="bullets-head">
+                      <label class="field-label">Details / Highlights</label>
+                      <button type="button" class="add-bullet-btn" (click)="addBullet(asFormGroup(entryCtrl))">+ Add Bullet</button>
+                    </div>
+                    @for (bulletCtrl of getBullets(asFormGroup(entryCtrl)).controls; track bi; let bi = $index) {
+                      <div class="bullet-row">
+                        <span class="bullet-dot">•</span>
+                        <input class="field-input bullet-input" [formControl]="$any(bulletCtrl)" placeholder="Describe a task or achievement..." />
+                        <button type="button" class="bullet-remove"
+                                (click)="removeBullet(asFormGroup(entryCtrl), bi)"
+                                [disabled]="getBullets(asFormGroup(entryCtrl)).length <= 1">✕</button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       @if (saveError) {
         <div class="alert alert-error">{{ saveError }}</div>
@@ -44,70 +148,159 @@ import { ResumeSection } from '../../../shared/models/models';
     </div>
 
     <style>
-    .generic-editor { display: flex; flex-direction: column; gap: 10px; }
+    .generic-editor { display: flex; flex-direction: column; gap: 12px; min-height: 300px; }
 
     .editor-top-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 4px;
     }
 
     .save-hint { font-size: 0.75rem; color: var(--text-muted); }
     .save-hint.saving { color: var(--teal); }
     .save-hint.error  { color: #ef4444; }
 
-    .char-count { font-size: 0.75rem; color: var(--text-muted); }
-    .char-count.over { color: #ef4444; }
+    /* Mode Toggle */
+    .mode-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.04);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .mode-btn {
+      background: none;
+      border: none;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: var(--teal);
+      color: #000;
+    }
 
+    .anim-fade { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Description Mode Styles */
     .toolbar-row {
       display: flex;
       gap: 6px;
-      padding: 6px 8px;
-      background: var(--bg-surface);
+      padding: 6px 12px;
+      background: #1a1f2e;
       border: 1px solid var(--border);
-      border-radius: 8px 8px 0 0;
+      border-radius: 10px 10px 0 0;
+      align-items: center;
     }
-
     .fmt-btn {
-      background: none;
-      border: 1px solid transparent;
-      border-radius: 5px;
-      padding: 3px 10px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-size: 0.82rem;
-      transition: background 0.1s;
+      background: none; border: 1px solid transparent; border-radius: 5px;
+      padding: 4px 10px; cursor: pointer; color: var(--text-secondary);
+      font-size: 0.82rem; transition: background 0.1s;
     }
     .fmt-btn:hover { background: rgba(255,255,255,0.06); border-color: var(--border); }
+    .char-count { margin-left: auto; font-size: 0.7rem; color: var(--text-muted); }
+    .char-count.over { color: #ef4444; }
 
     .generic-textarea {
-      width: 100%;
-      padding: 12px;
-      border-radius: 0 0 8px 8px;
-      border: 1px solid var(--border);
-      border-top: none;
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      font-size: 0.9rem;
-      resize: vertical;
-      line-height: 1.65;
-      box-sizing: border-box;
-      font-family: inherit;
+      width: 100%; padding: 14px; border-radius: 0 0 10px 10px;
+      border: 1px solid var(--border); border-top: none;
+      background: #111520; color: var(--text-primary);
+      font-size: 0.9rem; resize: vertical; line-height: 1.6;
+      box-sizing: border-box; font-family: inherit;
     }
     .generic-textarea:focus { border-color: var(--teal); outline: none; }
+    .format-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; }
+    code { background: rgba(255,255,255,0.07); padding: 1px 4px; border-radius: 3px; }
 
-    .format-hint {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin: 0;
+    /* Section Styling */
+    .section-styling {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .style-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .style-slider {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.1); outline: none;
+      -webkit-appearance: none; cursor: pointer;
+    }
+    .style-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--teal);
+      box-shadow: 0 0 10px rgba(0,212,180,0.4);
+    }
+    .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+
+    /* Structured Mode Styles */
+    .structured-editor { display: flex; flex-direction: column; gap: 14px; }
+    .entry-actions { display: flex; justify-content: flex-end; }
+    .add-entry-btn {
+      background: rgba(0,212,180,0.1); border: 1px solid rgba(0,212,180,0.2);
+      color: var(--teal); padding: 6px 14px; border-radius: 8px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .add-entry-btn:hover { background: rgba(0,212,180,0.15); }
+
+    .empty-entries {
+       padding: 30px; text-align: center; border: 1px dashed var(--border);
+       border-radius: 10px; color: var(--text-muted); font-size: 0.82rem;
     }
 
-    code {
-      background: rgba(255,255,255,0.07);
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 0.78rem;
+    .entry-list { display: flex; flex-direction: column; gap: 16px; }
+    .entry-card {
+      background: #111520; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
     }
+    .entry-card-header {
+      background: rgba(255,255,255,0.02); padding: 8px 16px;
+      border-bottom: 1px solid var(--border); display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .entry-index { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .entry-remove {
+      background: none; border: none; color: #ef4444; font-size: 0.7rem;
+      font-weight: 600; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    }
+    .entry-remove:hover { background: rgba(239,68,68,0.1); }
+
+    .entry-fields { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+    .field-input {
+      background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+      color: #fff; padding: 7px 10px; font-size: 0.85rem; outline: none; width: 100%;
+    }
+    .field-input:focus { border-color: var(--teal); }
+    .disabled-input { opacity: 0.4; pointer-events: none; }
+
+    .current-chk { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; }
+
+    .entry-bullets { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+    .bullets-head { display: flex; justify-content: space-between; align-items: center; }
+    .add-bullet-btn {
+      background: none; border: 1px solid rgba(0,212,180,0.3); color: var(--teal);
+      font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; cursor: pointer;
+    }
+    .bullet-row { display: flex; align-items: center; gap: 8px; }
+    .bullet-dot { color: var(--teal); font-size: 1.2rem; line-height: 1; }
+    .bullet-input { font-size: 0.82rem; }
+    .bullet-remove {
+      background: none; border: none; color: var(--text-muted); font-size: 0.75rem;
+      cursor: pointer; padding: 4px; opacity: 0.5;
+    }
+    .bullet-remove:hover { color: #ef4444; opacity: 1; }
+    .bullet-remove:disabled { display: none; }
     </style>
   `
 })
@@ -116,11 +309,17 @@ export class GenericSectionEditorComponent implements OnChanges {
   @Output() saved = new EventEmitter<ResumeSection>();
 
   private sectionApi = inject(SectionApiService);
+  private confirmService = inject(ConfirmService);
   private destroy$   = new Subject<void>();
 
+  mode: EditorMode = 'DESCRIPTION';
   textControl = new FormControl('', { nonNullable: true });
+  fontSizeControl = new FormControl(12, { nonNullable: true });
+  structuredForm = new FormArray<any>([]);
   saving    = false;
   saveError = '';
+
+  get entries(): FormGroup[] { return this.structuredForm.controls as FormGroup[]; }
 
   get placeholder(): string {
     const map: Record<string, string> = {
@@ -137,36 +336,157 @@ export class GenericSectionEditorComponent implements OnChanges {
     this.destroy$.next();
     this.saveError = '';
 
-    let text = '';
-    try {
-      const parsed = JSON.parse(this.section.content || '{}');
-      text = parsed.text || parsed.html || '';
-    } catch {
-      text = this.section.content || '';
-    }
-    this.textControl.setValue(text, { emitEvent: false });
+    const content = this.section.content || '';
+    let parsed: any = null;
+    try { parsed = JSON.parse(content); } catch { parsed = content; }
 
-    this.textControl.valueChanges.pipe(
+    const fs = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? (parsed.fontSize || 12) : 12;
+    this.fontSizeControl.setValue(fs, { emitEvent: false });
+
+    // Detect mode based on content structure
+    if (Array.isArray(parsed) || (parsed && parsed.items)) {
+      this.mode = 'STRUCTURED';
+      const items = Array.isArray(parsed) ? parsed : (parsed.items || []);
+      this.structuredForm = new FormArray<any>(items.map((e: any) => this.buildEntry(e)));
+    } else {
+      this.mode = 'DESCRIPTION';
+      const text = (typeof parsed === 'object' && parsed !== null) ? (parsed.text || parsed.html || '') : String(parsed || '');
+      this.textControl.setValue(text, { emitEvent: false });
+      this.structuredForm = new FormArray<any>([]);
+    }
+
+    // Combined auto-save logic
+    const update$ = new Subject<void>();
+
+    this.textControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.structuredForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+
+    update$.pipe(
       debounceTime(800),
-      distinctUntilChanged(),
-      switchMap(val => {
-        this.saving = true;
-        this.saveError = '';
-        return this.sectionApi.updateSection(this.section.sectionId, {
-          content: JSON.stringify({ text: val })
-        }).pipe(
-          catchError(() => {
-            this.saving = false;
-            this.saveError = 'Save failed.';
-            return EMPTY;
-          })
-        );
+      switchMap(() => {
+        const data = this.mode === 'DESCRIPTION'
+          ? { text: this.textControl.value, fontSize: this.fontSizeControl.value }
+          : { items: this.structuredForm.value, fontSize: this.fontSizeControl.value };
+        return this.save(data);
       }),
       takeUntil(this.destroy$)
-    ).subscribe(updated => {
-      this.saving = false;
-      this.saved.emit(updated);
+    ).subscribe((updated: ResumeSection) => this.onSaveSuccess(updated));
+  }
+
+  async setMode(m: EditorMode): Promise<void> {
+    if (this.mode === m) return;
+    const confirmed = await this.confirmService.ask({
+      title: 'Switch Mode',
+      message: `Switch to ${m === 'STRUCTURED' ? 'Structured' : 'Description'} mode? Some current content might be reformatted.`,
+      confirmText: 'Switch Mode',
+      type: 'info'
     });
+    if (!confirmed) return;
+
+    this.mode = m;
+    if (m === 'STRUCTURED') {
+      // Initialize with one empty entry if empty
+      if (this.structuredForm.length === 0) this.addEntry();
+    } else {
+      // Conversion from structured to description could be done here, but for now we just reset
+      this.textControl.setValue('');
+    }
+  }
+
+  // ── Structured Actions ──────────────────────────────────────────────────
+
+  addEntry(): void {
+    this.structuredForm.push(this.buildEntry({
+      title: '', subtitle: '', startDate: '', endDate: '', isCurrent: false, bullets: ['']
+    }));
+  }
+
+  removeEntry(index: number): void {
+    this.structuredForm.removeAt(index);
+  }
+
+  getBullets(entryGroup: FormGroup): FormArray {
+    return entryGroup.get('bullets') as FormArray;
+  }
+
+  addBullet(entryGroup: FormGroup): void {
+    this.getBullets(entryGroup).push(new FormControl('', { nonNullable: true }));
+  }
+
+  removeBullet(entryGroup: FormGroup, bulletIndex: number): void {
+    this.getBullets(entryGroup).removeAt(bulletIndex);
+  }
+
+  asFormGroup(ctrl: AbstractControl): FormGroup { return ctrl as FormGroup; }
+
+  // ── Labels & Placeholders ───────────────────────────────────────────────
+
+  getLabel(field: string): string {
+    const type = this.section.sectionType;
+    const labels: Record<string, Record<string, string>> = {
+      PROJECTS: {
+        title: 'Project Name',
+        subtitle: 'Role / Project Link',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        isCurrent: 'Currently working on this'
+      },
+      CERTIFICATIONS: {
+        title: 'Certification Name',
+        subtitle: 'Issuer / Organization',
+        startDate: 'Date Obtained',
+        endDate: 'Expiry Date',
+        isCurrent: 'Does not expire'
+      },
+      DEFAULT: {
+        title: 'Title',
+        subtitle: 'Subtitle / Location',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        isCurrent: 'Currently active'
+      }
+    };
+    return (labels[type] || labels['DEFAULT'])[field] || field;
+  }
+
+  getPlaceholder(field: string): string {
+    const type = this.section.sectionType;
+    if (type === 'PROJECTS' && field === 'title') return 'e.g. AI Resume Builder';
+    if (type === 'CERTIFICATIONS' && field === 'title') return 'e.g. AWS Solutions Architect';
+    return '';
+  }
+
+  // ── Internal Helpers ────────────────────────────────────────────────────
+
+  private buildEntry(e: any): FormGroup {
+    return new FormGroup({
+      title:     new FormControl(e.title     || '', { nonNullable: true, validators: [Validators.required] }),
+      subtitle:  new FormControl(e.subtitle  || '', { nonNullable: true }),
+      startDate: new FormControl(e.startDate || '', { nonNullable: true }),
+      endDate:   new FormControl(e.endDate   || '', { nonNullable: true }),
+      isCurrent: new FormControl(e.isCurrent || false, { nonNullable: true }),
+      bullets:   new FormArray((e.bullets || ['']).map((b: string) => new FormControl(b, { nonNullable: true })))
+    });
+  }
+
+  private save(data: any): Observable<ResumeSection> {
+    this.saving = true;
+    this.saveError = '';
+    return this.sectionApi.updateSection(this.section.sectionId, {
+      content: JSON.stringify(data)
+    }).pipe(
+      catchError(() => {
+        this.saving = false;
+        this.saveError = 'Save failed.';
+        return EMPTY;
+      })
+    );
+  }
+
+  private onSaveSuccess(updated: ResumeSection): void {
+    this.saving = false;
+    this.saved.emit(updated);
   }
 
   wrap(prefix: string, suffix: string): void {

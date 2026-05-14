@@ -9,6 +9,7 @@ import { Resume, TemplateResponseDTO, UserProfileResponse } from '../../../share
 import { ResumeCardComponent } from '../card/resume-card.component';
 import { ResumeApiService } from '../services/resume-api.service';
 import { ResumeStateService } from '../services/resume-state.service';
+import { ConfirmService } from '../../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-resume-dashboard',
@@ -22,6 +23,7 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
   private templateService = inject(TemplateService);
   private resumeApi = inject(ResumeApiService);
   private resumeState = inject(ResumeStateService);
+  private confirmService = inject(ConfirmService);
   private destroy$ = new Subject<void>();
 
   profile: UserProfileResponse | null = this.auth.currentUser();
@@ -146,8 +148,14 @@ export class ResumeDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  deleteResume(resume: Resume): void {
-    const confirmed = window.confirm(`Delete "${resume.title}"? This action cannot be undone.`);
+  async deleteResume(resume: Resume): Promise<void> {
+    const confirmed = await this.confirmService.ask({
+      title: 'Delete Resume',
+      message: `Are you sure you want to delete "${resume.title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      type: 'danger'
+    });
+
     if (!confirmed) {
       return;
     }

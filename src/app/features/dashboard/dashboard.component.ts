@@ -87,6 +87,6 @@ export class DashboardComponent implements OnInit {
   }
 
   formatCategory(category: string): string {
-    return category.replace(/_/g, ' ').replace(/\b\w/g, (value) => value.toUpperCase());
+    return category.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, (value) => value.toUpperCase());
   }
 }

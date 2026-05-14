@@ -6,6 +6,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { PaymentService, BillingCycle, CreateOrderResponse } from '../../core/services/payment.service';
 import { AuthService }    from '../../core/services/auth.service';
 import { USE_LOCALHOST_SIMULATED_PAYMENT } from '../../core/config/api.config';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 declare const Razorpay: new (options: object) => { open(): void };
 
@@ -436,6 +437,7 @@ export class PricingComponent implements OnInit {
   private router     = inject(Router);
   private ngZone     = inject(NgZone);
   private route      = inject(ActivatedRoute);
+  private confirmService = inject(ConfirmService);
 
   cycle: BillingCycle = 'MONTHLY';
   currentPlan: 'FREE' | 'PREMIUM' = 'FREE';
@@ -569,11 +571,14 @@ export class PricingComponent implements OnInit {
     rzp.open();
   }
 
-  private startSimulatedPayment(): void {
+  private async startSimulatedPayment(): Promise<void> {
     const amountLabel = this.cycle === 'YEARLY' ? 'Rs 500' : 'Rs 50';
-    const confirmed = window.confirm(
-      `Localhost dev mode active.\n\nSimulate a successful ${this.cycle.toLowerCase()} payment for ${amountLabel}?`
-    );
+    const confirmed = await this.confirmService.ask({
+      title: 'Simulate Payment',
+      message: `Localhost dev mode active. Simulate a successful ${this.cycle.toLowerCase()} payment for ${amountLabel}?`,
+      confirmText: 'Yes, Simulate',
+      type: 'info'
+    });
 
     if (!confirmed) {
       return;

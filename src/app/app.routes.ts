@@ -119,11 +119,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/notifications/admin-notifications.component')
           .then(m => m.AdminNotificationsComponent)
       },
-      {
-        path: 'audit',
-        loadComponent: () => import('./features/admin/audit/audit-logs.component')
-          .then(m => m.AuditLogsComponent)
-      },
+
       {
         path: 'subscriptions',
         loadComponent: () => import('./features/admin/subscriptions/admin-subscriptions.component')

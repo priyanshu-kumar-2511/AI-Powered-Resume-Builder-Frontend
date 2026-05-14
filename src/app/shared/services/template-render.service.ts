@@ -21,6 +21,7 @@ type PreviewExperience = {
 type PreviewEducation = {
   degree: string;
   institution: string;
+  fieldOfStudy: string;
   startYear: string;
   endYear: string;
   grade: string;
@@ -34,6 +35,7 @@ type PreviewProject = {
 };
 type PreviewCertification = {
   name: string;
+  issuer: string;
   date: string;
 };
 type PreviewKeyValue = {
@@ -61,642 +63,435 @@ type TemplateViewData = {
   github: string;
   website: string;
   summary: string;
+  hasSummary: boolean;
   skills: PreviewSkill[];
+  hasSkills: boolean;
   technicalSkills: PreviewSkill[];
+  hasTechnicalSkills: boolean;
   softSkills: PreviewSkill[];
+  hasSoftSkills: boolean;
   expertise: PreviewSkill[];
+  hasExpertise: boolean;
   experience: PreviewExperience[];
+  hasExperience: boolean;
   education: PreviewEducation[];
+  hasEducation: boolean;
   projects: PreviewProject[];
+  hasProjects: boolean;
   certifications: PreviewCertification[];
+  hasCertifications: boolean;
   achievements: PreviewAchievement[];
+  hasAchievements: boolean;
   additionalInfo: PreviewKeyValue[];
+  hasAdditionalInfo: boolean;
   references: PreviewReference[];
+  hasReferences: boolean;
   awards: PreviewSkill[];
+  hasAwards: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
 export class TemplateRenderService {
   private readonly demoData: TemplateViewData = {
-    fullName: 'Lorna Alvarado',
-    jobTitle: 'Marketing Manager',
-    email: 'hello@reallygreatsite.com',
-    phone: '+123-456-7890',
-    location: '123 Anywhere St., Any City',
-    linkedin: 'linkedin.com/in/lornaalvarado',
-    github: 'github.com/lornaalvarado',
-    website: 'www.reallygreatsite.com',
-    summary: 'Creative and detail-oriented marketing professional with 8+ years of experience building campaigns, improving conversion funnels, and mentoring cross-functional teams across digital channels.',
+    fullName: 'Lorna Alvarado', jobTitle: 'Senior Marketing Manager', email: 'hello@reallygreatsite.com',
+    phone: '+1 234 567 890', location: 'London, United Kingdom', linkedin: 'linkedin.com/in/lornaalvarado',
+    github: 'github.com/lornaalvarado', website: 'www.reallygreatsite.com',
+    summary: 'Strategic and results-driven Marketing Professional with over 8 years of experience in digital transformation, brand positioning, and cross-functional team leadership. Proven track record of increasing brand awareness by 40% and managing multi-million dollar budgets.',
+    hasSummary: true, 
     skills: [
-      { name: 'Project Management' },
-      { name: 'Public Relations' },
-      { name: 'Teamwork' },
-      { name: 'Leadership' },
-      { name: 'Time Management' },
-      { name: 'Effective Communication' }
-    ],
-    technicalSkills: [
-      { name: 'Project Management' },
-      { name: 'Public Relations' },
-      { name: 'Time Management' }
-    ],
-    softSkills: [
-      { name: 'Leadership' },
-      { name: 'Collaboration' },
-      { name: 'Communication' }
-    ],
-    expertise: [
-      { name: 'Brand Strategy' },
-      { name: 'Campaign Planning' },
-      { name: 'Market Research' },
-      { name: 'Content Marketing' },
-      { name: 'Budget Management' },
-      { name: 'Analytics' }
-    ],
+      { name: 'Strategic Planning' }, { name: 'Digital Marketing' }, 
+      { name: 'Team Leadership' }, { name: 'Market Research' },
+      { name: 'Budget Management' }, { name: 'Public Relations' }
+    ], 
+    hasSkills: true,
+    technicalSkills: [{ name: 'SEO/SEM' }, { name: 'Google Analytics' }, { name: 'HubSpot' }, { name: 'Salesforce' }], 
+    hasTechnicalSkills: true, 
+    softSkills: [{ name: 'Communication' }, { name: 'Adaptability' }, { name: 'Problem Solving' }], 
+    hasSoftSkills: true,
+    expertise: [], hasExpertise: false, 
     experience: [
       {
-        role: 'Senior Marketing Manager',
-        company: 'Wardiere Inc.',
-        startDate: '2030',
-        endDate: 'Present',
-        description: 'Built integrated marketing campaigns, improved reporting visibility, and scaled qualified pipeline growth across paid and owned channels.',
+        role: 'Marketing Manager', company: 'CloudScale Industries', startDate: '2020', endDate: 'Present',
+        description: 'Leading global marketing strategy and execution.',
         bullets: [
-          { text: 'Led a team of 8 marketers across lifecycle, content, and growth initiatives.' },
-          { text: 'Improved lead-to-opportunity conversion by 42% through funnel optimization.' },
-          { text: 'Partnered with product and sales teams to launch 4 high-performing campaigns.' }
+          { text: 'Developed and implemented a comprehensive digital marketing strategy that increased lead generation by 45%.' },
+          { text: 'Managed a cross-functional team of 12 specialists across creative, social, and performance marketing.' },
+          { text: 'Reduced customer acquisition cost (CAC) by 20% through optimized ad targeting and content personalization.' }
         ]
       },
       {
-        role: 'Marketing Manager',
-        company: 'Studio Showde',
-        startDate: '2027',
-        endDate: '2030',
-        description: 'Managed campaign execution, content systems, and stakeholder reporting for B2B demand generation programs.',
+        role: 'Marketing Specialist', company: 'BrightPath Solutions', startDate: '2016', endDate: '2020',
+        description: 'Executed multi-channel marketing campaigns.',
         bullets: [
-          { text: 'Owned quarterly campaign planning and managed a six-figure media budget.' },
-          { text: 'Created executive dashboards for CAC, MQL quality, and retention signals.' }
+          { text: 'Successfully launched 4 new product lines, achieving 110% of the first-year sales target.' },
+          { text: 'Orchestrated social media campaigns reaching over 1 million followers.' }
         ]
       }
-    ],
+    ], 
+    hasExperience: true,
     education: [
       {
-        degree: 'Master of Strategic Marketing',
-        institution: 'Wardiere University',
-        startYear: '2029',
-        endYear: '2030',
-        grade: 'GPA: 3.8 / 4.0',
-        description: 'Specialized in performance marketing, growth experimentation, and customer insights.',
-        highlights: [
-          { text: 'Capstone focused on lifecycle retention strategy for subscription products.' }
-        ]
+        degree: 'Master of Business Administration', institution: 'University of Business Excellence', fieldOfStudy: 'Marketing',
+        startYear: '2014', endYear: '2016', grade: '3.9/4.0', description: '', highlights: []
       },
       {
-        degree: 'Bachelor of Strategic Marketing',
-        institution: 'Wardiere University',
-        startYear: '2025',
-        endYear: '2029',
-        grade: 'GPA: 3.8 / 4.0',
-        description: 'Studied brand communication, analytics, and digital media strategy.',
-        highlights: [
-          { text: 'Graduated with distinction and led the student marketing association.' }
-        ]
+        degree: 'Bachelor of Science', institution: 'State Tech University', fieldOfStudy: 'Communications',
+        startYear: '2010', endYear: '2014', grade: '3.8/4.0', description: '', highlights: []
       }
-    ],
+    ], 
+    hasEducation: true,
     projects: [
       {
-        title: 'Demand Generation Revamp',
-        dates: '2029 - 2030',
-        bullets: [
-          { text: 'Redesigned nurture flows and increased qualified demo requests by 31%.' },
-          { text: 'Introduced attribution reporting that reduced campaign waste across channels.' }
-        ]
+        title: 'Global Brand Refresh', dates: '2021 - 2022',
+        bullets: [{ text: 'Led a complete visual and messaging overhaul for a Fortune 500 tech client.' }]
       }
-    ],
-    certifications: [
-      { name: 'Google Ads Search Certification', date: '2029' },
-      { name: 'HubSpot Content Marketing', date: '2028' }
-    ],
-    achievements: [
-      { title: 'Revenue Growth', description: 'Improved marketing-sourced pipeline by 42% in 12 months.' },
-      { title: 'Team Award', description: 'Led a cross-functional launch that won regional campaign honors.' }
-    ],
-    additionalInfo: [
-      { label: 'Languages', value: 'English (Native), Spanish (Professional)' },
-      { label: 'Portfolio', value: 'www.reallygreatsite.com' }
-    ],
-    references: [
-      {
-        name: 'Harper Russo',
-        title: 'CEO, Wardiere Inc.',
-        phone: '123-456-7890',
-        social: 'linkedin.com/in/harperrusso'
-      }
-    ],
-    awards: [
-      { name: 'Marketing Excellence Award' },
-      { name: 'Top Campaign Leader' }
-    ]
+    ], 
+    hasProjects: true,
+    certifications: [{ name: 'Google Ads Certification', issuer: 'Google', date: '2023' }], 
+    hasCertifications: true, 
+    achievements: [], hasAchievements: false,
+    additionalInfo: [], hasAdditionalInfo: false, references: [], hasReferences: false,
+    awards: [], hasAwards: false
   };
 
-  renderDocument(
-    template: Template | null | undefined,
-    options?: {
-      sections?: ResumeSection[];
-      profile?: UserProfileResponse | null;
-      resume?: Resume | null;
-      font?: PreviewFont;
-      primaryColor?: string;
-      fitToPage?: boolean;
-      useDemoData?: boolean;
-    }
-  ): string | null {
+  renderDocument(template: Template | null | undefined, options?: any): string | null {
     const layout = this.getLayout(template);
-    if (!layout) {
-      return null;
-    }
-
+    if (!layout) return null;
     const styles = this.getStyles(template);
+
+    // Sorting for reordering support and filtering for visibility
+    const sortedSections = [...(options?.sections ?? [])]
+      .filter(s => s.isVisible !== false)
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+
     const viewData = this.buildViewData(
-      options?.sections ?? [],
-      options?.profile ?? null,
-      options?.resume ?? null,
-      options?.useDemoData ?? (
-        !(options?.sections?.length) &&
-        !options?.profile &&
-        !options?.resume
-      )
+      sortedSections, options?.profile, options?.resume, 
+      options?.useDemoData ?? (!(options?.sections?.length) && !options?.profile)
     );
 
-    let renderedBody = layout;
     try {
-      renderedBody = Mustache.render(layout, viewData);
-    } catch (error) {
-      console.error('[TemplateRender] Mustache render failed:', error);
+      const renderedBody = Mustache.render(layout, viewData);
+      const fontCss = options?.font ? `
+        body { 
+          font-family: '${options.font.fontFamily}' !important; 
+          font-size: ${options.font.fontSize}px !important;
+        }
+      ` : '';
+      
+      const headerFontSize = options?.font?.contactFontSize || options?.contactFontSize || 24;
+      const subHeaderFontSize = Math.max(10, Math.floor(headerFontSize * 0.5));
+      const contactCss = `
+        .header .name, 
+        .navy-header .navy-name, 
+        .teal-header .teal-name, 
+        .timeline-header .timeline-name, 
+        .mono-header h1,
+        .ankesh-header h1,
+        .profile-section .name,
+        .ivory-header h1,
+        .profile-meta .name { 
+          font-size: ${headerFontSize}px !important; 
+        }
+        .header .job-title,
+        .header .contact-bar,
+        .contact-line,
+        .navy-contact,
+        .timeline-contact,
+        .teal-contact,
+        .teal-role,
+        .mono-contact,
+        .ankesh-sub,
+        .ankesh-contact,
+        .profile-section .title,
+        .side-section p,
+        .ivory-contact {
+          font-size: ${subHeaderFontSize}px !important;
+        }
+      `;
+
+      const bodyAttrs = options?.primaryColor ? ` style="--primary: ${options.primaryColor}; --accent: ${options.primaryColor};"` : '';
+      return `<!DOCTYPE html><html><head><style>${styles}${fontCss}${contactCss}</style></head><body${bodyAttrs}>${renderedBody}</body></html>`;
+    } catch (e) {
+      console.error(e);
+      return null;
     }
-
-    const fontCss = options?.font
-      ? `
-    :root {
-      --preview-font-family: '${options.font.fontFamily}', sans-serif;
-      --preview-font-size: ${options.font.fontSize}px;
-    }
-    body {
-      font-family: var(--preview-font-family) !important;
-      font-size: var(--preview-font-size) !important;
-    }`
-      : '';
-
-    const bodyAttrs = options?.primaryColor
-      ? ` style="--primary: ${options.primaryColor}; --accent: ${options.primaryColor}; --color-primary: ${options.primaryColor};"`
-      : '';
-
-    const fitToPageCss = options?.fitToPage
-      ? `
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 100% !important;
-      min-height: 100% !important;
-      background: #fff !important;
-      overflow: hidden !important;
-    }
-
-    body > * {
-      width: 100% !important;
-      max-width: none !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-    }
-
-    .resume,
-    .ats-resume,
-    .corp-resume,
-    .sidebar-resume,
-    .navy-resume,
-    .timeline-resume,
-    .teal-resume,
-    .creative-resume {
-      width: 100% !important;
-      max-width: none !important;
-      min-height: 100vh !important;
-      margin: 0 !important;
-      border: none !important;
-      box-shadow: none !important;
-    }`
-      : '';
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    ${styles}
-    ${fontCss}
-    ${fitToPageCss}
-  </style>
-</head>
-<body${bodyAttrs}>${renderedBody}</body>
-</html>`;
   }
 
-  buildViewData(
-    sections: ResumeSection[] = [],
-    profile: UserProfileResponse | null = null,
-    resume: Resume | null = null,
-    useDemoData = true
-  ): TemplateViewData {
+  private readonly demoSections: any[] = [
+    { title: 'Professional Summary', sectionType: 'SUMMARY', content: JSON.stringify({ text: 'Strategic and results-driven Marketing Professional with over 8 years of experience in digital transformation, brand positioning, and cross-functional team leadership. Proven track record of increasing brand awareness by 40% and managing multi-million dollar budgets. Expert in leveraging data analytics to drive customer acquisition and retention strategies.', fontSize: 12 }), isVisible: true, displayOrder: 1 },
+    { title: 'Work Experience', sectionType: 'EXPERIENCE', content: JSON.stringify({ items: [
+      { role: 'Senior Marketing Manager', company: 'CloudScale Industries', startDate: 'Jan 2020', isCurrent: true, bullets: [
+        'Developed and implemented a comprehensive digital marketing strategy that increased lead generation by 45% within the first year.',
+        'Managed a cross-functional team of 15 specialists across creative, social, and performance marketing channels.',
+        'Reduced customer acquisition cost (CAC) by 20% through optimized ad targeting and sophisticated content personalization.',
+        'Oversaw a $2.5M annual marketing budget, consistently delivering high ROI across all campaigns.',
+        'Collaborated with product teams to align marketing messaging with new feature releases.'
+      ] },
+      { role: 'Digital Marketing Specialist', company: 'BrightPath Solutions', startDate: 'June 2016', endDate: 'Dec 2019', bullets: [
+        'Successfully launched 4 new product lines, achieving 110% of the first-year sales target and expanding market share.',
+        'Orchestrated social media campaigns reaching over 1.2 million unique followers and increasing engagement by 60%.',
+        'Implemented SEO best practices that moved 15 high-value keywords to the first page of Google results.',
+        'Designed and executed A/B tests for email marketing, resulting in a 25% increase in open rates.'
+      ] }
+    ], fontSize: 12 }), isVisible: true, displayOrder: 2 },
+    { title: 'Education', sectionType: 'EDUCATION', content: JSON.stringify({ items: [
+      { degree: 'Master of Business Administration', institution: 'University of Business Excellence', fieldOfStudy: 'Marketing Management', startYear: '2014', endYear: '2016' },
+      { degree: 'Bachelor of Science in Communications', institution: 'State Tech University', fieldOfStudy: 'Digital Media', startYear: '2010', endYear: '2014' }
+    ], fontSize: 12 }), isVisible: true, displayOrder: 3 },
+    { title: 'Projects', sectionType: 'PROJECTS', content: JSON.stringify({ items: [
+      { title: 'Global Brand Refresh 2022', dates: '2021 - 2022', bullets: [
+        'Led a complete visual and messaging overhaul for a global SaaS platform, resulting in a 30% increase in brand sentiment scores.',
+        'Coordinated with external agencies and internal stakeholders to ensure brand consistency across 10+ international markets.'
+      ] },
+      { title: 'E-commerce Optimization Project', dates: '2019', bullets: [
+        'Redesigned the checkout flow of a major retail site, reducing cart abandonment by 15%.'
+      ] }
+    ], fontSize: 12 }), isVisible: true, displayOrder: 4 },
+    { title: 'Technical Skills', sectionType: 'SKILLS', content: JSON.stringify({ technical: ['SEO/SEM Expert', 'Google Analytics 4', 'HubSpot / Salesforce CRM', 'Adobe Creative Suite', 'Python for Data Analysis', 'SQL Queries', 'A/B Testing Tools'], soft: ['Strategic Leadership', 'Public Speaking', 'Conflict Resolution', 'Agile Project Management'], fontSize: 12 }), isVisible: true, displayOrder: 5 }
+  ];
+
+  buildViewData(sections: ResumeSection[] = [], profile: any, resume: any, useDemoData = true): TemplateViewData {
+    const finalSections = (useDemoData && (!sections || sections.length === 0)) ? this.demoSections : sections;
     const viewData = useDemoData ? this.cloneDemoData() : this.createEmptyViewData();
+    if (profile) {
+      viewData.fullName = (profile.fullName || '').trim();
+      viewData.email = (profile.email || '').trim();
+      viewData.phone = (profile.mobileNumber || '').trim();
+      viewData.location = (profile.location || '').trim();
+      viewData.linkedin = (profile.linkedin || '').trim();
+      viewData.github = (profile.github || '').trim();
+      viewData.website = (profile.website || '').trim();
+    }
+    if (resume?.targetJobTitle) viewData.jobTitle = resume.targetJobTitle.trim();
 
-    if (this.hasText(profile?.fullName)) viewData.fullName = profile!.fullName.trim();
-    if (this.hasText(profile?.email)) viewData.email = profile!.email.trim();
-    if (this.hasText(profile?.mobileNumber)) viewData.phone = profile!.mobileNumber.trim();
-    if (this.hasText(profile?.location)) viewData.location = profile!.location!.trim();
-    if (this.hasText(profile?.linkedin)) viewData.linkedin = profile!.linkedin!.trim();
-    if (this.hasText(profile?.github)) viewData.github = profile!.github!.trim();
-    if (this.hasText(profile?.website)) viewData.website = profile!.website!.trim();
-    if (this.hasText(resume?.targetJobTitle)) viewData.jobTitle = resume!.targetJobTitle.trim();
+    const dynamicSections: any[] = [];
+    const additionalInfoMap = new Map<string, string>();
 
-    const actualTechnicalSkills: string[] = [];
-    const actualSoftSkills: string[] = [];
-    const actualExperience: PreviewExperience[] = [];
-    const actualEducation: PreviewEducation[] = [];
-    const actualProjects: PreviewProject[] = [];
-    const actualCertifications: PreviewCertification[] = [];
-    const actualAchievements: PreviewAchievement[] = [];
-    const actualAdditionalInfo: PreviewKeyValue[] = [];
-
-    sections.forEach((section) => {
-      if (!section.isVisible) {
-        return;
+    finalSections.forEach(s => {
+      if (!s.isVisible) return;
+      let parsed = this.parseContent(s.content);
+      
+      let sectionFontSize = 12;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (parsed.fontSize) sectionFontSize = parsed.fontSize;
       }
 
-      const parsed = this.parseContent(section.content);
+      let sectionData: any = { 
+        title: s.title, 
+        fontSize: sectionFontSize,
+        computedStyle: `font-size: ${sectionFontSize}px !important;`,
+        isExperience: s.sectionType === 'EXPERIENCE',
+        isEducation: s.sectionType === 'EDUCATION',
+        isProjects: s.sectionType === 'PROJECTS',
+        isCertifications: s.sectionType === 'CERTIFICATIONS',
+        isSkills: s.sectionType === 'SKILLS',
+        isSummary: s.sectionType === 'SUMMARY',
+        isCustom: s.sectionType === 'CUSTOM' || s.sectionType === 'VOLUNTEER' || s.sectionType === 'LANGUAGES'
+      };
 
-      switch (section.sectionType) {
-        case 'SUMMARY': {
-          const summary = this.extractTextValue(parsed);
-          if (this.hasText(summary)) {
-            viewData.summary = this.renderRichText(summary.trim());
-          }
+      const dataToExtract = (parsed && parsed.items) ? parsed.items : parsed;
+
+      switch (s.sectionType) {
+        case 'SUMMARY':
+          viewData.summary = this.renderRichText(this.extractTextValue(parsed));
+          viewData.hasSummary = !!viewData.summary;
+          sectionData.summary = viewData.summary;
           break;
-        }
-        case 'SKILLS': {
-          const extracted = this.extractSkills(parsed);
-          actualTechnicalSkills.push(...extracted.technical);
-          actualSoftSkills.push(...extracted.soft);
+        case 'EXPERIENCE':
+          const exp = this.extractExperience(dataToExtract);
+          viewData.experience.push(...exp);
+          viewData.hasExperience = viewData.experience.length > 0;
+          sectionData.items = exp;
+          // Fallback achievements for older templates
+          const achievements = exp.map(e => ({ title: e.role, description: e.bullets.map(b => b.text).join(' ') }));
+          viewData.achievements.push(...achievements);
+          viewData.hasAchievements = viewData.achievements.length > 0;
           break;
-        }
-        case 'EXPERIENCE': {
-          actualExperience.push(...this.extractExperience(parsed));
+        case 'EDUCATION':
+          const edu = this.extractEducation(dataToExtract);
+          viewData.education.push(...edu);
+          viewData.hasEducation = viewData.education.length > 0;
+          sectionData.items = edu;
           break;
-        }
-        case 'EDUCATION': {
-          actualEducation.push(...this.extractEducation(parsed));
+        case 'PROJECTS':
+          const proj = this.extractProjects(dataToExtract);
+          viewData.projects.push(...proj);
+          viewData.hasProjects = viewData.projects.length > 0;
+          sectionData.items = proj;
           break;
-        }
-        case 'PROJECTS': {
-          actualProjects.push(...this.extractProjects(parsed));
+        case 'CERTIFICATIONS':
+          const cert = this.extractCertifications(dataToExtract);
+          viewData.certifications.push(...cert);
+          viewData.hasCertifications = viewData.certifications.length > 0;
+          sectionData.items = cert;
+          // Map to awards for backward compatibility
+          const awards = cert.map(c => ({ name: c.name }));
+          viewData.awards.push(...awards);
+          viewData.hasAwards = viewData.awards.length > 0;
           break;
-        }
-        case 'CERTIFICATIONS': {
-          actualCertifications.push(...this.extractCertifications(parsed));
+        case 'SKILLS':
+          const sk = this.extractSkills(dataToExtract);
+          const combined = [...sk.technical, ...sk.soft].map(n => ({ name: n }));
+          viewData.skills.push(...combined);
+          viewData.hasSkills = viewData.skills.length > 0;
+          viewData.technicalSkills.push(...sk.technical.map(n => ({ name: n })));
+          viewData.hasTechnicalSkills = viewData.technicalSkills.length > 0;
+          viewData.softSkills.push(...sk.soft.map(n => ({ name: n })));
+          viewData.hasSoftSkills = viewData.softSkills.length > 0;
+          viewData.expertise.push(...combined);
+          viewData.hasExpertise = viewData.expertise.length > 0;
+          sectionData.items = combined;
           break;
-        }
-        case 'LANGUAGES': {
-          const languages = this.extractLineItems(parsed);
-          if (languages.length) {
-            actualAdditionalInfo.push({
-              label: 'Languages',
-              value: languages.join(', ')
-            });
-          }
-          break;
-        }
+        case 'LANGUAGES':
         case 'VOLUNTEER':
-        case 'CUSTOM': {
-          const text = this.extractTextValue(parsed);
-          if (this.hasText(text)) {
-            actualAdditionalInfo.push({
-              label: section.title,
-              value: text.trim()
-            });
+        case 'CUSTOM':
+          const label = s.title || (s.sectionType === 'LANGUAGES' ? 'Languages' : 'Additional Info');
+          const val = this.extractTextValue(parsed);
+          additionalInfoMap.set(label.toLowerCase(), val);
+          sectionData.value = this.renderRichText(val);
+          sectionData.isStructured = Array.isArray(dataToExtract) && dataToExtract.length > 0;
+          if (sectionData.isStructured) {
+            sectionData.items = this.extractExperience(dataToExtract);
           }
           break;
-        }
       }
+      dynamicSections.push(sectionData);
     });
 
-    if (actualExperience.length) {
-      viewData.experience = actualExperience;
-      if (!actualAchievements.length) {
-        viewData.achievements = actualExperience.slice(0, 2).map((item) => ({
-          title: item.role || item.company || 'Impact',
-          description: item.description || item.bullets.map((bullet) => bullet.text).join(' ')
-        })).filter((item) => this.hasText(item.description));
-      }
-    }
+    viewData.additionalInfo = Array.from(additionalInfoMap.entries()).map(([k, v]) => ({ 
+      label: k.charAt(0).toUpperCase() + k.slice(1), 
+      value: v 
+    }));
+    viewData.hasAdditionalInfo = viewData.additionalInfo.length > 0;
 
-    if (actualEducation.length) viewData.education = actualEducation;
-    if (actualProjects.length) viewData.projects = actualProjects;
-    if (actualCertifications.length) {
-      viewData.certifications = actualCertifications;
-      viewData.awards = actualCertifications.slice(0, 3).map((item) => ({ name: item.name }));
-    }
-    if (actualAchievements.length) viewData.achievements = actualAchievements;
-
-    if (actualAdditionalInfo.length) {
-      const merged = [...viewData.additionalInfo];
-      actualAdditionalInfo.forEach((item) => {
-        const existing = merged.findIndex((entry) => entry.label.toLowerCase() === item.label.toLowerCase());
-        if (existing >= 0) merged[existing] = item;
-        else merged.push(item);
-      });
-      viewData.additionalInfo = merged;
-    }
-
-    const uniqueTechnical = Array.from(new Set(actualTechnicalSkills.map(s => s.trim()).filter(s => s.length > 0)));
-    const uniqueSoft = Array.from(new Set(actualSoftSkills.map(s => s.trim()).filter(s => s.length > 0)));
-    const combined = [...uniqueTechnical, ...uniqueSoft];
-
-    if (combined.length) {
-      viewData.skills = combined.map(name => ({ name }));
-      viewData.technicalSkills = uniqueTechnical.map(name => ({ name }));
-      viewData.softSkills = uniqueSoft.map(name => ({ name }));
-      viewData.expertise = combined.slice(0, 6).map(name => ({ name }));
-    }
-
+    (viewData as any).sections = dynamicSections;
     return viewData;
   }
 
-  private getLayout(template: Template | null | undefined): string {
-    const directLayout = template?.htmlLayout || (template as Record<string, string> | null | undefined)?.['html_layout'] || '';
-    if (directLayout) {
-      return directLayout;
-    }
-
-    return resolveTemplateFallback(template)?.htmlLayout || '';
+  private getLayout(t: any) {
+    const fallback = resolveTemplateFallback(t);
+    if (fallback) return fallback.htmlLayout;
+    return t?.html_layout || t?.htmlLayout;
   }
 
-  private getStyles(template: Template | null | undefined): string {
-    const directStyles = template?.cssStyles || (template as Record<string, string> | null | undefined)?.['css_styles'] || '';
-    if (directStyles) {
-      return directStyles;
-    }
-
-    return resolveTemplateFallback(template)?.cssStyles || '';
+  private getStyles(t: any) {
+    const fallback = resolveTemplateFallback(t);
+    if (fallback) return fallback.cssStyles;
+    return t?.css_styles || t?.cssStyles;
   }
-
-  private cloneDemoData(): TemplateViewData {
-    return JSON.parse(JSON.stringify(this.demoData)) as TemplateViewData;
-  }
-
+  private cloneDemoData(): TemplateViewData { return JSON.parse(JSON.stringify(this.demoData)); }
   private createEmptyViewData(): TemplateViewData {
     return {
-      fullName: '',
-      jobTitle: '',
-      email: '',
-      phone: '',
-      location: '',
-      linkedin: '',
-      github: '',
-      website: '',
-      summary: '',
-      skills: [],
-      technicalSkills: [],
-      softSkills: [],
-      expertise: [],
-      experience: [],
-      education: [],
-      projects: [],
-      certifications: [],
-      achievements: [],
-      additionalInfo: [],
-      references: [],
-      awards: []
+      fullName: '', jobTitle: '', email: '', phone: '', location: '',
+      linkedin: '', github: '', website: '', summary: '', hasSummary: false,
+      skills: [], hasSkills: false, technicalSkills: [], hasTechnicalSkills: false,
+      softSkills: [], hasSoftSkills: false, expertise: [], hasExpertise: false,
+      experience: [], hasExperience: false, education: [], hasEducation: false,
+      projects: [], hasProjects: false, certifications: [], hasCertifications: false,
+      achievements: [], hasAchievements: false, additionalInfo: [], hasAdditionalInfo: false,
+      references: [], hasReferences: false, awards: [], hasAwards: false
     };
   }
+  private parseContent(c: any) { try { return typeof c === 'string' ? JSON.parse(c) : c; } catch { return c; } }
+  private extractTextValue(v: any) { return v?.text || v?.html || (typeof v === 'string' ? v : ''); }
+  
+  private renderRichText(v: string) { 
+    if (!v) return '';
+    // 1. Escape HTML for XSS protection
+    let escaped = v.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;')
+                   .replace(/"/g, '&quot;')
+                   .replace(/'/g, '&#039;');
+    
+    // 2. Simple Markdown parsing
+    return escaped
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\+\+(.*?)\+\+/g, '<u>$1</u>')
+      .replace(/~~(.*?)~~/g, '<s>$1</s>')
+      .replace(/\n/g, '<br/>');
+  }
 
-  private parseContent(content: string | null | undefined): unknown {
-    if (!content) return null;
-    try {
-      return JSON.parse(content);
-    } catch {
-      return content;
+  private extractExperience(v: any): PreviewExperience[] {
+    if (!v) return [];
+    const items = Array.isArray(v) ? v : [v];
+    return items.map(e => {
+      if (typeof e === 'string') return { role: 'Selected Experience', company: '', startDate: '', endDate: '', description: e, bullets: [{ text: e }] };
+      return {
+        role: e.role || e.title || '',
+        company: e.company || e.subtitle || e.organization || '',
+        startDate: e.startDate || '',
+        endDate: e.isCurrent ? 'Present' : (e.endDate || ''),
+        description: e.description || (e.bullets || []).map((b: any) => typeof b === 'string' ? b : (b.text || '')).join(' '),
+        bullets: (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') }))
+      };
+    });
+  }
+
+  private extractEducation(v: any): PreviewEducation[] {
+    if (!v) return [];
+    const items = Array.isArray(v) ? v : [v];
+    return items.map((e: any) => {
+      const description = e.description || e.fieldOfStudy || e.grade || '';
+      return {
+        degree: e.degree || e.title || '',
+        institution: e.institution || e.subtitle || '',
+        fieldOfStudy: e.fieldOfStudy || '',
+        startYear: e.startYear || e.startDate || '',
+        endYear: e.isCurrent ? 'Present' : (e.endYear || e.endDate || ''),
+        grade: e.grade || '',
+        description: description,
+        highlights: (e.bullets || []).length > 0 ? 
+           (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') })) :
+           (description ? [{ text: description }] : [])
+      };
+    });
+  }
+
+  private extractProjects(v: any): PreviewProject[] {
+    if (!v) return [];
+    const items = Array.isArray(v) ? v : [v];
+    return items.map(e => {
+      if (typeof e === 'string') return { title: 'Selected Project', dates: '', bullets: [{ text: e }] };
+      return {
+        title: e.name || e.title || '',
+        dates: `${e.startDate || ''}${e.startDate && e.endDate ? ' - ' : ''}${e.isCurrent ? 'Present' : (e.endDate || '')}`,
+        bullets: (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') }))
+      };
+    });
+  }
+
+  private extractCertifications(v: any): PreviewCertification[] {
+    if (!v) return [];
+    if (typeof v === 'string') return v.split(',').map(s => ({ name: s.trim(), issuer: '', date: '' }));
+    const items = Array.isArray(v) ? v : [v];
+    return items.map(e => ({
+      name: e.title || e.name || '',
+      issuer: e.subtitle || e.issuer || e.organization || '',
+      date: e.date || e.year || e.issuedAt || e.startDate || ''
+    }));
+  }
+
+  private extractSkills(v: any) {
+    if (!v) return { technical: [], soft: [] };
+    if (typeof v === 'string') return { technical: v.split(',').map(s => s.trim()), soft: [] };
+    if (Array.isArray(v)) {
+       const technical = v.map(i => typeof i === 'object' ? (i.name || i.title || '') : String(i)).filter(Boolean);
+       return { technical, soft: [] };
     }
-  }
-
-  private extractTextValue(value: unknown): string {
-    if (typeof value === 'string') return value;
-    if (value && typeof value === 'object') {
-      const record = value as Record<string, unknown>;
-      if (typeof record['text'] === 'string') return record['text'];
-      if (typeof record['html'] === 'string') return record['html'];
-      if (typeof record['description'] === 'string') return record['description'];
-    }
-    return '';
-  }
-
-  private renderRichText(value: string): string {
-    return this.escapeHtml(value)
-      .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/gs, '<em>$1</em>')
-      .replace(/\+\+(.+?)\+\+/gs, '<u>$1</u>')
-      .replace(/~~(.+?)~~/gs, '<s>$1</s>')
-      .replace(/\r?\n/g, '<br>');
-  }
-
-  private escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  private extractSkills(value: unknown): { technical: string[]; soft: string[] } {
-    const result = { technical: [] as string[], soft: [] as string[] };
-    if (!value) return result;
-
-    if (Array.isArray(value)) {
-      result.technical = value
-        .map((item) => {
-          if (typeof item === 'string') return item;
-          if (item && typeof item === 'object' && typeof (item as Record<string, unknown>)['name'] === 'string') {
-            return String((item as Record<string, unknown>)['name']);
-          }
-          return '';
-        })
-        .filter((item) => this.hasText(item));
-      return result;
-    }
-
-    if (typeof value === 'object') {
-      const obj = value as Record<string, unknown>;
-      
-      if (Array.isArray(obj['technical'])) {
-        result.technical = obj['technical'].map(String).filter((s) => this.hasText(s));
+    const technical: string[] = [];
+    const soft: string[] = [];
+    if (v.technical && Array.isArray(v.technical)) technical.push(...v.technical.map(String));
+    if (v.soft && Array.isArray(v.soft)) soft.push(...v.soft.map(String));
+    
+    // Handle arbitrary keys (categories)
+    Object.keys(v).forEach(key => {
+      if (key !== 'technical' && key !== 'soft' && key !== 'fontSize' && Array.isArray(v[key])) {
+        technical.push(...v[key].map(String));
       }
-      if (Array.isArray(obj['soft'])) {
-        result.soft = obj['soft'].map(String).filter((s) => this.hasText(s));
-      }
+    });
 
-      if (!obj['technical'] && !obj['soft']) {
-        result.technical = Object.values(obj).flatMap((entry) => {
-          if (!Array.isArray(entry)) return [];
-          return entry.map(String).filter((s) => this.hasText(s));
-        });
-      }
-    }
-
-    return result;
-  }
-
-  private extractExperience(value: unknown): PreviewExperience[] {
-    if (!Array.isArray(value)) return [];
-
-    return value
-      .map((entry) => {
-        const item = (entry ?? {}) as Record<string, unknown>;
-        const bullets = this.extractBullets(item['bullets']);
-        const description = this.firstText(
-          item['description'],
-          item['summary'],
-          bullets.map((bullet) => bullet.text).join(' ')
-        );
-
-        return {
-          role: this.stringValue(item['role']),
-          company: this.stringValue(item['company']),
-          startDate: this.stringValue(item['startDate']),
-          endDate: item['isCurrent'] ? 'Present' : this.stringValue(item['endDate']),
-          description,
-          bullets: bullets.length ? bullets : [{ text: description }]
-        };
-      })
-      .filter((item) => this.hasText(item.role) || this.hasText(item.company) || item.bullets.length > 0);
-  }
-
-  private extractEducation(value: unknown): PreviewEducation[] {
-    if (!Array.isArray(value)) return [];
-
-    return value
-      .map((entry) => {
-        const item = (entry ?? {}) as Record<string, unknown>;
-        const highlights = this.extractBullets(item['highlights']);
-        const description = this.firstText(
-          item['description'],
-          item['fieldOfStudy'],
-          item['grade'],
-          highlights.map((highlight) => highlight.text).join(' ')
-        );
-
-        const finalHighlights = highlights.length
-          ? highlights
-          : description
-            ? [{ text: description }]
-            : [];
-
-        return {
-          degree: this.stringValue(item['degree']),
-          institution: this.stringValue(item['institution']),
-          startYear: this.stringValue(item['startYear']),
-          endYear: this.stringValue(item['endYear']),
-          grade: this.stringValue(item['grade']),
-          description,
-          highlights: finalHighlights
-        };
-      })
-      .filter((item) => this.hasText(item.degree) || this.hasText(item.institution));
-  }
-
-  private extractProjects(value: unknown): PreviewProject[] {
-    if (Array.isArray(value)) {
-      return value
-        .map((entry) => {
-          const item = (entry ?? {}) as Record<string, unknown>;
-          const bullets = this.extractBullets(item['bullets']);
-          const title = this.firstText(item['title'], item['name'], item['role'], 'Project');
-          const startDate = this.stringValue(item['startDate']);
-          const endDate = item['isCurrent'] ? 'Present' : this.stringValue(item['endDate']);
-          const dates = this.firstText(item['dates'], [startDate, endDate].filter(Boolean).join(' - '));
-          const description = this.firstText(item['description'], this.extractTextValue(item));
-
-          return {
-            title,
-            dates,
-            bullets: bullets.length ? bullets : description ? [{ text: description }] : []
-          };
-        })
-        .filter((item) => this.hasText(item.title) || item.bullets.length > 0);
-    }
-
-    const text = this.extractTextValue(value);
-    if (!this.hasText(text)) return [];
-
-    return [
-      {
-        title: 'Selected Project',
-        dates: '',
-        bullets: [{ text: text.trim() }]
-      }
-    ];
-  }
-
-  private extractCertifications(value: unknown): PreviewCertification[] {
-    if (Array.isArray(value)) {
-      return value
-        .map((entry) => {
-          const item = (entry ?? {}) as Record<string, unknown>;
-          return {
-            name: this.firstText(item['name'], item['title']),
-            date: this.firstText(item['date'], item['year'], item['issuedAt'])
-          };
-        })
-        .filter((item) => this.hasText(item.name));
-    }
-
-    const lines = this.extractLineItems(value);
-    return lines.map((line) => ({ name: line, date: '' }));
-  }
-
-  private extractLineItems(value: unknown): string[] {
-    const text = this.extractTextValue(value);
-    if (!this.hasText(text)) return [];
-
-    return text
-      .split(/\r?\n|,/)
-      .map((line) => line.replace(/^[-*#\s]+/, '').trim())
-      .filter((line) => line.length > 0);
-  }
-
-  private extractBullets(value: unknown): PreviewBullet[] {
-    if (!Array.isArray(value)) return [];
-
-    return value
-      .map((bullet) => {
-        if (typeof bullet === 'string') return { text: bullet.trim() };
-        if (bullet && typeof bullet === 'object' && typeof (bullet as Record<string, unknown>)['text'] === 'string') {
-          return { text: String((bullet as Record<string, unknown>)['text']).trim() };
-        }
-        return null;
-      })
-      .filter((bullet): bullet is PreviewBullet => !!bullet && this.hasText(bullet.text));
-  }
-
-  private stringValue(value: unknown): string {
-    return typeof value === 'string' ? value.trim() : '';
-  }
-
-  private hasText(value: unknown): value is string {
-    return typeof value === 'string' && value.trim().length > 0;
-  }
-
-  private firstText(...values: unknown[]): string {
-    for (const value of values) {
-      if (typeof value === 'string' && value.trim()) return value.trim();
-    }
-    return '';
+    return { technical, soft };
   }
 }

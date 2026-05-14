@@ -29,91 +29,123 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   <header class="header">
     <h1 class="name">{{fullName}}</h1>
     <div class="contact-bar">
-      <span>{{phone}}</span>
-      <span>{{email}}</span>
-      <span>{{linkedin}}</span>
-      <span>{{github}}</span>
+      {{#phone}}<span>{{phone}}</span>{{/phone}}
+      {{#email}}<span>{{email}}</span>{{/email}}
+      {{#location}}<span>{{location}}</span>{{/location}}
+      {{#linkedin}}<span>{{linkedin}}</span>{{/linkedin}}
+      {{#github}}<span>{{github}}</span>{{/github}}
+      {{#website}}<span>{{website}}</span>{{/website}}
     </div>
   </header>
 
-  <section class="section">
-    <h2 class="section-title">Career Objective</h2>
-    <p class="summary-text">{{{summary}}}</p>
-  </section>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    {{#isSummary}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      <p class="summary-text">{{{summary}}}</p>
+    </section>
+    {{/isSummary}}
 
-  <section class="section">
-    <h2 class="section-title">Education</h2>
-    {{#education}}
-    <div class="edu-item">
-      <div class="edu-row">
-        <strong class="edu-degree">{{degree}}</strong>
-        <span class="edu-dates">{{startYear}} - {{endYear}}</span>
+    {{#isEducation}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      {{#items}}
+      <div class="edu-item">
+        <div class="edu-row">
+          <strong class="edu-degree">{{degree}} {{#fieldOfStudy}}in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
+          <span class="edu-dates">{{startYear}} - {{endYear}}</span>
+        </div>
+        <div class="edu-row">
+          <span class="edu-institution">{{institution}}</span>
+          {{#grade}}<span class="edu-grade">Grade: {{grade}}</span>{{/grade}}
+        </div>
       </div>
-      <div class="edu-row">
-        <span class="edu-institution">{{institution}}</span>
-        <span class="edu-grade">{{grade}}</span>
+      {{/items}}
+    </section>
+    {{/isEducation}}
+
+    {{#isSkills}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      <ul class="bullet-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        {{#items}}<li>{{name}}</li>{{/items}}
+      </ul>
+    </section>
+    {{/isSkills}}
+
+    {{#isExperience}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      {{#items}}
+      <div class="exp-item">
+        <div class="exp-header">
+          <strong class="exp-company">{{company}}</strong>
+          <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+        </div>
+        <div class="exp-role">{{role}}</div>
+        <ul class="bullet-list">
+          {{#bullets}}<li>{{text}}</li>{{/bullets}}
+        </ul>
       </div>
-    </div>
-    {{/education}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isExperience}}
 
-  <section class="section two-col-section">
-    <div class="col">
-      <h2 class="section-title">Technical Skills</h2>
-      <ul class="bullet-list">
-        {{#technicalSkills}}<li>{{name}}</li>{{/technicalSkills}}
-      </ul>
-    </div>
-    <div class="col">
-      <h2 class="section-title">Soft Skills</h2>
-      <ul class="bullet-list">
-        {{#softSkills}}<li>{{name}}</li>{{/softSkills}}
-      </ul>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2 class="section-title">Experience</h2>
-    {{#experience}}
-    <div class="exp-item">
-      <div class="exp-header">
-        <strong class="exp-company">{{company}}</strong>
-        <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+    {{#isProjects}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      {{#items}}
+      <div class="project-item">
+        <div class="project-header">
+          <strong>{{title}}</strong>
+          <span class="exp-dates">{{dates}}</span>
+        </div>
+        <ul class="bullet-list">
+          {{#bullets}}<li>{{text}}</li>{{/bullets}}
+        </ul>
       </div>
-      <div class="exp-role">{{role}}</div>
-      <ul class="bullet-list">
-        {{#bullets}}<li>{{text}}</li>{{/bullets}}
-      </ul>
-    </div>
-    {{/experience}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isProjects}}
 
-  <section class="section">
-    <h2 class="section-title">Projects</h2>
-    {{#projects}}
-    <div class="project-item">
-      <div class="project-header">
-        <strong>{{title}}</strong>
-        <span class="exp-dates">{{dates}}</span>
+    {{#isCertifications}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      {{#items}}
+      <div class="cert-row">
+        <span>- {{name}} {{#issuer}}({{issuer}}){{/issuer}}</span>
+        <span class="exp-dates">{{date}}</span>
       </div>
-      <ul class="bullet-list">
-        {{#bullets}}<li>{{text}}</li>{{/bullets}}
-      </ul>
-    </div>
-    {{/projects}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isCertifications}}
 
-  <section class="section">
-    <h2 class="section-title">Certifications</h2>
-    {{#certifications}}
-    <div class="cert-row">
-      <span>- {{name}}</span>
-      <span class="exp-dates">{{date}}</span>
-    </div>
-    {{/certifications}}
-  </section>
+    {{#isCustom}}
+    <section class="section">
+      <h2 class="section-title">{{title}}</h2>
+      {{#isStructured}}
+        {{#items}}
+        <div class="exp-item">
+          <div class="exp-header">
+            <strong>{{role}} at {{company}}</strong>
+            <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+          </div>
+          <ul class="bullet-list">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+        </div>
+        {{/items}}
+      {{/isStructured}}
+      {{^isStructured}}
+        <p class="summary-text">{{{value}}}</p>
+      {{/isStructured}}
+    </section>
+    {{/isCustom}}
+  </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Times New Roman",Times,serif;max-width:780px;margin:0 auto;padding:36px 40px;color:#111;font-size:13px;line-height:1.55;background:#fff}.header{text-align:center;margin-bottom:14px}.name{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:8px;color:var(--primary,#111)}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;font-size:12px;color:#333;border-top:1.5px solid var(--primary,#111);border-bottom:1.5px solid var(--primary,#111);padding:6px 0}.section{margin-bottom:16px}.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary,#111);border-bottom:1.5px solid var(--primary,#111);padding-bottom:3px;margin-bottom:10px}.summary-text{font-size:12.5px}.two-col-section{display:grid;grid-template-columns:1fr 1fr;gap:24px}.col .section-title{margin-top:0}.edu-item{margin-bottom:8px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:600}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:12px;color:#444}.exp-item,.project-item{margin-bottom:12px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700}.exp-role{font-style:italic;font-size:12.5px;margin:2px 0 5px}.exp-dates{font-size:12px;color:#444}.bullet-list{padding-left:18px;margin-top:4px}.bullet-list li{margin-bottom:3px;font-size:12.5px}.cert-row{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{margin:0;padding:0;min-height:100vh;background:#fff}.resume{font-family:"Times New Roman",Times,serif;width:100%;margin:0 auto;padding:30px 20px;color:#111;font-size:12.5px;line-height:1.45;background:#fff}.header{text-align:center;margin-bottom:12px}.name{font-size:2.2em;font-weight:700;letter-spacing:.01em;margin-bottom:4px;color:#000;text-transform:uppercase}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;font-size:0.9em;color:#333;padding:4px 0;margin-bottom:10px}.section{margin-bottom:15px}.section-title{font-size:1.05em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#000;border-top:1.5px solid #000;padding-top:3px;margin-bottom:8px}.summary-text{font-size:0.95em}.edu-item{margin-bottom:6px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:700}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:0.9em;color:#444}.exp-item,.project-item{margin-bottom:10px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700}.exp-role{font-style:italic;font-size:0.95em;margin:1px 0 3px}.exp-dates{font-size:0.9em;color:#444}.bullet-list{padding-left:16px;margin-top:3px}.bullet-list li{margin-bottom:2px;font-size:0.95em}.cert-row{display:flex;justify-content:space-between;font-size:0.95em;margin-bottom:3px}`
   },
   {
     templateId: 2,
@@ -122,80 +154,124 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   <header class="header">
     <h1 class="name">{{fullName}}</h1>
     <p class="job-title">{{jobTitle}}</p>
-    <div class="contact-line">{{email}} | {{phone}} | {{location}}</div>
+    <div class="contact-line">
+      {{#email}}{{email}}{{/email}}{{#phone}} | {{phone}}{{/phone}}{{#location}} | {{location}}{{/location}}
+      {{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}{{#website}} | {{website}}{{/website}}
+    </div>
   </header>
 
-  <section class="section">
-    <div class="section-title-bar"><h2>SUMMARY</h2></div>
-    <p class="summary-text">{{{summary}}}</p>
-  </section>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    {{#isSummary}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      <p class="summary-text">{{{summary}}}</p>
+    </section>
+    {{/isSummary}}
 
-  <section class="section">
-    <div class="section-title-bar"><h2>WORK EXPERIENCE</h2></div>
-    {{#experience}}
-    <div class="exp-item">
-      <div class="exp-header">
-        <strong class="exp-role">{{role}}, {{company}}</strong>
-        <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+    {{#isExperience}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      {{#items}}
+      <div class="exp-item">
+        <div class="exp-header">
+          <strong class="exp-role">{{role}}, {{company}}</strong>
+          <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+        </div>
+        <ul class="bullet-list">
+          {{#bullets}}<li>{{text}}</li>{{/bullets}}
+        </ul>
       </div>
-      <ul class="bullet-list">
-        {{#bullets}}<li>{{text}}</li>{{/bullets}}
-      </ul>
-    </div>
-    {{/experience}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isExperience}}
 
-  <section class="section">
-    <div class="section-title-bar"><h2>PROJECTS</h2></div>
-    {{#projects}}
-    <div class="exp-item">
-      <div class="exp-header">
-        <strong class="exp-role">{{title}}</strong>
-        <span class="exp-dates">{{dates}}</span>
+    {{#isProjects}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      {{#items}}
+      <div class="exp-item">
+        <div class="exp-header">
+          <strong class="exp-role">{{title}}</strong>
+          <span class="exp-dates">{{dates}}</span>
+        </div>
+        <ul class="bullet-list">
+          {{#bullets}}<li>{{text}}</li>{{/bullets}}
+        </ul>
       </div>
-      <ul class="bullet-list">
-        {{#bullets}}<li>{{text}}</li>{{/bullets}}
-      </ul>
-    </div>
-    {{/projects}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isProjects}}
 
-  <section class="section">
-    <div class="section-title-bar"><h2>CERTIFICATIONS</h2></div>
-    {{#certifications}}
-    <div class="exp-item" style="margin-bottom: 8px;">
-      <div class="exp-header">
-        <strong class="exp-role">{{name}}</strong>
-        <span class="exp-dates">{{date}}</span>
+    {{#isCertifications}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      {{#items}}
+      <div class="exp-item" style="margin-bottom: 8px;">
+        <div class="exp-header">
+          <strong class="exp-role">{{name}} {{#issuer}}({{issuer}}){{/issuer}}</strong>
+          <span class="exp-dates">{{date}}</span>
+        </div>
       </div>
-    </div>
-    {{/certifications}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isCertifications}}
 
-  <section class="section">
-    <div class="section-title-bar"><h2>EDUCATION</h2></div>
-    {{#education}}
-    <div class="edu-item">
-      <div class="edu-header">
-        <strong>{{degree}}</strong>
-        <span class="exp-dates">{{startYear}} - {{endYear}}</span>
+    {{#isEducation}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      {{#items}}
+      <div class="edu-item">
+        <div class="edu-header">
+          <strong>{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
+          <span class="exp-dates">{{startYear}} - {{endYear}}</span>
+        </div>
+        <div class="edu-row" style="display:flex; justify-content:space-between; margin-bottom:4px">
+          <div class="edu-institution">{{institution}}</div>
+          {{#grade}}<div class="edu-grade">Grade: {{grade}}</div>{{/grade}}
+        </div>
+        <ul class="bullet-list">
+          {{#highlights}}<li>{{text}}</li>{{/highlights}}
+        </ul>
       </div>
-      <div class="edu-institution">{{institution}}</div>
-      <ul class="bullet-list">
-        {{#highlights}}<li>{{text}}</li>{{/highlights}}
-      </ul>
-    </div>
-    {{/education}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isEducation}}
 
-  <section class="section">
-    <div class="section-title-bar"><h2>KEY SKILLS</h2></div>
-    <div class="skills-grid">
-      {{#skills}}<span class="skill-item">- {{name}}</span>{{/skills}}
-    </div>
-  </section>
+    {{#isSkills}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      <div class="skills-grid">
+        {{#items}}<span class="skill-item">- {{name}}</span>{{/items}}
+      </div>
+    </section>
+    {{/isSkills}}
+
+    {{#isCustom}}
+    <section class="section">
+      <div class="section-title-bar"><h2>{{title}}</h2></div>
+      {{#isStructured}}
+        {{#items}}
+        <div class="exp-item">
+          <div class="exp-header">
+            <strong class="exp-role">{{role}} {{company}}</strong>
+            <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+          </div>
+          <ul class="bullet-list">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+        </div>
+        {{/items}}
+      {{/isStructured}}
+      {{^isStructured}}
+        <p class="summary-text">{{{value}}}</p>
+      {{/isStructured}}
+    </section>
+    {{/isCustom}}
+  </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.resume{font-family:"Open Sans",Arial,sans-serif;max-width:780px;margin:0 auto;padding:40px;color:#111;font-size:13px;line-height:1.6;background:#fff}.header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--primary,#111)}.name{font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}.job-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#444;margin-bottom:8px}.contact-line{font-size:12.5px;color:#555}.section{margin-bottom:20px}.section-title-bar{background:color-mix(in srgb,var(--primary,#111) 8%,transparent);padding:5px 10px;margin-bottom:12px}.section-title-bar h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary,#111)}.exp-item,.edu-item{margin-bottom:14px}.exp-header,.edu-header{display:flex;justify-content:space-between;align-items:baseline}.exp-role{font-weight:700;font-size:13px}.exp-dates{font-size:12px;color:#555}.edu-institution{font-size:12.5px;color:#333;margin:3px 0}.bullet-list{padding-left:18px;margin-top:6px}.bullet-list li{margin-bottom:4px;font-size:12.5px;text-align:justify}.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}.skill-item{font-size:12.5px}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{margin:0;padding:0;min-height:100vh;background:#fff}.resume{font-family:"Inter",Arial,sans-serif;width:100%;margin:0 auto;padding:40px 20px;color:#111;font-size:13px;line-height:1.6;background:#fff}.header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--primary,#2563eb)}.name{font-size:2.2em;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;color:#111}.job-title{font-size:1em;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#4b5563;margin-bottom:8px}.contact-line{font-size:0.95em;color:#6b7280}.section{margin-bottom:20px}.section-title-bar h2{font-size:0.95em;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary,#2563eb);margin-bottom:10px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}.exp-item,.edu-item{margin-bottom:14px}.exp-header,.edu-header{display:flex;justify-content:space-between;align-items:baseline}.exp-role{font-weight:700;font-size:1em}.exp-dates{font-size:0.9em;color:#6b7280}.edu-institution{font-size:0.95em;color:#333;margin:3px 0}.bullet-list{padding-left:18px;margin-top:6px}.bullet-list li{margin-bottom:4px;font-size:0.95em}.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}.skill-item{font-size:0.95em}`
   },
   {
     templateId: 3,
@@ -209,93 +285,126 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
 
     <div class="side-section">
       <h3>Contact</h3>
-      <p>{{email}}</p>
-      <p>{{phone}}</p>
-      <p>{{location}}</p>
-      <p>{{linkedin}}</p>
+      {{#email}}<p>{{email}}</p>{{/email}}
+      {{#phone}}<p>{{phone}}</p>{{/phone}}
+      {{#location}}<p>{{location}}</p>{{/location}}
+      {{#linkedin}}<p>{{linkedin}}</p>{{/linkedin}}
+      {{#github}}<p>{{github}}</p>{{/github}}
+      {{#website}}<p>{{website}}</p>{{/website}}
     </div>
 
-    <div class="side-section">
-      <h3>Skills</h3>
-      <ul class="skills-list">
-        {{#skills}}<li>{{name}}</li>{{/skills}}
-      </ul>
-    </div>
-
-    <div class="side-section">
-      <h3>Education</h3>
-      {{#education}}
-      <div class="side-edu">
-        <strong class="side-degree">{{degree}}</strong>
-        <span class="side-inst">{{institution}}</span>
-        <span class="side-dates">{{startYear}} - {{endYear}}</span>
+    {{#sections}}
+    <div style="{{{computedStyle}}}">
+      {{#isSkills}}
+      <div class="side-section">
+        <h3>{{title}}</h3>
+        <ul class="skills-list">
+          {{#items}}<li>{{name}}</li>{{/items}}
+        </ul>
       </div>
-      {{/education}}
-    </div>
+      {{/isSkills}}
 
-    <div class="side-section">
-      <h3>Certifications</h3>
-      {{#certifications}}
-      <div class="side-edu">
-        <strong class="side-degree">{{name}}</strong>
-        <span class="side-dates">{{date}}</span>
+      {{#isEducation}}
+      <div class="side-section">
+        <h3>{{title}}</h3>
+        {{#items}}
+        <div class="side-edu">
+          <strong class="side-degree">{{degree}}</strong>
+          {{#fieldOfStudy}}<div class="side-inst" style="font-style:italic">{{fieldOfStudy}}</div>{{/fieldOfStudy}}
+          <div class="side-inst">{{institution}}</div>
+          {{#grade}}<div class="side-inst">Grade: {{grade}}</div>{{/grade}}
+          <span class="side-dates">{{startYear}} - {{endYear}}</span>
+        </div>
+        {{/items}}
       </div>
-      {{/certifications}}
+      {{/isEducation}}
+
+      {{#isCertifications}}
+      <div class="side-section">
+        <h3>{{title}}</h3>
+        {{#items}}
+        <div class="side-edu">
+          <strong class="side-degree">{{name}}</strong>
+          {{#issuer}}<div class="side-inst">{{issuer}}</div>{{/issuer}}
+          <span class="side-dates">{{date}}</span>
+        </div>
+        {{/items}}
+      </div>
+      {{/isCertifications}}
     </div>
+    {{/sections}}
   </div>
 
   <div class="main-content">
-    <section class="main-section">
-      <h2>About Me</h2>
-      <p>{{{summary}}}</p>
-    </section>
+    {{#sections}}
+    <div style="{{{computedStyle}}}">
+      {{#isSummary}}
+      <section class="main-section">
+        <h2>{{title}}</h2>
+        <p>{{{summary}}}</p>
+      </section>
+      {{/isSummary}}
 
-    <section class="main-section">
-      <h2>Area of Expertise</h2>
-      <div class="expertise-grid">
-        {{#expertise}}<span>{{name}}</span>{{/expertise}}
-      </div>
-    </section>
-
-    <section class="main-section">
-      <h2>Professional Experience</h2>
-      {{#experience}}
-      <div class="exp-block">
-        <div class="exp-meta">
-          <strong>{{role}}, {{company}}</strong>
-          <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+      {{#isExperience}}
+      <section class="main-section">
+        <h2>{{title}}</h2>
+        {{#items}}
+        <div class="exp-block">
+          <div class="exp-meta">
+            <strong>{{role}}, {{company}}</strong>
+            <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+          </div>
+          <ul class="main-bullets">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
         </div>
-        <ul class="main-bullets">
-          {{#bullets}}<li>{{text}}</li>{{/bullets}}
-        </ul>
-      </div>
-      {{/experience}}
-    </section>
+        {{/items}}
+      </section>
+      {{/isExperience}}
 
-    <section class="main-section">
-      <h2>Projects</h2>
-      {{#projects}}
-      <div class="exp-block">
-        <div class="exp-meta">
-          <strong>{{title}}</strong>
-          <span class="exp-dates">{{dates}}</span>
+      {{#isProjects}}
+      <section class="main-section">
+        <h2>{{title}}</h2>
+        {{#items}}
+        <div class="exp-block">
+          <div class="exp-meta">
+            <strong>{{title}}</strong>
+            <span class="exp-dates">{{dates}}</span>
+          </div>
+          <ul class="main-bullets">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
         </div>
-        <ul class="main-bullets">
-          {{#bullets}}<li>{{text}}</li>{{/bullets}}
-        </ul>
-      </div>
-      {{/projects}}
-    </section>
+        {{/items}}
+      </section>
+      {{/isProjects}}
 
-    <section class="main-section">
-      <h2>Additional Information</h2>
-      <ul class="main-bullets">
-        {{#additionalInfo}}<li><strong>{{label}}:</strong> {{value}}</li>{{/additionalInfo}}
-      </ul>
-    </section>
+      {{#isCustom}}
+      <section class="main-section">
+        <h2>{{title}}</h2>
+        {{#isStructured}}
+          {{#items}}
+          <div class="exp-block">
+            <div class="exp-meta">
+              <strong>{{role}} at {{company}}</strong>
+              <span class="exp-dates">{{startDate}} - {{endDate}}</span>
+            </div>
+            <ul class="main-bullets">
+              {{#bullets}}<li>{{text}}</li>{{/bullets}}
+            </ul>
+          </div>
+          {{/items}}
+        {{/isStructured}}
+        {{^isStructured}}
+          <p class="summary-text">{{{value}}}</p>
+        {{/isStructured}}
+      </section>
+      {{/isCustom}}
+    </div>
+    {{/sections}}
   </div>
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{background:#fff}.creative-resume{display:grid;grid-template-columns:260px 1fr;min-height:100vh;font-family:"Outfit",sans-serif;font-size:13px;background:#fff}.sidebar{background:#111827;color:#fff;padding:36px 24px}.name{font-size:22px;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.2}.title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:28px}.side-section{margin-bottom:24px}.side-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--primary,#60a5fa);border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px;margin-bottom:10px}.side-section p{font-size:12px;color:#d1d5db;margin-bottom:6px}.skills-list{list-style:none}.skills-list li{background:rgba(255,255,255,.06);margin-bottom:5px;padding:4px 10px;border-radius:4px;font-size:12px;color:#e5e7eb}.side-edu{margin-bottom:10px}.side-degree{display:block;font-size:12px;font-weight:600;color:#fff}.side-inst{display:block;font-size:11px;color:#9ca3af}.side-dates{font-size:11px;color:#6b7280}.main-content{padding:36px;background:#fff}.main-section{margin-bottom:22px}.main-section h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid #e5e7eb;padding-bottom:5px;margin-bottom:12px;color:#111}.expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12.5px;color:#374151}.expertise-grid span{background:color-mix(in srgb,var(--primary,#60a5fa) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary,#60a5fa) 35%,transparent);border-radius:5px;padding:4px 8px;font-size:11px;font-weight:600;color:var(--primary,#1e40af);text-align:center;display:block}.exp-block{margin-bottom:14px}.exp-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}.exp-meta strong{font-size:13px;color:#111}.exp-dates{font-size:12px;color:#6b7280}.main-bullets{padding-left:16px}.main-bullets li{margin-bottom:4px;font-size:12.5px;color:#374151}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{margin:0;padding:0;min-height:100vh;background:#fff}.creative-resume{display:grid;grid-template-columns:260px 1fr;width:100%;min-height:100vh;font-family:"Outfit",sans-serif;font-size:13px;background:#fff}.sidebar{background:#111827;color:#fff;padding:36px 20px}.name{font-size:1.7em;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.2}.title{font-size:0.9em;text-transform:uppercase;letter-spacing:.1em;color:#9ca3af;margin-bottom:28px}.side-section{margin-bottom:24px}.side-section h3{font-size:0.75em;text-transform:uppercase;letter-spacing:.12em;color:var(--primary,#60a5fa);border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px;margin-bottom:10px}.side-section p{font-size:0.9em;color:#d1d5db;margin-bottom:6px}.skills-list{list-style:none}.skills-list li{background:rgba(255,255,255,.06);margin-bottom:5px;padding:4px 10px;border-radius:4px;font-size:0.9em;color:#e5e7eb}.side-edu{margin-bottom:10px}.side-degree{display:block;font-size:0.9em;font-weight:600;color:#fff}.side-inst{display:block;font-size:0.85em;color:#9ca3af}.side-dates{font-size:0.85em;color:#6b7280}.main-content{padding:36px 25px;background:#fff}.main-section{margin-bottom:22px}.main-section h2{font-size:1.1em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid #e5e7eb;padding-bottom:5px;margin-bottom:12px;color:#111}.expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:0.95em;color:#374151}.expertise-grid span{background:color-mix(in srgb,var(--primary,#60a5fa) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary,#60a5fa) 35%,transparent);border-radius:5px;padding:4px 8px;font-size:0.85em;font-weight:600;color:var(--primary,#1e40af);text-align:center;display:block}.exp-block{margin-bottom:14px}.exp-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}.exp-meta strong{font-size:1em;color:#111}.exp-dates{font-size:0.9em;color:#6b7280}.main-bullets{padding-left:16px}.main-bullets li{margin-bottom:4px;font-size:0.95em;color:#374151}`
   },
   {
     templateId: 4,
@@ -303,70 +412,109 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     htmlLayout: `<div class="navy-resume">
   <header class="navy-header">
     <h1 class="navy-name">{{fullName}}</h1>
-    <div class="navy-contact">{{email}} | {{phone}} | {{location}}</div>
+    <div class="navy-contact">
+      {{#email}}{{email}}{{/email}}{{#phone}} | {{phone}}{{/phone}}{{#location}} | {{location}}{{/location}}
+      {{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}{{#website}} | {{website}}{{/website}}
+    </div>
   </header>
 
-  <section class="section summary">
-    <h2>Summary</h2>
-    <p>{{{summary}}}</p>
-  </section>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    {{#isSummary}}
+    <section class="section summary">
+      <h2>{{title}}</h2>
+      <p>{{{summary}}}</p>
+    </section>
+    {{/isSummary}}
 
-  <section class="section experience">
-    <h2>Work Experience</h2>
-    {{#experience}}
-    <article class="navy-block">
-      <div class="navy-row">
-        <strong>{{role}}</strong>
-        <span>{{startDate}} - {{endDate}}</span>
+    {{#isExperience}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="navy-block">
+        <div class="navy-row">
+          <strong>{{role}}</strong>
+          <span>{{startDate}} - {{endDate}}</span>
+        </div>
+        <div class="navy-company">{{company}}</div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </article>
+      {{/items}}
+    </section>
+    {{/isExperience}}
+
+    {{#isProjects}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="navy-block">
+        <div class="navy-row">
+          <strong>{{title}}</strong>
+          <span>{{dates}}</span>
+        </div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </article>
+      {{/items}}
+    </section>
+    {{/isProjects}}
+
+    {{#isEducation}}
+    <section class="section education">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <div class="navy-edu">
+        <div class="navy-row">
+          <strong class="navy-degree">{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
+          <span class="navy-dates">{{startYear}} - {{endYear}}</span>
+        </div>
+        <div class="navy-row">
+          <div class="navy-inst">{{institution}}</div>
+          {{#grade}}<div class="navy-grade">GPA: {{grade}}</div>{{/grade}}
+        </div>
       </div>
-      <div class="navy-company">{{company}}</div>
-      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-    </article>
-    {{/experience}}
-  </section>
+      {{/items}}
+    </section>
+    {{/isEducation}}
 
-  <section class="section experience">
-    <h2>Projects</h2>
-    {{#projects}}
-    <article class="navy-block">
-      <div class="navy-row">
-        <strong>{{title}}</strong>
-        <span>{{dates}}</span>
-      </div>
-      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-    </article>
-    {{/projects}}
-  </section>
+    {{#isSkills}}
+    <section class="section skills">
+      <h2>{{title}}</h2>
+      <ul class="navy-list">{{#items}}<li>{{name}}</li>{{/items}}</ul>
+    </section>
+    {{/isSkills}}
 
-  <section class="section education">
-    <h2>Education</h2>
-    {{#education}}
-    <article class="navy-block">
-      <strong>{{degree}}</strong>
-      <div>{{institution}}</div>
-      <div class="navy-muted">{{startYear}} - {{endYear}}</div>
-    </article>
-    {{/education}}
-  </section>
+    {{#isCertifications}}
+    <section class="section certifications">
+      <h2>{{title}}</h2>
+      <ul class="navy-list">
+        {{#items}}<li><strong>{{name}}</strong> {{#issuer}}- {{issuer}}{{/issuer}} <span class="navy-muted">{{date}}</span></li>{{/items}}
+      </ul>
+    </section>
+    {{/isCertifications}}
 
-  <section class="section skills">
-    <h2>Skills</h2>
-    <ul class="navy-list">{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
-  </section>
-
-  <section class="section awards">
-    <h2>Awards</h2>
-    <ul class="navy-list">{{#awards}}<li>{{name}}</li>{{/awards}}</ul>
-  </section>
-
-  <section class="section certifications">
-    <h2>Certifications</h2>
-    <ul class="navy-list">
-      {{#certifications}}<li><strong>{{name}}</strong> <span class="navy-muted">{{date}}</span></li>{{/certifications}}
-    </ul>
-  </section>
+    {{#isCustom}}
+    <section class="section">
+      <h2>{{title}}</h2>
+      {{#isStructured}}
+        {{#items}}
+        <article class="navy-block">
+          <div class="navy-row">
+            <strong>{{role}} at {{company}}</strong>
+            <span>{{startDate}} - {{endDate}}</span>
+          </div>
+          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+        </article>
+        {{/items}}
+      {{/isStructured}}
+      {{^isStructured}}
+        <p>{{{value}}}</p>
+      {{/isStructured}}
+    </section>
+    {{/isCustom}}
+  </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{max-width:820px;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 40px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:34px;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:11px;color:#cbd5e1}.section{padding:0 38px;margin-bottom:22px}.section h2{margin:0 0 12px;font-size:12px;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-muted{color:#64748b;font-size:11px}.navy-list{margin:0;padding-left:18px}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{width:100%;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 20px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:2.6em;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:0.85em;color:#cbd5e1}.section{padding:0 20px;margin-bottom:22px}.section h2{margin:0 0 12px;font-size:0.9em;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-muted{color:#64748b;font-size:0.85em}.navy-list{margin:0;padding-left:18px}`
   },
   {
     templateId: 5,
@@ -378,84 +526,127 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
       <p class="timeline-role">{{jobTitle}}</p>
     </div>
     <div class="timeline-contact">
-      <span>{{phone}}</span>
-      <span>{{location}}</span>
-      <span>{{email}}</span>
+      {{#phone}}<span>{{phone}}</span>{{/phone}}
+      {{#email}}<span>{{email}}</span>{{/email}}
+      {{#location}}<span>{{location}}</span>{{/location}}
+      {{#linkedin}}<span>{{linkedin}}</span>{{/linkedin}}
+      {{#github}}<span>{{github}}</span>{{/github}}
+      {{#website}}<span>{{website}}</span>{{/website}}
     </div>
   </header>
 
-  <section class="section summary">
-    <h2>About Me</h2>
-    <p>{{{summary}}}</p>
-  </section>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    {{#isSummary}}
+    <section class="section summary">
+      <h2>{{title}}</h2>
+      <p>{{{summary}}}</p>
+    </section>
+    {{/isSummary}}
 
-  <section class="section education">
-    <h2>Education</h2>
-    {{#education}}
-    <article class="timeline-item">
-      <div class="timeline-left">
-        <strong>{{startYear}} - {{endYear}}</strong>
-        <span>{{institution}}</span>
-      </div>
-      <div class="timeline-right">
-        <strong>{{degree}}</strong>
-        <p>{{description}}</p>
-      </div>
-    </article>
-    {{/education}}
-  </section>
+    {{#isEducation}}
+    <section class="section education">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="timeline-item">
+        <div class="timeline-left">
+          <strong>{{startYear}} - {{endYear}}</strong>
+          {{#grade}}<span>Grade: {{grade}}</span>{{/grade}}
+        </div>
+        <div class="timeline-right">
+          <strong>{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
+          <span>{{institution}}</span>
+        </div>
+      </article>
+      {{/items}}
+    </section>
+    {{/isEducation}}
 
-  <section class="section experience">
-    <h2>Experience</h2>
-    {{#experience}}
-    <article class="timeline-item">
-      <div class="timeline-left">
-        <strong>{{startDate}} - {{endDate}}</strong>
-        <span>{{company}}</span>
-      </div>
-      <div class="timeline-right">
-        <strong>{{role}}</strong>
-        <p>{{description}}</p>
-      </div>
-    </article>
-    {{/experience}}
-  </section>
+    {{#isExperience}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="timeline-item">
+        <div class="timeline-left">
+          <strong>{{startDate}} - {{endDate}}</strong>
+          <span>{{company}}</span>
+        </div>
+        <div class="timeline-right">
+          <strong>{{role}}</strong>
+          <p>{{description}}</p>
+        </div>
+      </article>
+      {{/items}}
+    </section>
+    {{/isExperience}}
 
-  <section class="section experience">
-    <h2>Projects</h2>
-    {{#projects}}
-    <article class="timeline-item">
-      <div class="timeline-left">
-        <strong>{{dates}}</strong>
-      </div>
-      <div class="timeline-right">
-        <strong>{{title}}</strong>
-        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-      </div>
-    </article>
-    {{/projects}}
-  </section>
+    {{#isProjects}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="timeline-item">
+        <div class="timeline-left">
+          <strong>{{dates}}</strong>
+        </div>
+        <div class="timeline-right">
+          <strong>{{title}}</strong>
+          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+        </div>
+      </article>
+      {{/items}}
+    </section>
+    {{/isProjects}}
 
-  <section class="section experience">
-    <h2>Certifications</h2>
-    {{#certifications}}
-    <article class="timeline-item">
-      <div class="timeline-left">
-        <strong>{{date}}</strong>
-      </div>
-      <div class="timeline-right">
-        <strong>{{name}}</strong>
-      </div>
-    </article>
-    {{/certifications}}
-  </section>
+    {{#isCertifications}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="timeline-item">
+        <div class="timeline-left">
+          <strong>{{date}}</strong>
+        </div>
+        <div class="timeline-right">
+          <strong>{{name}}</strong>
+          {{#issuer}}<div>{{issuer}}</div>{{/issuer}}
+        </div>
+      </article>
+      {{/items}}
+    </section>
+    {{/isCertifications}}
 
-  <section class="section skills">
-    <h2>Skills</h2>
-    <div class="timeline-skills">{{#skills}}<span>{{name}}</span>{{/skills}}</div>
-  </section>
+    {{#isSkills}}
+    <section class="section skills">
+      <h2>{{title}}</h2>
+      <div class="timeline-skills">{{#items}}<span>{{name}}</span>{{/items}}</div>
+    </section>
+    {{/isSkills}}
+
+    {{#isCustom}}
+    <section class="section">
+      <h2>{{title}}</h2>
+      {{#isStructured}}
+        {{#items}}
+        <article class="timeline-item">
+          <div class="timeline-left">
+            <strong>{{startDate}} - {{endDate}}</strong>
+            <span>{{company}}</span>
+          </div>
+          <div class="timeline-right">
+            <strong>{{role}}</strong>
+            <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+          </div>
+        </article>
+        {{/items}}
+      {{/isStructured}}
+      {{^isStructured}}
+        <p>{{{value}}}</p>
+      {{/isStructured}}
+    </section>
+    {{/isCustom}}
+  </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#1f2937;font-family:Raleway,Arial,sans-serif}.timeline-resume{max-width:820px;margin:0 auto;padding:40px;border:1px solid #dbe4ee;background:#fff}.timeline-header{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid var(--primary,#0f172a);padding-bottom:18px;margin-bottom:24px}.timeline-name{margin:0 0 4px;font-size:30px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary,#0f172a)}.timeline-role{margin:0;color:#64748b;text-transform:uppercase;letter-spacing:.16em;font-size:11px}.timeline-contact{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#475569}.section{margin-bottom:22px}.section h2{margin:0 0 14px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #cbd5e1;padding-bottom:4px;color:var(--primary,#0f172a)}.timeline-item{display:grid;grid-template-columns:170px 1fr;gap:18px;margin-bottom:14px}.timeline-left{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#64748b}.timeline-right strong{display:block;margin-bottom:4px}.timeline-right p{margin:0;font-size:11.5px;color:#475569}.timeline-right ul{margin:4px 0 0;padding-left:16px;font-size:11.5px;color:#475569}.timeline-skills{display:flex;flex-wrap:wrap;gap:8px}.timeline-skills span{border:1px solid color-mix(in srgb,var(--primary,#0f172a) 30%, #cbd5e1);background:color-mix(in srgb,var(--primary,#0f172a) 6%, #f8fafc);border-radius:999px;padding:4px 10px;font-size:11px;color:var(--primary,#334155)}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#1f2937;font-family:Raleway,Arial,sans-serif}.timeline-resume{width:100%;margin:0 auto;padding:40px 20px;background:#fff}.timeline-header{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid var(--primary,#0f172a);padding-bottom:18px;margin-bottom:24px}.timeline-name{margin:0 0 4px;font-size:2.3em;letter-spacing:.08em;text-transform:uppercase;color:var(--primary,#0f172a)}.timeline-role{margin:0;color:#64748b;text-transform:uppercase;letter-spacing:.16em;font-size:0.85em}.timeline-contact{display:flex;flex-direction:column;gap:5px;font-size:0.85em;color:#475569}.section{margin-bottom:22px;position:relative}.section h2{margin:0 0 14px;font-size:0.9em;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #cbd5e1;padding-bottom:4px;color:var(--primary,#0f172a)}.timeline-item{display:grid;grid-template-columns:170px 1fr;gap:18px;margin-bottom:18px;position:relative}.timeline-item::before{content:"";position:absolute;left:161px;top:0;bottom:0;width:2px;background:#e5e7eb}.timeline-item::after{content:"";position:absolute;left:158px;top:6px;width:8px;height:8px;background:var(--primary,#0f172a);border-radius:50%;z-index:1}.timeline-left{display:flex;flex-direction:column;gap:3px;font-size:0.85em;color:#64748b;text-align:right;padding-right:20px}.timeline-right strong{display:block;margin-bottom:4px}.timeline-right p{margin:0;font-size:0.9em;color:#475569}.timeline-right ul{margin:4px 0 0;padding-left:16px;font-size:0.9em;color:#475569}.timeline-skills{display:flex;flex-wrap:wrap;gap:8px}.timeline-skills span{border:1px solid color-mix(in srgb,var(--primary,#0f172a) 30%, #cbd5e1);background:color-mix(in srgb,var(--primary,#0f172a) 6%, #f8fafc);border-radius:999px;padding:4px 10px;font-size:0.85em;color:var(--primary,#334155)}`
   },
   {
     templateId: 6,
@@ -464,277 +655,407 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   <header class="teal-header">
     <h1 class="teal-name">{{fullName}}</h1>
     <p class="teal-role">{{jobTitle}}</p>
-    <div class="teal-contact">{{location}} | {{email}} | {{website}}</div>
+    <div class="teal-contact">
+      {{#location}}{{location}}{{/location}}{{#email}} | {{email}}{{/email}}{{#website}} | {{website}}{{/website}}
+      {{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}
+    </div>
   </header>
 
   <p class="teal-intro">{{{summary}}}</p>
 
   <div class="teal-grid">
     <main>
-      <section class="section expertise">
-        <h2>Area of Expertise</h2>
-        <div class="teal-pills">{{#expertise}}<span>{{name}}</span>{{/expertise}}</div>
-      </section>
+      {{#sections}}
+      <div style="{{{computedStyle}}}">
+        {{#isSummary}}
+        <section class="section">
+          <h2>{{title}}</h2>
+          <p>{{{summary}}}</p>
+        </section>
+        {{/isSummary}}
 
-      <section class="section achievements">
-        <h2>Key Achievements</h2>
-        <ul>{{#achievements}}<li><strong>{{title}}.</strong> {{description}}</li>{{/achievements}}</ul>
-      </section>
+        {{#isExperience}}
+        <section class="section experience">
+          <h2>{{title}}</h2>
+          {{#items}}
+          <article class="teal-block">
+            <div class="teal-row">
+              <strong>{{role}}, {{company}}</strong>
+              <span>{{startDate}} - {{endDate}}</span>
+            </div>
+            <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+          </article>
+          {{/items}}
+        </section>
+        {{/isExperience}}
 
-      <section class="section experience">
-        <h2>Professional Experience</h2>
-        {{#experience}}
-        <article class="teal-block">
-          <div class="teal-row">
-            <strong>{{role}}, {{company}}</strong>
-            <span>{{startDate}} - {{endDate}}</span>
-          </div>
-          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-        </article>
-        {{/experience}}
-      </section>
+        {{#isProjects}}
+        <section class="section experience">
+          <h2>{{title}}</h2>
+          {{#items}}
+          <article class="teal-block">
+            <div class="teal-row">
+              <strong>{{title}}</strong>
+              <span>{{dates}}</span>
+            </div>
+            <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+          </article>
+          {{/items}}
+        </section>
+        {{/isProjects}}
 
-      <section class="section experience">
-        <h2>Projects</h2>
-        {{#projects}}
-        <article class="teal-block">
-          <div class="teal-row">
-            <strong>{{title}}</strong>
-            <span>{{dates}}</span>
-          </div>
-          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-        </article>
-        {{/projects}}
-      </section>
+        {{#isEducation}}
+        <section class="section education">
+          <h2>{{title}}</h2>
+          {{#items}}
+          <article class="teal-block">
+            <div class="teal-row">
+              <strong>{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
+              <span>{{startYear}} - {{endYear}}</span>
+            </div>
+            <div class="teal-row">
+              <div>{{institution}}</div>
+              {{#grade}}<div>Grade: {{grade}}</div>{{/grade}}
+            </div>
+          </article>
+          {{/items}}
+        </section>
+        {{/isEducation}}
 
-      <section class="section education">
-        <h2>Education</h2>
-        {{#education}}
-        <article class="teal-block">
-          <div class="teal-row">
-            <strong>{{degree}}</strong>
-            <span>{{startYear}} - {{endYear}}</span>
-          </div>
-          <div>{{institution}}</div>
-        </article>
-        {{/education}}
-      </section>
+        {{#isCustom}}
+        <section class="section">
+          <h2>{{title}}</h2>
+          {{#isStructured}}
+            {{#items}}
+            <article class="teal-block">
+              <div class="teal-row">
+                <strong>{{role}} at {{company}}</strong>
+                <span>{{startDate}} - {{endDate}}</span>
+              </div>
+              <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+            </article>
+            {{/items}}
+          {{/isStructured}}
+          {{^isStructured}}
+            <p>{{{value}}}</p>
+          {{/isStructured}}
+        </section>
+        {{/isCustom}}
+      </div>
+      {{/sections}}
     </main>
 
     <aside>
-      <section class="section additional">
-        <h2>Certifications</h2>
-        <ul>{{#certifications}}<li><strong>{{name}}</strong> {{date}}</li>{{/certifications}}</ul>
-      </section>
+      {{#sections}}
+      <div style="{{{computedStyle}}}">
+        {{#isSkills}}
+        <section class="section additional">
+          <h2>{{title}}</h2>
+          <div class="teal-pills">{{#items}}<span>{{name}}</span>{{/items}}</div>
+        </section>
+        {{/isSkills}}
 
-      <section class="section additional">
-        <h2>Additional Information</h2>
-        <ul>{{#additionalInfo}}<li><strong>{{label}}:</strong> {{value}}</li>{{/additionalInfo}}</ul>
-      </section>
+        {{#isCertifications}}
+        <section class="section additional">
+          <h2>{{title}}</h2>
+          <ul>{{#items}}<li><strong>{{name}}</strong> {{#issuer}}({{issuer}}){{/issuer}} {{date}}</li>{{/items}}</ul>
+        </section>
+        {{/isCertifications}}
+      </div>
+      {{/sections}}
     </aside>
   </div>
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111;font-family:"DM Sans",Arial,sans-serif}.teal-resume{max-width:820px;margin:0 auto;padding:40px;background:#fff}.teal-header{padding-bottom:14px;border-bottom:2px solid var(--primary,#111);margin-bottom:16px}.teal-name{margin:0 0 4px;font-size:28px;letter-spacing:.04em;text-transform:uppercase;color:var(--primary,#111)}.teal-role{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#4b5563}.teal-contact{font-size:11px;color:#6b7280}.teal-intro{margin:0 0 20px;font-size:11.5px;color:#374151}.teal-grid{display:grid;grid-template-columns:1fr 220px;gap:28px}.section{margin-bottom:20px}.section h2{margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--primary,#0d9488);padding-bottom:5px;color:var(--primary,#0d9488)}.teal-pills{display:flex;flex-wrap:wrap;gap:8px}.teal-pills span{border:1px solid color-mix(in srgb,var(--primary,#0d9488) 35%, white);background:color-mix(in srgb,var(--primary,#0d9488) 10%, white);border-radius:999px;padding:4px 10px;font-size:10.5px;color:var(--primary,#0d9488)}.teal-row{display:flex;justify-content:space-between;gap:12px}.teal-block{margin-bottom:12px}.teal-block ul,.achievements ul,.additional ul{margin:6px 0 0;padding-left:18px}.teal-block li,.achievements li,.additional li{margin-bottom:4px;font-size:11px}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#111;font-family:"DM Sans",Arial,sans-serif}.teal-resume{width:100%;margin:0 auto;padding:0 0 40px;background:#fff}.teal-header{background:var(--primary,#0d9488);color:#fff;padding:40px 25px 30px;margin-bottom:24px;text-align:left}.teal-name{margin:0 0 8px;font-size:2.6em;letter-spacing:.04em;text-transform:uppercase;color:#fff;font-weight:800}.teal-role{margin:0 0 10px;font-size:1.1em;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,0.85)}.teal-contact{font-size:0.9em;color:rgba(255,255,255,0.75)}.teal-intro{margin:0 25px 25px;font-size:0.95em;color:#374151;line-height:1.6}.teal-grid{display:grid;grid-template-columns:1fr 240px;gap:32px;padding:0 25px}.section{margin-bottom:24px}.section h2{margin:0 0 12px;font-size:0.9em;text-transform:uppercase;letter-spacing:.12em;border-bottom:2px solid var(--primary,#0d9488);padding-bottom:6px;color:var(--primary,#0d9488);font-weight:700}.teal-pills{display:flex;flex-wrap:wrap;gap:8px}.teal-pills span{border:1px solid color-mix(in srgb,var(--primary,#0d9488) 35%, white);background:color-mix(in srgb,var(--primary,#0d9488) 10%, white);border-radius:999px;padding:4px 12px;font-size:0.85em;color:var(--primary,#0d9488)}.teal-row{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}.teal-block{margin-bottom:16px}.teal-block ul,.achievements ul,.additional ul{margin:6px 0 0;padding-left:18px}.teal-block li,.achievements li,.additional li{margin-bottom:5px;font-size:0.9em;color:#4b5563}`
   },
   {
     templateId: 7,
     name: 'Simple Ivory',
     htmlLayout: `<div class="ivory-resume">
-  <header class="ivory-header" data-section="CONTACT">
+  <header class="ivory-header">
     <h1>{{fullName}}</h1>
     <p>{{jobTitle}}</p>
-    <div class="ivory-contact">{{email}} | {{phone}} | {{location}}</div>
+    <div class="ivory-contact">
+      {{#email}}{{email}}{{/email}}{{#phone}} | {{phone}}{{/phone}}{{#location}} | {{location}}{{/location}}
+      {{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}{{#website}} | {{website}}{{/website}}
+    </div>
   </header>
 
-  <section class="section summary" data-section="SUMMARY">
-    <h2>Professional Summary</h2>
-    <p>{{{summary}}}</p>
-  </section>
-
-  <section class="section experience" data-section="EXPERIENCE">
-    <h2>Experience</h2>
-    {{#experience}}
-    <article class="ivory-block">
-      <div class="ivory-row">
-        <strong>{{role}}, {{company}}</strong>
-        <span>{{startDate}} - {{endDate}}</span>
-      </div>
-      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-    </article>
-    {{/experience}}
-  </section>
-
-  <div class="ivory-grid">
-    <section class="section education" data-section="EDUCATION">
-      <h2>Education</h2>
-      {{#education}}
-      <article class="ivory-block">
-        <strong>{{degree}}</strong>
-        <div>{{institution}}</div>
-        <span>{{startYear}} - {{endYear}}</span>
-      </article>
-      {{/education}}
-    </section>
-
-    <section class="section skills" data-section="SKILLS">
-      <h2>Skills</h2>
-      <ul class="plain-list">{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
-    </section>
-  </div>
-
-  <section class="section projects" data-section="PROJECTS">
-    <h2>Projects</h2>
-    {{#projects}}
-    <article class="ivory-block">
-      <div class="ivory-row">
-        <strong>{{title}}</strong>
-        <span>{{dates}}</span>
-      </div>
-      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-    </article>
-    {{/projects}}
-  </section>
-
-  <section class="section certifications" data-section="CERTIFICATIONS">
-    <h2>Certifications</h2>
-    <ul class="plain-list">{{#certifications}}<li>{{name}} <span>{{date}}</span></li>{{/certifications}}</ul>
-  </section>
-</div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#1f2937;font-family:Georgia,"Times New Roman",serif}.ivory-resume{max-width:820px;margin:0 auto;padding:42px;background:#fffaf4}.ivory-header{text-align:center;padding-bottom:18px;margin-bottom:22px;border-bottom:1px solid var(--primary,#d6c8b8)}.ivory-header h1{margin:0;font-size:31px;color:var(--primary,#2b2118)}.ivory-header p{margin:6px 0 8px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--primary,#2b2118) 70%,#2b2118)}.ivory-contact{font-size:11px;color:color-mix(in srgb,var(--primary,#6b5b4d) 60%,#2b2118)}.section{margin-bottom:22px}.section h2{margin:0 0 12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary,#6c4f3d);border-bottom:1px solid color-mix(in srgb,var(--primary,#6c4f3d) 30%,transparent);padding-bottom:5px}.section p,.section li,.section div,.section span{font-size:12.2px}.ivory-block{margin-bottom:12px}.ivory-row{display:flex;justify-content:space-between;gap:12px}.ivory-row span,.certifications span{color:color-mix(in srgb,var(--primary,#7c6b5b) 50%,#2b2118);font-size:11px}.ivory-block ul,.plain-list{margin:6px 0 0;padding-left:18px}.ivory-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}`
-  },
-  {
-    templateId: 8,
-    name: 'Clean Columns',
-    htmlLayout: `<div class="columns-resume">
-  <aside class="columns-side">
-    <section class="side-card" data-section="CONTACT">
-      <h1>{{fullName}}</h1>
-      <p>{{jobTitle}}</p>
-      <div>{{email}}</div>
-      <div>{{phone}}</div>
-      <div>{{location}}</div>
-      <div>{{linkedin}}</div>
-    </section>
-
-    <section class="side-card skills" data-section="SKILLS">
-      <h2>Skills</h2>
-      <ul>{{#skills}}<li>{{name}}</li>{{/skills}}</ul>
-    </section>
-
-    <section class="side-card certifications" data-section="CERTIFICATIONS">
-      <h2>Certifications</h2>
-      <ul>{{#certifications}}<li>{{name}}</li>{{/certifications}}</ul>
-    </section>
-  </aside>
-
-  <main class="columns-main">
-    <section class="main-card summary" data-section="SUMMARY">
-      <h2>Summary</h2>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    {{#isSummary}}
+    <section class="section summary">
+      <h2>{{title}}</h2>
       <p>{{{summary}}}</p>
     </section>
+    {{/isSummary}}
 
-    <section class="main-card experience" data-section="EXPERIENCE">
-      <h2>Experience</h2>
-      {{#experience}}
-      <article class="entry">
-        <div class="entry-top">
-          <strong>{{role}}</strong>
+    {{#isExperience}}
+    <section class="section experience">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="ivory-block">
+        <div class="ivory-row">
+          <strong>{{role}}, {{company}}</strong>
           <span>{{startDate}} - {{endDate}}</span>
         </div>
-        <div class="entry-sub">{{company}}</div>
         <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
       </article>
-      {{/experience}}
+      {{/items}}
     </section>
+    {{/isExperience}}
 
-    <section class="main-card education" data-section="EDUCATION">
-      <h2>Education</h2>
-      {{#education}}
-      <article class="entry">
-        <div class="entry-top">
-          <strong>{{degree}}</strong>
+    {{#isEducation}}
+    <section class="section education">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="ivory-block">
+        <div class="ivory-row">
+          <strong>{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong>
           <span>{{startYear}} - {{endYear}}</span>
         </div>
-        <div class="entry-sub">{{institution}}</div>
+        <div>{{institution}}</div>
       </article>
-      {{/education}}
+      {{/items}}
     </section>
+    {{/isEducation}}
 
-    <section class="main-card projects" data-section="PROJECTS">
-      <h2>Projects</h2>
-      {{#projects}}
-      <article class="entry">
-        <div class="entry-top">
+    {{#isSkills}}
+    <section class="section skills">
+      <h2>{{title}}</h2>
+      <div class="ivory-skills">{{#items}}<span>{{name}}</span>{{/items}}</div>
+    </section>
+    {{/isSkills}}
+
+    {{#isProjects}}
+    <section class="section projects">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="ivory-block">
+        <div class="ivory-row">
           <strong>{{title}}</strong>
           <span>{{dates}}</span>
         </div>
         <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
       </article>
-      {{/projects}}
+      {{/items}}
     </section>
-  </main>
+    {{/isProjects}}
+
+    {{#isCertifications}}
+    <section class="section certs">
+      <h2>{{title}}</h2>
+      {{#items}}
+      <article class="ivory-block">
+        <div class="ivory-row">
+          <strong>{{name}} {{#issuer}}({{issuer}}){{/issuer}}</strong>
+          <span>{{date}}</span>
+        </div>
+      </article>
+      {{/items}}
+    </section>
+    {{/isCertifications}}
+
+    {{#isCustom}}
+    <section class="section">
+      <h2>{{title}}</h2>
+      {{#isStructured}}
+        {{#items}}
+        <article class="ivory-block">
+          <div class="ivory-row">
+            <strong>{{role}} at {{company}}</strong>
+            <span>{{startDate}} - {{endDate}}</span>
+          </div>
+          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+        </article>
+        {{/items}}
+      {{/isStructured}}
+      {{^isStructured}}
+        <p>{{{value}}}</p>
+      {{/isStructured}}
+    </section>
+    {{/isCustom}}
+  </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#0f172a;font-family:"Segoe UI",Arial,sans-serif}.columns-resume{display:grid;grid-template-columns:220px 1fr;max-width:860px;margin:0 auto;background:#fff}.columns-side{background:#f8fafc;border-right:1px solid #dbe3ea;padding:28px 20px}.columns-main{padding:28px 30px}.side-card,.main-card{margin-bottom:22px}.side-card h1{margin:0 0 4px;font-size:24px}.side-card p{margin:0 0 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#475569}.side-card h2,.main-card h2{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--primary,#0f766e)}.side-card ul,.main-card ul{margin:6px 0 0;padding-left:18px}.side-card li,.main-card li,.side-card div,.main-card p,.entry-sub,.entry span{font-size:11.5px}.entry{margin-bottom:12px}.entry-top{display:flex;justify-content:space-between;gap:12px}.entry-sub{margin-top:2px;color:#475569}.entry span{color:#64748b}.main-card{padding-bottom:14px;border-bottom:1px solid #e2e8f0}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fdfaf0;color:#333;font-family:Lora,serif}.ivory-resume{width:100%;margin:0 auto;padding:40px 20px;background:#fdfaf0}.ivory-header{text-align:center;margin-bottom:30px}.ivory-header h1{margin:0;font-size:2.3em;color:#000}.ivory-header p{margin:5px 0;font-size:1em;color:#666;text-transform:uppercase;letter-spacing:.1em}.ivory-contact{font-size:0.9em;color:#888}.section{margin-bottom:24px}.section h2{font-size:0.95em;text-transform:uppercase;letter-spacing:.12em;color:#000;padding-bottom:6px;margin-bottom:12px}.ivory-block{margin-bottom:14px}.ivory-row{display:flex;justify-content:space-between;margin-bottom:4px}.ivory-row strong{font-size:1.05em;color:#111}.ivory-row span{font-size:0.9em;color:#999}.ivory-block ul{padding-left:18px;margin-top:6px}.ivory-block li{margin-bottom:4px;font-size:0.95em}.ivory-skills{display:flex;flex-wrap:wrap;gap:12px}.ivory-skills span{font-size:0.95em}`
+  },
+  {
+    templateId: 8,
+    name: 'Clean Columns',
+    htmlLayout: `<div class="resume">
+  <header class="header">
+    <h1 class="name">{{fullName}}</h1>
+    <p class="role">{{jobTitle}}</p>
+    <div class="contact">{{#email}}{{email}} | {{/email}}{{#phone}}{{phone}} | {{/phone}}{{#location}}{{location}}{{/location}}{{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}{{#website}} | {{website}}{{/website}}</div>
+  </header>
+  {{#sections}}
+  <div class="section" style="{{{computedStyle}}}">
+    <h2>{{title}}</h2>
+    {{#isSummary}}<p>{{{summary}}}</p>{{/isSummary}}
+    {{#isExperience}}{{#items}}
+      <div class="item">
+        <div class="row"><strong>{{role}}, {{company}}</strong><span>{{startDate}} - {{endDate}}</span></div>
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+      </div>
+    {{/items}}{{/isExperience}}
+    {{#isEducation}}{{#items}}
+      <div class="item">
+        <div class="row"><strong>{{degree}}</strong><span>{{startYear}} - {{endYear}}</span></div>
+        <div>{{institution}}</div>
+      </div>
+    {{/items}}{{/isEducation}}
+    {{#isSkills}}<div class="skills">{{#items}}<span>{{name}}</span>{{/items}}</div>{{/isSkills}}
+  </div>
+  {{/sections}}
+</div>`,
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;font-family:Inter,sans-serif}.resume{width:100%;padding:40px 25px}.header{margin-bottom:30px;border-left:4px solid var(--primary,#000);padding-left:15px}.name{font-size:2.4em;margin:0}.role{font-size:1.1em;color:#666;margin:4px 0}.contact{font-size:0.9em;color:#888}.section{margin-bottom:24px}.section h2{font-size:1em;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:12px;color:var(--primary,#000)}.item{margin-bottom:15px}.row{display:flex;justify-content:space-between;margin-bottom:4px}.skills{display:flex;flex-wrap:wrap;gap:10px}.skills span{background:#f3f4f6;padding:4px 10px;border-radius:4px;font-size:0.9em}`
   },
   {
     templateId: 9,
     name: 'Minimal Mono',
     htmlLayout: `<div class="mono-resume">
-  <header class="mono-header" data-section="CONTACT">
-    <div>
-      <h1>{{fullName}}</h1>
-      <p>{{jobTitle}}</p>
-    </div>
-    <div class="mono-contact">
-      <span>{{email}}</span>
-      <span>{{phone}}</span>
-      <span>{{location}}</span>
+  <header class="mono-header">
+    <h1>{{fullName}}</h1>
+    <p>{{jobTitle}}</p>
+    <div class="mono-contact">{{#email}}{{email}} | {{/email}}{{#phone}}{{phone}} | {{/phone}}{{#location}}{{location}}{{/location}}{{#linkedin}} | {{linkedin}}{{/linkedin}}{{#github}} | {{github}}{{/github}}{{#website}} | {{website}}{{/website}}</div>
+  </header>
+  {{#sections}}
+  <div style="{{{computedStyle}}}">
+    <section class="mono-section">
+      <h2>// {{title}}</h2>
+      {{#isSummary}}<p>{{{summary}}}</p>{{/isSummary}}
+      {{#isExperience}}{{#items}}
+        <div class="mono-item">
+          <div class="mono-top"><strong>{{role}} @ {{company}}</strong><span>{{startDate}} -> {{endDate}}</span></div>
+          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+        </div>
+      {{/items}}{{/isExperience}}
+      {{#isEducation}}{{#items}}
+        <div class="mono-item">
+          <div class="mono-top"><strong>{{degree}}</strong><span>{{startYear}} - {{endYear}}</span></div>
+          <div>{{institution}}</div>
+        </div>
+      {{/items}}{{/isEducation}}
+      {{#isSkills}}<div class="mono-tags">{{#items}}<span>[{{name}}]</span>{{/items}}</div>{{/isSkills}}
+    </section>
+  </div>
+  {{/sections}}
+</div>`,
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#000;font-family:"Courier New",monospace}.mono-resume{width:100%;padding:40px 20px}.mono-header{margin-bottom:30px;border-bottom:1px dashed #000;padding-bottom:20px}.mono-header h1{font-size:2.2em;margin:0}.mono-header p{font-size:1.1em;margin:8px 0}.mono-contact{font-size:0.85em;color:#666}.mono-section{margin-bottom:25px}.mono-section h2{font-size:1em;text-transform:uppercase;color:#000;margin-bottom:12px}.mono-item{margin-bottom:15px}.mono-top{display:flex;justify-content:space-between;margin-bottom:5px}.mono-tags{display:flex;flex-wrap:wrap;gap:12px}ul{padding-left:20px;margin-top:5px}li{margin-bottom:4px;font-size:0.9em}`
+  },
+  {
+    templateId: 10,
+    name: 'Ankesh',
+    htmlLayout: `<div class="ankesh-resume">
+  <header class="ankesh-header">
+    <h1 class="ankesh-name">{{fullName}}</h1>
+    <div class="ankesh-contact-grid">
+      {{#phone}}<div class="ankesh-contact-item"><strong>Phone:</strong> {{phone}}</div>{{/phone}}
+      {{#email}}<div class="ankesh-contact-item"><strong>Email:</strong> {{email}}</div>{{/email}}
+      {{#linkedin}}<div class="ankesh-contact-item"><strong>LinkedIn:</strong> <a href="https://{{linkedin}}">{{linkedin}}</a></div>{{/linkedin}}
+      {{#github}}<div class="ankesh-contact-item"><strong>GitHub:</strong> <a href="https://{{github}}">{{github}}</a></div>{{/github}}
+      {{#website}}<div class="ankesh-contact-item"><strong>Portfolio:</strong> <a href="https://{{website}}">{{website}}</a></div>{{/website}}
     </div>
   </header>
 
-  <section class="mono-section summary" data-section="SUMMARY">
-    <h2>Summary</h2>
-    <p>{{{summary}}}</p>
-  </section>
+  {{#sections}}
+  <div class="ankesh-section" style="{{{computedStyle}}}">
+    <h2 class="ankesh-section-title">{{title}}</h2>
+    <div class="ankesh-section-content">
+      {{#isSummary}}
+        <p class="ankesh-text">{{{summary}}}</p>
+      {{/isSummary}}
 
-  <section class="mono-section skills" data-section="SKILLS">
-    <h2>Skills</h2>
-    <div class="mono-tags">{{#skills}}<span>{{name}}</span>{{/skills}}</div>
-  </section>
+      {{#isEducation}}
+        {{#items}}
+        <div class="ankesh-entry">
+          <div class="ankesh-row">
+            <span class="ankesh-entry-title"><strong>{{degree}}{{#fieldOfStudy}} in {{fieldOfStudy}}{{/fieldOfStudy}}</strong></span>
+            <span class="ankesh-entry-date">{{startYear}} – {{endYear}}</span>
+          </div>
+          <div class="ankesh-row">
+            <span class="ankesh-entry-sub">{{institution}}</span>
+            {{#grade}}<span class="ankesh-entry-meta">CGPA: {{grade}}</span>{{/grade}}
+          </div>
+        </div>
+        {{/items}}
+      {{/isEducation}}
 
-  <section class="mono-section experience" data-section="EXPERIENCE">
-    <h2>Experience</h2>
-    {{#experience}}
-    <article class="mono-item">
-      <div class="mono-top"><strong>{{role}} / {{company}}</strong><span>{{startDate}} - {{endDate}}</span></div>
-      <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-    </article>
-    {{/experience}}
-  </section>
+      {{#isSkills}}
+        <div class="ankesh-skills-container">
+          <ul class="ankesh-bullets ankesh-skills-list">
+            {{#items}}
+              <li><strong>{{name}}:</strong> {{#details}}{{.}}{{/details}}</li>
+            {{/items}}
+          </ul>
+        </div>
+      {{/isSkills}}
 
-  <div class="mono-grid">
-    <section class="mono-section education" data-section="EDUCATION">
-      <h2>Education</h2>
-      {{#education}}
-      <article class="mono-item">
-        <div class="mono-top"><strong>{{degree}}</strong><span>{{startYear}} - {{endYear}}</span></div>
-        <div>{{institution}}</div>
-      </article>
-      {{/education}}
-    </section>
+      {{#isExperience}}
+        {{#items}}
+        <div class="ankesh-entry">
+          <div class="ankesh-row">
+            <span class="ankesh-entry-title"><strong>{{company}}</strong></span>
+            <span class="ankesh-entry-date">{{startDate}} – {{endDate}}</span>
+          </div>
+          <div class="ankesh-row">
+            <span class="ankesh-entry-sub">{{role}}</span>
+            {{#location}}<span class="ankesh-entry-meta">{{location}}</span>{{/location}}
+          </div>
+          <ul class="ankesh-bullets">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+        </div>
+        {{/items}}
+      {{/isExperience}}
 
-    <section class="mono-section projects" data-section="PROJECTS">
-      <h2>Projects</h2>
-      {{#projects}}
-      <article class="mono-item">
-        <div class="mono-top"><strong>{{title}}</strong><span>{{dates}}</span></div>
-        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
-      </article>
-      {{/projects}}
-    </section>
+      {{#isProjects}}
+        {{#items}}
+        <div class="ankesh-entry">
+          <div class="ankesh-row">
+            <span class="ankesh-entry-title"><strong>{{title}}</strong></span>
+            <span class="ankesh-entry-date">{{dates}}</span>
+          </div>
+          <ul class="ankesh-bullets">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+        </div>
+        {{/items}}
+      {{/isProjects}}
+
+      {{#isCertifications}}
+        <ul class="ankesh-bullets">
+          {{#items}}
+          <li>
+            <div class="ankesh-row">
+              <span>{{name}} {{#issuer}}({{issuer}}){{/issuer}}</span>
+              <span class="ankesh-entry-date">{{date}}</span>
+            </div>
+          </li>
+          {{/items}}
+        </ul>
+      {{/isCertifications}}
+
+      {{#isCustom}}
+        {{#isStructured}}
+          {{#items}}
+          <div class="ankesh-entry">
+            <div class="ankesh-row">
+              <strong>{{role}} at {{company}}</strong>
+              <span>{{startDate}} - {{endDate}}</span>
+            </div>
+            <ul class="ankesh-bullets">{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+          </div>
+          {{/items}}
+        {{/isStructured}}
+        {{^isStructured}}<p class="ankesh-text">{{{value}}}</p>{{/isStructured}}
+      {{/isCustom}}
+    </div>
   </div>
+  {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;background:#fff;color:#111827;font-family:"Courier New",monospace}.mono-resume{max-width:840px;margin:0 auto;padding:34px;background:#fff}.mono-header{display:flex;justify-content:space-between;gap:18px;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--primary,#111827)}.mono-header h1{margin:0;font-size:28px;letter-spacing:.06em}.mono-header p{margin:6px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:#4b5563}.mono-contact{display:flex;flex-direction:column;gap:4px;font-size:11px;text-align:right;color:#374151}.mono-section{margin-bottom:20px}.mono-section h2{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--primary,#111827);background:color-mix(in srgb,var(--primary,#111827) 8%,transparent);padding:6px 8px}.mono-tags{display:flex;flex-wrap:wrap;gap:8px}.mono-tags span{border:1px solid color-mix(in srgb,var(--primary,#111827) 30%,transparent);padding:4px 8px;font-size:11px}.mono-item{margin-bottom:12px}.mono-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}.mono-top span{font-size:11px;color:#6b7280}.mono-item div,.mono-item li,.mono-section p{font-size:11.5px}.mono-item ul{margin:4px 0 0;padding-left:18px}.mono-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}`
+    cssStyles: `.ankesh-resume{width:100%;padding:30px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#000;line-height:1.4}.ankesh-header{text-align:center;margin-bottom:20px}.ankesh-name{font-size:28pt;font-weight:800;text-transform:uppercase;margin-bottom:10px;letter-spacing:1px}.ankesh-contact-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;font-size:9pt;border-bottom:2px solid #000;padding-bottom:10px}.ankesh-contact-item a{color:#000;text-decoration:underline}.ankesh-section{margin-bottom:15px}.ankesh-section-title{font-size:14pt;font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #000;padding-bottom:2px;margin-bottom:8px}.ankesh-text{font-size:10.5pt;text-align:justify}.ankesh-entry{margin-bottom:10px}.ankesh-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11pt}.ankesh-entry-title{font-size:11pt}.ankesh-entry-sub{font-size:10.5pt}.ankesh-entry-date,.ankesh-entry-meta{font-size:10pt;color:#333}.ankesh-bullets{margin:5px 0;padding-left:20px;list-style-type:disc}.ankesh-bullets li{font-size:10.5pt;margin-bottom:3px}.ankesh-skills-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;list-style:none;padding-left:0}`
   }
 ];
 
@@ -751,7 +1072,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
  */
 export function resolveTemplateFallback(template: Template | null | undefined): TemplateFallback | null {
   if (!template) {
-    return null;
+    return TEMPLATE_FALLBACKS[0] || null;
   }
 
   // Attempt to find by ID first
@@ -761,6 +1082,8 @@ export function resolveTemplateFallback(template: Template | null | undefined): 
   }
 
   // Fallback to finding by Name (case-insensitive)
-  const byName = TEMPLATE_FALLBACKS.find((item) => item.name.toLowerCase() === template.name.toLowerCase());
+  const byName = TEMPLATE_FALLBACKS.find((item) => 
+    item.name && template.name && item.name.toLowerCase() === template.name.toLowerCase()
+  );
   return byName || null;
 }

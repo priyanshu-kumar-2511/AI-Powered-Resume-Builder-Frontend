@@ -12,6 +12,16 @@
 
   <!-- Canvas area -->
   <div class="canvas-area">
+    @if (isOverA4) {
+      <div class="a4-warning-banner">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Resume exceeds A4 size (1 page). Adjust sections or font size to fit.</span>
+      </div>
+    }
     <!-- Loading overlay -->
     <div class="canvas-overlay" [style.display]="loading ? 'flex' : 'none'">
       <div class="spinner spinner-light"></div>
@@ -79,22 +89,39 @@
 /* Canvas area */
 .canvas-area {
   flex: 1; overflow: auto;
-  display: flex; align-items: flex-start;
-  justify-content: center;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  background: #161b25;
+  position: relative;
+}
+
+.a4-warning-banner {
+  width: 100%;
+  background: rgba(245, 158, 11, 0.1);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f59e0b;
+  font-size: 0.72rem;
+  font-weight: 500;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.paper-stage {
   padding: 24px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: min-content;
   background:
     radial-gradient(circle at 30% 70%, rgba(0,212,180,0.03) 0%, transparent 50%),
-    repeating-linear-gradient(
-      0deg,
-      transparent, transparent 24px,
-      rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent, transparent 24px,
-      rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px
-    ),
-    #161b25;
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px),
+    repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.015) 24px, rgba(255,255,255,0.015) 25px);
 }
 
 /* Loading/empty overlays */

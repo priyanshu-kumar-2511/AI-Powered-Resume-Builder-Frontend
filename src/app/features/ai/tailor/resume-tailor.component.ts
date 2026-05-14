@@ -116,6 +116,8 @@ export class ResumeTailorComponent {
           this.progressLabel = 'Background worker processing…';
           const startTime = new Date().getTime();
           
+          let timeoutId: any;
+
           const pollInterval = setInterval(() => {
             this.aiApi.getHistory(userId).subscribe({
               next: history => {
@@ -126,6 +128,7 @@ export class ResumeTailorComponent {
                 if (latest && latest.response) {
                   clearInterval(interval);
                   clearInterval(pollInterval);
+                  clearTimeout(timeoutId);
                   this.result = latest.response;
                   this.loading = false;
                 }
@@ -135,7 +138,7 @@ export class ResumeTailorComponent {
           }, 3000);
 
           // Timeout after 60 seconds
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             clearInterval(interval);
             clearInterval(pollInterval);
             if (this.loading) {

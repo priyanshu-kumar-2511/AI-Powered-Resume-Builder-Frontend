@@ -13,6 +13,7 @@ export interface AdminUser {
   roles: string[];
   isActive: boolean;
   createdAt: string;
+  premiumExpiresAt?: string;
 }
 
 export interface AdminTemplate {
@@ -46,6 +47,7 @@ export interface AiUsageStats {
   totalCostEstimate: number; // Keep for fallback, will be 0
   callsByModel: Record<string, number>;
   topUsersByUsage: { userId: string; username: string; callCount: number }[];
+  dailyTrend?: { date: string; count: number }[];
 }
 
 export interface UserDetailStats {
@@ -133,6 +135,11 @@ export class AdminApiService {
   /** Re-activate a previously deactivated template by updating it */
   activateTemplate(id: number): Observable<AdminTemplate> {
     return this.http.put<AdminTemplate>(`${API_BASE}/templates/${id}`, { isActive: true });
+  }
+
+  /** Permanently delete a template */
+  deleteTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/templates/${id}`);
   }
 
   /** Extract template HTML/CSS and Thumbnail from an uploaded PDF resume */

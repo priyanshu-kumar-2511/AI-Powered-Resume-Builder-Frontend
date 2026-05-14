@@ -4,14 +4,26 @@
       <span class="editor-type-badge">{{ section.sectionType }}</span>
       <h2 class="editor-title">{{ section.title }}</h2>
     </div>
-    <button
-      type="button"
-      class="delete-btn"
-      [disabled]="deleting"
-      (click)="deleteSection()"
-      title="Delete section">
-      {{ deleting ? '...' : '🗑️ Delete' }}
-    </button>
+    @if (!showConfirmDelete) {
+      <button
+        type="button"
+        class="delete-btn"
+        [disabled]="deleting"
+        (click)="deleteSection()"
+        title="Delete section">
+        🗑️ Delete
+      </button>
+    } @else {
+      <div class="confirm-delete-wrap">
+        <span class="confirm-label">Are you sure?</span>
+        <button type="button" class="btn-confirm-yes" (click)="deleteSection()" [disabled]="deleting">
+          {{ deleting ? '...' : 'Yes, Delete' }}
+        </button>
+        <button type="button" class="btn-confirm-no" (click)="cancelDelete()" [disabled]="deleting">
+          Cancel
+        </button>
+      </div>
+    }
   </div>
 
   @if (deleteError) {
@@ -98,8 +110,35 @@
   transition: background 0.15s;
 }
 
-.delete-btn:hover { background: rgba(239,68,68,0.08); }
+.delete-btn:hover { background: rgba(239,68,68,0.1); }
 .delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.confirm-delete-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+.confirm-label { font-size: 0.72rem; font-weight: 600; color: #f87171; margin-right: 4px; }
+
+.btn-confirm-yes {
+  background: #ef4444; color: #fff; border: none; padding: 4px 10px;
+  border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+}
+.btn-confirm-yes:hover { background: #dc2626; }
+
+.btn-confirm-no {
+  background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;
+}
+.btn-confirm-no:hover { background: rgba(255,255,255,0.1); }
 
 .editor-body { padding: 24px; }
 </style>

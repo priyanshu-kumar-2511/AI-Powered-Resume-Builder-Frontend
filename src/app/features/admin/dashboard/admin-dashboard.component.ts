@@ -304,7 +304,7 @@ export class AdminDashboardComponent implements OnInit {
     { path: '/admin/subscriptions', icon: '💰', label: 'Subscriptions'    },
     { path: '/admin/exports',    icon: '📦', label: 'Export Stats'      },
     { path: '/admin/broadcast',  icon: '📢', label: 'Broadcast'         },
-    { path: '/admin/audit',      icon: '🕵️', label: 'Audit Logs'        },
+
   ];
 
   get adminName(): string { return this.auth.currentUser()?.fullName ?? 'Admin'; }

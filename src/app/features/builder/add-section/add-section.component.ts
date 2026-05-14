@@ -95,11 +95,12 @@ export class AddSectionComponent {
   private defaultContent(type: SectionType): string {
     switch (type) {
       case 'SUMMARY':    return JSON.stringify({ text: '' });
-      case 'EXPERIENCE': return JSON.stringify([]);
-      case 'EDUCATION':  return JSON.stringify([]);
-      case 'SKILLS':     return JSON.stringify([]);
+      case 'EXPERIENCE':
+      case 'EDUCATION':
+      case 'SKILLS':
       case 'PROJECTS':
       case 'CERTIFICATIONS':
+        return JSON.stringify([]);
       case 'LANGUAGES':
       case 'VOLUNTEER':
       case 'CUSTOM':

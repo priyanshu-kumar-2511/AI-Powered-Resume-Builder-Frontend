@@ -189,6 +189,15 @@
         Click any section in the resume to edit it
       </div>
       <app-live-preview (sectionClicked)="onSectionClickFromPreview($event)" />
+
+      <!-- A4 Height Warning -->
+      @if ((builderState.isOverA4Height$ | async) && !warningDismissed) {
+        <div class="a4-warning-banner">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>Content exceeds A4 page height. Try reducing font sizes or content.</span>
+          <button class="a4-close" (click)="dismissWarning()" title="Dismiss warning">✕</button>
+        </div>
+      }
     </main>
 
     <!-- RIGHT PANEL — section editor -->
@@ -715,6 +724,50 @@
 
   .canvas-hint.hidden {
     opacity: 0;
+  }
+
+  .a4-warning-banner {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #7c2d12;
+    color: #fdba74;
+    border: 1px solid #9a3412;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 100;
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .a4-close {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fdba74;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 10px;
+    margin-left: 10px;
+    transition: all 0.2s;
+  }
+  .a4-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  @keyframes bounceIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
   }
 
   /* Right panel */

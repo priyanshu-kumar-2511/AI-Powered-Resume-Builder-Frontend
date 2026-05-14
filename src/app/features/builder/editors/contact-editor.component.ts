@@ -28,6 +28,16 @@ type ContactFormValue = {
         <span class="save-hint">{{ savedMessage }}</span>
       </div>
 
+      <!-- Section Styling (Font Size) -->
+      <div class="section-styling" [formGroup]="form">
+        <label class="style-label">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Header Font Size:
+        </label>
+        <input type="range" min="12" max="48" formControlName="fontSize" class="style-slider">
+        <span class="style-val">{{ form.get('fontSize')?.value }}px</span>
+      </div>
+
       <form class="contact-form" [formGroup]="form">
         <div class="field-group">
           <label class="field-label">Full Name</label>
@@ -77,6 +87,30 @@ type ContactFormValue = {
     <style>
       .contact-editor { display: flex; flex-direction: column; gap: 14px; }
       .editor-top-row { display: flex; justify-content: space-between; align-items: center; }
+
+      /* Section Styling */
+      .section-styling {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border); border-radius: 10px;
+        margin-bottom: 4px;
+      }
+      .style-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+      }
+      .style-slider {
+        flex: 1; height: 4px; border-radius: 2px;
+        background: rgba(255,255,255,0.1); outline: none;
+        -webkit-appearance: none; cursor: pointer;
+      }
+      .style-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 14px; height: 14px;
+        border-radius: 50%; background: var(--teal);
+        box-shadow: 0 0 10px rgba(0,212,180,0.4);
+      }
+      .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+
       .save-hint { font-size: 0.75rem; color: var(--text-muted); }
       .contact-form { display: flex; flex-direction: column; gap: 12px; }
       .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -115,7 +149,8 @@ export class ContactEditorComponent implements OnChanges {
     linkedin: new FormControl('', { nonNullable: true }),
     github: new FormControl('', { nonNullable: true }),
     website: new FormControl('', { nonNullable: true }),
-    jobTitle: new FormControl('', { nonNullable: true })
+    jobTitle: new FormControl('', { nonNullable: true }),
+    fontSize: new FormControl(24, { nonNullable: true })
   });
 
   ngOnChanges(): void {
@@ -123,6 +158,9 @@ export class ContactEditorComponent implements OnChanges {
 
     const profile = this.builderState.userProfileSnapshot;
     const resume = this.builderState.resumeSnapshot;
+    
+    let storedOverrides: any = {};
+    try { storedOverrides = JSON.parse(localStorage.getItem(this.storageKey) || '{}'); } catch { }
 
     this.form.setValue({
       fullName: profile?.fullName || '',
@@ -132,7 +170,8 @@ export class ContactEditorComponent implements OnChanges {
       linkedin: profile?.linkedin || '',
       github: profile?.github || '',
       website: profile?.website || '',
-      jobTitle: resume?.targetJobTitle || ''
+      jobTitle: resume?.targetJobTitle || '',
+      fontSize: storedOverrides.fontSize || 24
     }, { emitEvent: false });
 
     this.form.valueChanges.pipe(
@@ -140,7 +179,7 @@ export class ContactEditorComponent implements OnChanges {
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
       takeUntil(this.destroy$)
     ).subscribe((value) => {
-      this.applyChanges(value as ContactFormValue);
+      this.applyChanges(value as any);
     });
   }
 
@@ -165,6 +204,8 @@ export class ContactEditorComponent implements OnChanges {
     };
 
     this.builderState.setUserProfile(mergedProfile);
+    this.builderState.setContactFontSize((value as any).fontSize);
+    
     localStorage.setItem(this.storageKey, JSON.stringify({
       fullName: value.fullName,
       email: value.email,
@@ -172,7 +213,8 @@ export class ContactEditorComponent implements OnChanges {
       location: value.location,
       linkedin: value.linkedin,
       github: value.github,
-      website: value.website
+      website: value.website,
+      fontSize: (value as any).fontSize
     }));
 
     if (currentResume && currentResume.targetJobTitle !== value.jobTitle) {

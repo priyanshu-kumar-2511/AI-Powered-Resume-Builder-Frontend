@@ -31,6 +31,14 @@
         (click)="toggleVisibility($event, section)">
         {{ section.isVisible ? '👁️' : '🙈' }}
       </button>
+
+      <button
+        type="button"
+        class="delete-btn"
+        title="Delete section"
+        (click)="deleteSection($event, section)">
+        🗑️
+      </button>
     </div>
   }
 </div>
@@ -116,8 +124,25 @@
 }
 
 .section-item:hover .vis-btn,
-.section-item.selected .vis-btn {
+.section-item.selected .vis-btn,
+.section-item:hover .delete-btn,
+.section-item.selected .delete-btn {
   opacity: 1;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
 }
 
 .empty-list {

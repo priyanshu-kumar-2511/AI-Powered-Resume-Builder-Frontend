@@ -11,6 +11,16 @@ import { ResumeSection } from '../../../shared/models/models';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="summary-editor">
+      <!-- Section Styling (Font Size) -->
+      <div class="section-styling">
+        <label class="style-label">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          Section Font Size:
+        </label>
+        <input type="range" min="8" max="24" [formControl]="fontSizeControl" class="style-slider">
+        <span class="style-val">{{ fontSizeControl.value }}px</span>
+      </div>
+
       <label class="field-label">Professional Summary</label>
       <textarea
         class="summary-textarea"
@@ -34,6 +44,30 @@ import { ResumeSection } from '../../../shared/models/models';
 
     <style>
     .summary-editor { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Section Styling */
+    .section-styling {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 4px;
+    }
+    .style-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .style-slider {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.1); outline: none;
+      -webkit-appearance: none; cursor: pointer;
+    }
+    .style-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--teal);
+      box-shadow: 0 0 10px rgba(0,212,180,0.4);
+    }
+    .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+
     .field-label { font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); }
     .summary-textarea {
       width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
@@ -58,6 +92,7 @@ export class SummaryEditorComponent implements OnChanges {
   private destroy$   = new Subject<void>();
 
   textControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(600)] });
+  fontSizeControl = new FormControl(12, { nonNullable: true });
   saving    = false;
   saveError = '';
 
@@ -73,15 +108,22 @@ export class SummaryEditorComponent implements OnChanges {
     let parsed: any;
     try { parsed = JSON.parse(this.section.content || '{}'); } catch { parsed = {}; }
     this.textControl.setValue(parsed.text || '', { emitEvent: false });
+    this.fontSizeControl.setValue(parsed.fontSize || 12, { emitEvent: false });
     this.saveError = '';
 
-    this.textControl.valueChanges.pipe(
+    const update$ = new Subject<void>();
+    this.textControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+
+    update$.pipe(
       debounceTime(800),
-      distinctUntilChanged(),
-      switchMap(text => {
+      switchMap(() => {
         this.saving = true;
         this.saveError = '';
-        const content = JSON.stringify({ text });
+        const content = JSON.stringify({ 
+          text: this.textControl.value, 
+          fontSize: this.fontSizeControl.value 
+        });
         return this.sectionApi.updateSection(this.section.sectionId, { content }).pipe(
           catchError(() => { this.saving = false; this.saveError = 'Save failed.'; return EMPTY; })
         );

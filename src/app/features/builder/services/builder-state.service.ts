@@ -12,26 +12,34 @@ export class BuilderStateService {
   private readonly defaultPreviewStyle = {
     fontSize: 11,
     fontFamily: 'Inter',
-    primaryColor: '#00d4b4'
+    primaryColor: '#00d4b4',
+    contactFontSize: 24
   };
 
   private sectionsSubject = new BehaviorSubject<ResumeSection[]>([]);
   private resumeSubject   = new BehaviorSubject<Resume | null>(null);
   private templateSubject = new BehaviorSubject<Template | null>(null);
   private userProfileSubject = new BehaviorSubject<UserProfileResponse | null>(null);
-  private fontSubject     = new BehaviorSubject<{ fontSize: number, fontFamily: string, primaryColor: string }>(this.defaultPreviewStyle);
+  private fontSubject     = new BehaviorSubject<{ fontSize: number, fontFamily: string, primaryColor: string, contactFontSize: number }>(this.defaultPreviewStyle);
+  private isOverA4HeightSubject = new BehaviorSubject<boolean>(false);
 
   readonly sections$ = this.sectionsSubject.asObservable();
   readonly resume$   = this.resumeSubject.asObservable();
   readonly template$ = this.templateSubject.asObservable();
   readonly userProfile$ = this.userProfileSubject.asObservable();
   readonly font$     = this.fontSubject.asObservable();
+  readonly isOverA4Height$ = this.isOverA4HeightSubject.asObservable();
 
   get sectionsSnapshot(): ResumeSection[] { return this.sectionsSubject.value; }
   get resumeSnapshot(): Resume | null      { return this.resumeSubject.value; }
   get templateSnapshot(): Template | null  { return this.templateSubject.value; }
   get userProfileSnapshot(): UserProfileResponse | null { return this.userProfileSubject.value; }
   get fontSnapshot() { return this.fontSubject.value; }
+  get isOverA4HeightSnapshot(): boolean { return this.isOverA4HeightSubject.value; }
+
+  setOverA4Height(isOver: boolean): void {
+    this.isOverA4HeightSubject.next(isOver);
+  }
 
   // ── Sections ──────────────────────────────────────────────────────────────
   
@@ -100,7 +108,8 @@ export class BuilderStateService {
         this.fontSubject.next({
           fontSize: parsed.fontSize ?? this.defaultPreviewStyle.fontSize,
           fontFamily: parsed.fontFamily ?? this.defaultPreviewStyle.fontFamily,
-          primaryColor: parsed.primaryColor ?? this.defaultPreviewStyle.primaryColor
+          primaryColor: parsed.primaryColor ?? this.defaultPreviewStyle.primaryColor,
+          contactFontSize: parsed.contactFontSize ?? this.defaultPreviewStyle.contactFontSize
         });
       } catch (e) {
         console.error('Failed to parse customizations from resume:', e);
@@ -153,6 +162,10 @@ export class BuilderStateService {
   setPrimaryColor(color: string): void {
     if (!color) return;
     this.fontSubject.next({ ...this.fontSnapshot, primaryColor: color });
+  }
+
+  setContactFontSize(size: number): void {
+    this.fontSubject.next({ ...this.fontSnapshot, contactFontSize: size });
   }
 
   // ── Reset ─────────────────────────────────────────────────────────────────

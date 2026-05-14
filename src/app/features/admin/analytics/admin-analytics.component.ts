@@ -125,37 +125,20 @@ import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/ad
             </div>
           </div>
 
-          <!-- Usage Graph -->
-          <div class="sub-title" style="margin-top:20px">AI Activity Trend (Last 7 Days - Calls)</div>
-          <div class="graph-wrap">
-            <svg viewBox="0 0 400 150" class="trend-svg">
-              <!-- Grid lines -->
-              <line x1="0" y1="30" x2="400" y2="30" stroke="rgba(255,255,255,0.05)" />
-              <line x1="0" y1="70" x2="400" y2="70" stroke="rgba(255,255,255,0.05)" />
-              <line x1="0" y1="110" x2="400" y2="110" stroke="rgba(255,255,255,0.05)" />
-              
-              <!-- Gradient fill -->
-              <defs>
-                <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="rgba(139,92,246,0.3)" />
-                  <stop offset="100%" stop-color="rgba(139,92,246,0)" />
-                </linearGradient>
-              </defs>
-              <path [attr.d]="chartAreaPath" fill="url(#lineGrad)" />
-              
-              <!-- Main line -->
-              <path [attr.d]="chartLinePath" fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-              
-              <!-- Points -->
-              @for (p of chartPoints; track p.x) {
-                <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" fill="#8b5cf6" stroke="#111520" stroke-width="2" />
+          <!-- Usage Graph (Scrollable Bar Chart) -->
+          <div class="sub-title" style="margin-top:20px">AI Activity Trend (Daily Usage)</div>
+          <div class="graph-scroll-wrap">
+            <div class="bar-chart">
+              @for (item of barChartData; track item.date) {
+                <div class="bar-col">
+                  <div class="bar-val-hint">{{ item.count }}</div>
+                  <div class="bar-stem" [style.height.px]="(item.count / maxBarVal) * 110">
+                    <div class="bar-glow"></div>
+                  </div>
+                  <div class="bar-date">{{ item.date }}</div>
+                </div>
               }
- 
-              <!-- Labels -->
-              @for (p of chartPoints; track p.x) {
-                <text [attr.x]="p.x" y="145" text-anchor="middle" class="chart-text">{{ p.label }}</text>
-              }
-            </svg>
+            </div>
           </div>
  
           <div class="sub-title" style="margin-top:20px">Top Users by Activity</div>
@@ -216,9 +199,16 @@ import { AdminApiService, PlatformAnalytics, AiUsageStats } from '../services/ad
     .rank-bar { height: 100%; background: linear-gradient(90deg,#00d4b4,#00b89c); border-radius: 3px; }
     .rank-count { font-size: 0.7rem; color: rgba(255,255,255,0.4); width: 60px; text-align: right; flex-shrink: 0; }
 
-    .graph-wrap { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 10px 10px; margin-top: 12px; }
-    .trend-svg { width: 100%; height: 160px; overflow: visible; }
-    .chart-text { font-size: 8px; fill: rgba(255,255,255,0.3); font-weight: 600; }
+    .graph-scroll-wrap { overflow-x: auto; padding-bottom: 12px; margin-top: 12px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+    .graph-scroll-wrap::-webkit-scrollbar { height: 6px; }
+    .graph-scroll-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    
+    .bar-chart { display: flex; align-items: flex-end; gap: 14px; min-width: max-content; height: 180px; padding: 24px 16px 36px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 42px; position: relative; }
+    .bar-stem { width: 12px; background: linear-gradient(to top, #8b5cf6, #c084fc); border-radius: 6px; position: relative; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .bar-glow { position: absolute; inset: 0; background: inherit; filter: blur(4px); opacity: 0.35; }
+    .bar-val-hint { font-size: 0.62rem; color: rgba(255,255,255,0.2); margin-bottom: 2px; }
+    .bar-date { font-size: 0.62rem; color: rgba(255,255,255,0.3); white-space: nowrap; transform: rotate(-45deg); position: absolute; bottom: -30px; left: 50%; transform-origin: left; }
 
     .two-col-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   `]
@@ -268,25 +258,31 @@ export class AdminAnalyticsComponent implements OnInit {
  
   // ── Chart Logic ──────────────────────────────────────────────────────────
   
-  chartPoints: {x: number, y: number, label: string}[] = [];
-  chartLinePath = '';
-  chartAreaPath = '';
+  barChartData: {date: string, count: number}[] = [];
+  maxBarVal = 1;
  
   private generateChartData(): void {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // Mock daily usage values based on total calls
-    const base = (this.ai?.totalAiCalls ?? 100) / 7;
-    const values = [base*0.8, base*1.2, base*0.9, base*1.5, base*1.1, base*0.7, base*1.3];
-    const maxVal = Math.max(...values, 10);
+    if (this.ai?.dailyTrend && this.ai.dailyTrend.length > 0) {
+      this.barChartData = this.ai.dailyTrend.map(d => ({
+        date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        count: d.count
+      }));
+    } else {
+      // Fallback: If no real data, show empty/zero bars for the last 30 days
+      const values: {date: string, count: number}[] = [];
+      const now = new Date();
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        values.push({
+          date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          count: 0 // No more random data, show real 0s
+        });
+      }
+      this.barChartData = values;
+    }
     
-    this.chartPoints = values.map((v, i) => ({
-      x: (i * (400 / 6)),
-      y: 130 - (v / maxVal * 100),
-      label: days[i]
-    }));
- 
-    this.chartLinePath = 'M' + this.chartPoints.map(p => `${p.x},${p.y}`).join(' L');
-    this.chartAreaPath = this.chartLinePath + ` L400,130 L0,130 Z`;
+    this.maxBarVal = Math.max(...this.barChartData.map(v => v.count), 1);
   }
 
   barPct(val: number, max: number): number { return max > 0 ? Math.round((val / max) * 100) : 0; }
