@@ -12,6 +12,7 @@ import { extractErrorMessage } from '../../../shared/utils/http-error.util';
   templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnDestroy {
+  private readonly mobilePrefix = '+91';
   private fb     = inject(FormBuilder);
   private auth   = inject(AuthService);
   private router = inject(Router);
@@ -19,7 +20,7 @@ export class RegisterComponent implements OnDestroy {
   form = this.fb.group({
     fullName:     ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     age:          [null as number | null, [Validators.required, Validators.min(18), Validators.max(120)]],
-    mobileNumber: ['', [Validators.required, Validators.pattern(/^\+91[0-9]{10}$/)]],
+    mobileNumber: [this.mobilePrefix, [Validators.required, Validators.pattern(/^\+91[0-9]{10}$/)]],
     email:        ['', [Validators.required, Validators.email]],
     otp:          ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
     username:     ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
@@ -187,6 +188,23 @@ export class RegisterComponent implements OnDestroy {
         this.loading = false;
       }
     });
+  }
+
+  onMobileNumberInput() {
+    const rawValue = `${this.mobileNumber.value ?? ''}`;
+    let digitsOnly = rawValue.replace(/\D/g, '');
+
+    if (rawValue.trim().startsWith(this.mobilePrefix)) {
+      digitsOnly = digitsOnly.slice(2);
+    } else if (digitsOnly.length > 10 && digitsOnly.startsWith('91')) {
+      digitsOnly = digitsOnly.slice(2);
+    }
+
+    const normalizedValue = `${this.mobilePrefix}${digitsOnly.slice(0, 10)}`;
+
+    if (rawValue !== normalizedValue) {
+      this.mobileNumber.setValue(normalizedValue, { emitEvent: false });
+    }
   }
 
   ngOnDestroy() {

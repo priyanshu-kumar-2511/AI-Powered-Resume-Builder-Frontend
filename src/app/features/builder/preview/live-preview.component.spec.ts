@@ -27,7 +27,8 @@ describe('LivePreviewComponent', () => {
 
     mockBuilderState = {
       sections$: sectionsSubject.asObservable(),
-      template$: templateSubject.asObservable()
+      template$: templateSubject.asObservable(),
+      setOverA4Height: jasmine.createSpy('setOverA4Height')
     };
 
     mockLivePreview = {
@@ -217,13 +218,30 @@ describe('LivePreviewComponent', () => {
       expect((component as any).resolveSectionType(contact)).toBe('CONTACT');
     });
 
-    it('should handle height check postMessage', () => {
-      // @ts-ignore
-      mockBuilderState.setOverA4Height = jasmine.createSpy('setOverA4Height');
+    it('should only flag overflow when content exceeds the A4 viewport', () => {
       const doc = mockIframe.contentDocument!;
-      // Mock scrollHeight
-      Object.defineProperty(doc.documentElement, 'scrollHeight', { value: 2000, configurable: true });
-      
+      const root = doc.createElement('div');
+      root.className = 'resume';
+      doc.body.appendChild(root);
+
+      Object.defineProperty(doc.documentElement, 'clientHeight', { value: 1123, configurable: true });
+      Object.defineProperty(doc.body, 'clientHeight', { value: 1123, configurable: true });
+      Object.defineProperty(doc.documentElement, 'scrollHeight', { value: 1123, configurable: true });
+      Object.defineProperty(doc.body, 'scrollHeight', { value: 1123, configurable: true });
+      Object.defineProperty(root, 'scrollHeight', { value: 1123, configurable: true });
+      Object.defineProperty(root, 'offsetHeight', { value: 1123, configurable: true });
+      const rectSpy = spyOn(root, 'getBoundingClientRect').and.returnValue({ height: 1123 } as DOMRect);
+
+      (component as any).checkHeight();
+      expect(mockBuilderState.setOverA4Height).toHaveBeenCalledWith(false);
+
+      mockBuilderState.setOverA4Height.calls.reset();
+      Object.defineProperty(doc.documentElement, 'scrollHeight', { value: 1145, configurable: true });
+      Object.defineProperty(doc.body, 'scrollHeight', { value: 1145, configurable: true });
+      Object.defineProperty(root, 'scrollHeight', { value: 1145, configurable: true });
+      Object.defineProperty(root, 'offsetHeight', { value: 1145, configurable: true });
+      rectSpy.and.returnValue({ height: 1145 } as DOMRect);
+
       (component as any).checkHeight();
       expect(mockBuilderState.setOverA4Height).toHaveBeenCalledWith(true);
     });

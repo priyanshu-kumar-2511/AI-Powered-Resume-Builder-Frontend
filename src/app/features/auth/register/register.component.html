@@ -65,7 +65,7 @@
 
             <div class="form-group">
               <label class="form-label">Mobile Number</label>
-              <input formControlName="mobileNumber" type="tel" class="form-control" placeholder="+917654321098">
+              <input formControlName="mobileNumber" type="tel" class="form-control" placeholder="7654321098" maxlength="13" (input)="onMobileNumberInput()">
               @if (mobileNumber.invalid && mobileNumber.touched) {
                 <span class="form-error">Format: +91 followed by 10 digits</span>
               }

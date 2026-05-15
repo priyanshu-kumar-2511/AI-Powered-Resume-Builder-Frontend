@@ -41,6 +41,10 @@ describe('RegisterComponent', () => {
     expect(component.form.invalid).toBeTrue();
   });
 
+  it('should prefill mobile number with +91', () => {
+    expect(component.mobileNumber.value).toBe('+91');
+  });
+
   it('should calculate password strength', () => {
     component.form.patchValue({ password: 'pass' });
     expect(component.passwordStrength).toBe(0);
@@ -172,6 +176,16 @@ describe('RegisterComponent', () => {
     component.form.patchValue({ fullName: 'John', age: 25, mobileNumber: '+919876543210', email: 't@t.com' });
     component.resendOtp();
     expect(component.error).toEqual('Resend Failed');
+  });
+
+  it('should preserve +91 prefix while typing mobile number', () => {
+    component.form.patchValue({ mobileNumber: '9876543210' });
+    component.onMobileNumberInput();
+    expect(component.mobileNumber.value).toBe('+919876543210');
+
+    component.form.patchValue({ mobileNumber: '' });
+    component.onMobileNumberInput();
+    expect(component.mobileNumber.value).toBe('+91');
   });
 
   it('should clear interval on ngOnDestroy', fakeAsync(() => {

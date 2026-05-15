@@ -51,14 +51,6 @@
 
       <div class="fmt-divider"></div>
 
-      <!-- Inline text formatting -->
-      <button class="fmt-btn fmt-bold" title="Bold" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('**')"><strong>B</strong></button>
-      <button class="fmt-btn fmt-italic" title="Italic" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('*')"><em>I</em></button>
-      <button class="fmt-btn" title="Underline" style="text-decoration:underline" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('++')">U</button>
-      <button class="fmt-btn" title="Strikethrough" style="text-decoration:line-through" (mousedown)="$event.preventDefault()" (click)="applyInlineFormat('~~')">S</button>
-
-      <div class="fmt-divider"></div>
-
       <!-- Live template accent color -->
       <div class="fmt-color-wrap" title="Template Accent Color">
         <div class="fmt-color-swatch" [style.background]="currentFont.primaryColor"></div>
@@ -81,23 +73,6 @@
         </div>
       </div>
 
-      <div class="fmt-divider"></div>
-
-      <!-- Alignment -->
-      <button class="fmt-btn" title="Align Left">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="15" y2="12" />
-          <line x1="3" y1="18" x2="18" y2="18" />
-        </svg>
-      </button>
-      <button class="fmt-btn" title="Align Center">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="7" y1="12" x2="17" y2="12" />
-          <line x1="4" y1="18" x2="20" y2="18" />
-        </svg>
-      </button>
     </div>
 
     <div class="topbar-right">
@@ -360,8 +335,9 @@
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 8px;
     padding: 4px 8px;
-    flex: 1;
-    max-width: 680px;
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: none;
     margin: 0 auto;
   }
 

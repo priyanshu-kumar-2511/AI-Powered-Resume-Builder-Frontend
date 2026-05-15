@@ -47,7 +47,15 @@ describe('TemplateRenderService', () => {
     const html = service.renderDocument(template, {
       font: { fontFamily: 'Roboto', fontSize: 14 }
     });
-    expect(html).toContain("font-family: 'Roboto' !important;");
+    expect(html).toContain("--resume-global-font: 'Roboto', 'Trebuchet MS', Verdana, sans-serif;");
+    expect(html).toContain('family=Roboto');
+    expect(html).toContain('--resume-global-scale');
+  });
+
+  it('should inject theme-aware accent styles into classic ats fallback', () => {
+    const html = service.renderDocument({ templateId: 1, name: 'Classic ATS' } as any, { useDemoData: false });
+    expect(html).toContain('color:var(--primary,#0f766e)');
+    expect(html).toContain('border-top:1.5px solid var(--primary,#0f766e)');
   });
 
   it('should handle render failure catch block', () => {
@@ -241,16 +249,6 @@ describe('TemplateRenderService', () => {
       expect(data.projects[0].dates).toBe('2021 - 2022');
     });
 
-    it('should handle single string PROJECT content', () => {
-      const sections: ResumeSection[] = [{
-        sectionType: 'PROJECTS',
-        content: JSON.stringify('Single project text'),
-        isVisible: true
-      } as any];
-      const data = service.buildViewData(sections, null, null, false);
-      expect(data.projects[0].title).toBe('Selected Project');
-      expect(data.projects[0].bullets[0].text).toBe('Single project text');
-    });
     it('should handle projects isCurrent and string branch', () => {
       const s1 = [{ sectionType: 'PROJECTS', content: JSON.stringify({ name: 'P', startDate: '2020', isCurrent: true }), isVisible: true }] as any;
       const d1 = service.buildViewData(s1, null, null, false);
@@ -259,6 +257,29 @@ describe('TemplateRenderService', () => {
       const s2 = [{ sectionType: 'PROJECTS', content: JSON.stringify(['Proj A']), isVisible: true }] as any;
       const d2 = service.buildViewData(s2, null, null, false);
       expect(d2.projects[0].title).toBe('Selected Project');
+    });
+    it('should handle PROJECTS description mode payloads', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'PROJECTS',
+        content: JSON.stringify({ text: '### Resume Builder\nBuilt an ATS-friendly editor\n- Added live preview sync' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.projects[0].title).toBe('Resume Builder');
+      expect(data.projects[0].bullets.map((bullet) => bullet.text)).toEqual([
+        'Built an ATS-friendly editor',
+        'Added live preview sync'
+      ]);
+    });
+    it('should use the first plain project line as the title', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'PROJECTS',
+        content: JSON.stringify({ text: 'bjbj' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.projects[0].title).toBe('bjbj');
+      expect(data.projects[0].bullets).toEqual([]);
     });
 
     it('should handle CERTIFICATIONS title/year/issuedAt', () => {
@@ -296,6 +317,129 @@ describe('TemplateRenderService', () => {
       const s3 = [{ sectionType: 'CERTIFICATIONS', content: JSON.stringify('Cert 1, Cert 2'), isVisible: true }] as any;
       const d3 = service.buildViewData(s3, null, null, false);
       expect(d3.certifications.length).toBe(2);
+    });
+
+    it('should split certification bullet lines into name, issuer, and date', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CERTIFICATIONS',
+        content: JSON.stringify('- Azure Fundamentals (AZ 900) - Microsoft March 2025\n- Java Problem Solving - Code Chef April 2025'),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.certifications[0]).toEqual({
+        name: 'Azure Fundamentals (AZ 900)',
+        issuer: 'Microsoft',
+        date: 'March 2025',
+        startDate: 'March 2025',
+        endDate: '',
+        bullets: []
+      });
+      expect(data.certifications[1]).toEqual({
+        name: 'Java Problem Solving',
+        issuer: 'Code Chef',
+        date: 'April 2025',
+        startDate: 'April 2025',
+        endDate: '',
+        bullets: []
+      });
+    });
+    it('should handle CERTIFICATIONS description mode payloads', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CERTIFICATIONS',
+        content: JSON.stringify({ text: '- AWS Solutions Architect - Amazon 2024\n- Azure Administrator - Microsoft 2023' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.certifications[0]).toEqual({
+        name: 'AWS Solutions Architect',
+        issuer: 'Amazon',
+        date: '2024',
+        startDate: '2024',
+        endDate: '',
+        bullets: []
+      });
+      expect(data.certifications[1]).toEqual({
+        name: 'Azure Administrator',
+        issuer: 'Microsoft',
+        date: '2023',
+        startDate: '2023',
+        endDate: '',
+        bullets: []
+      });
+    });
+    it('should keep certification bullets only when they have text', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CERTIFICATIONS',
+        content: JSON.stringify({
+          items: [{ title: 'AWS', subtitle: 'Amazon', startDate: '2024', bullets: ['', 'Validated architecture skills'] }]
+        }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.certifications[0].bullets).toEqual([{ text: 'Validated architecture skills' }]);
+    });
+
+    it('should include certification expiry date in preview data', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CERTIFICATIONS',
+        content: JSON.stringify({
+          items: [{ title: 'AWS', subtitle: 'Amazon', startDate: '2024', endDate: '2027' }]
+        }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.certifications[0]).toEqual({
+        name: 'AWS',
+        issuer: 'Amazon',
+        date: '2024 - 2027',
+        startDate: '2024',
+        endDate: '2027',
+        bullets: []
+      });
+    });
+
+    it('should hide non-expiring certification text in preview data', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CERTIFICATIONS',
+        content: JSON.stringify({
+          items: [{ title: 'Azure', subtitle: 'Microsoft', startDate: '2024', isCurrent: true }]
+        }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.certifications[0].date).toBe('2024');
+      expect(data.certifications[0].endDate).toBe('');
+    });
+
+    it('should preserve repeated spaces in rich text output', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'SUMMARY',
+        content: JSON.stringify({ text: 'Line 1  Line 2' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.summary).toContain('Line 1&nbsp; Line 2');
+    });
+    it('should render markdown headings and bullet lists in rich text output', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'CUSTOM',
+        content: JSON.stringify({ text: '### Features\n- First item\n- Second item' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      const customSection = (data as any).sections.find((section: any) => section.isCustom);
+      expect(customSection.value).toContain('<h3 class="md-h3">Features</h3>');
+      expect(customSection.value).toContain('<ul class="md-list">');
+      expect(customSection.value).toContain('<li>First item</li>');
+    });
+    it('should preserve repeated spaces in project bullets', () => {
+      const sections: ResumeSection[] = [{
+        sectionType: 'PROJECTS',
+        content: JSON.stringify({ text: '### Resume Builder\nFixed  live  preview  spacing' }),
+        isVisible: true
+      } as any];
+      const data = service.buildViewData(sections, null, null, false);
+      expect(data.projects[0].bullets[0].text).toContain('\u00A0');
     });
 
     it('should handle LANGUAGES section', () => {
@@ -352,13 +496,4 @@ describe('TemplateRenderService', () => {
     expect(data.summary).toBe('{invalid-json}');
   });
 
-  it('should convert newlines to <br/> in rich text', () => {
-    const sections: ResumeSection[] = [{
-      sectionType: 'SUMMARY',
-      content: JSON.stringify({ text: "Line 1\nLine 2" }),
-      isVisible: true
-    } as any];
-    const data = service.buildViewData(sections, null, null, false);
-    expect(data.summary).toBe('Line 1<br/>Line 2');
-  });
 });

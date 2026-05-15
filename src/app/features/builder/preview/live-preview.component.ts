@@ -20,6 +20,8 @@ import { ResumeSection, Template } from '../../../shared/models/models';
   templateUrl: './live-preview.component.html'
 })
 export class LivePreviewComponent implements OnInit, OnDestroy {
+  private readonly a4ViewportHeightPx = 1123;
+  private readonly contentRootSelector = '.resume, .creative-resume, .navy-resume, .timeline-resume, .teal-resume, .ivory-resume, .mono-resume, .ankesh-resume';
   @ViewChild('previewFrame') set frameRef(ref: ElementRef<HTMLIFrameElement>) {
     if (ref?.nativeElement) {
       this.livePreview.registerIframe(ref.nativeElement);
@@ -209,24 +211,72 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     try {
       const doc = this.iframeEl?.contentDocument;
       if (!doc || !doc.body) return;
-      
-      const height = doc.documentElement.scrollHeight;
-      const A4_HEIGHT_PX = 1123; // approx 297mm at 96dpi
-      
-      // Add a small 5px tolerance buffer to account for browser measurement inconsistencies
-      // This prevents the warning from showing when the resume visually fits on one page
-      const isOver = height > (A4_HEIGHT_PX + 5); 
-      window.parent.postMessage({ type: 'HEIGHT_CHECK', isOver, height }, '*');
+
+      const viewportHeight = Math.max(
+        doc.documentElement.clientHeight,
+        doc.body.clientHeight,
+        this.iframeEl?.contentWindow?.innerHeight ?? 0,
+        this.a4ViewportHeightPx
+      );
+      const contentHeight = this.measureContentHeight(doc);
+
+      // Ignore tiny measurement noise, but show the warning as soon as content genuinely flows
+      // beyond the A4 viewport instead of treating min-height stretching as overflow.
+      const isOver = contentHeight > (viewportHeight + 8);
+      this.isOverA4 = isOver;
       this.builderState.setOverA4Height(isOver);
     } catch { }
+  }
+
+  private measureContentHeight(doc: Document): number {
+    const root = doc.querySelector<HTMLElement>(this.contentRootSelector);
+    const body = doc.body;
+    const docEl = doc.documentElement;
+
+    return Math.max(
+      root ? this.getElementExtent(root) : 0,
+      this.getContentBottom(body),
+      body.scrollHeight,
+      docEl.scrollHeight
+    );
+  }
+
+  private getElementExtent(element: HTMLElement): number {
+    return Math.max(
+      element.scrollHeight,
+      element.offsetHeight,
+      Math.ceil(element.getBoundingClientRect().height)
+    );
+  }
+
+  private getContentBottom(container: HTMLElement): number {
+    const descendants = Array.from(container.querySelectorAll<HTMLElement>('*'));
+    let maxBottom = 0;
+
+    for (const element of descendants) {
+      const style = window.getComputedStyle(element);
+      if (style.position === 'fixed') {
+        continue;
+      }
+
+      const hasRenderableContent =
+        (element.textContent || '').trim().length > 0 ||
+        element.children.length > 0 ||
+        element.offsetHeight > 1;
+
+      if (!hasRenderableContent) {
+        continue;
+      }
+
+      maxBottom = Math.max(maxBottom, element.offsetTop + element.offsetHeight);
+    }
+
+    return maxBottom;
   }
 
   private onIframeMessage = (event: MessageEvent): void => {
     if (event.data?.type === 'SECTION_CLICK' && event.data.sectionType) {
       this.sectionClicked.emit(event.data.sectionType as string);
-    } else if (event.data?.type === 'HEIGHT_CHECK') {
-      this.isOverA4 = event.data.isOver;
-      this.builderState.setOverA4Height(event.data.isOver);
     }
   };
 

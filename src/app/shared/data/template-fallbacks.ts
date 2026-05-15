@@ -117,6 +117,11 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
         <span>- {{name}} {{#issuer}}({{issuer}}){{/issuer}}</span>
         <span class="exp-dates">{{date}}</span>
       </div>
+      {{#bullets}}
+      <ul class="bullet-list">
+        {{#bullets}}<li>{{text}}</li>{{/bullets}}
+      </ul>
+      {{/bullets}}
       {{/items}}
     </section>
     {{/isCertifications}}
@@ -145,7 +150,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
   {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{margin:0;padding:0;min-height:100vh;background:#fff}.resume{font-family:"Times New Roman",Times,serif;width:100%;margin:0 auto;padding:30px 20px;color:#111;font-size:12.5px;line-height:1.45;background:#fff}.header{text-align:center;margin-bottom:12px}.name{font-size:2.2em;font-weight:700;letter-spacing:.01em;margin-bottom:4px;color:#000;text-transform:uppercase}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;font-size:0.9em;color:#333;padding:4px 0;margin-bottom:10px}.section{margin-bottom:15px}.section-title{font-size:1.05em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#000;border-top:1.5px solid #000;padding-top:3px;margin-bottom:8px}.summary-text{font-size:0.95em}.edu-item{margin-bottom:6px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:700}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:0.9em;color:#444}.exp-item,.project-item{margin-bottom:10px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700}.exp-role{font-style:italic;font-size:0.95em;margin:1px 0 3px}.exp-dates{font-size:0.9em;color:#444}.bullet-list{padding-left:16px;margin-top:3px}.bullet-list li{margin-bottom:2px;font-size:0.95em}.cert-row{display:flex;justify-content:space-between;font-size:0.95em;margin-bottom:3px}`
+    cssStyles: `*{box-sizing:border-box;margin:0;padding:0}body{margin:0;padding:0;min-height:100vh;background:#fff}.resume{font-family:"Times New Roman",Times,serif;width:100%;margin:0 auto;padding:30px 20px;color:#111;font-size:12.5px;line-height:1.45;background:#fff}.header{text-align:center;margin-bottom:12px}.name{font-size:2.2em;font-weight:700;letter-spacing:.01em;margin-bottom:4px;color:#000;text-transform:uppercase}.contact-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;font-size:0.9em;color:#333;padding:4px 0;margin-bottom:10px}.section{margin-bottom:15px}.section-title{font-size:1.05em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary,#0f766e);border-top:1.5px solid var(--primary,#0f766e);padding-top:3px;margin-bottom:8px}.summary-text{font-size:0.95em}.edu-item{margin-bottom:6px}.edu-row{display:flex;justify-content:space-between}.edu-degree{font-weight:700}.edu-institution{color:#333}.edu-dates,.edu-grade{font-size:0.9em;color:#444}.exp-item,.project-item{margin-bottom:10px}.exp-header,.project-header{display:flex;justify-content:space-between;align-items:baseline}.exp-company{font-weight:700;color:var(--primary,#0f766e)}.exp-role{font-style:italic;font-size:0.95em;margin:1px 0 3px}.exp-dates{font-size:0.9em;color:#444}.bullet-list{padding-left:16px;margin-top:3px}.bullet-list li{margin-bottom:2px;font-size:0.95em}.cert-row{display:flex;justify-content:space-between;font-size:0.95em;margin-bottom:3px}`
   },
   {
     templateId: 2,
@@ -212,6 +217,11 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
           <strong class="exp-role">{{name}} {{#issuer}}({{issuer}}){{/issuer}}</strong>
           <span class="exp-dates">{{date}}</span>
         </div>
+        {{#bullets}}
+        <ul class="bullet-list">
+          {{#bullets}}<li>{{text}}</li>{{/bullets}}
+        </ul>
+        {{/bullets}}
       </div>
       {{/items}}
     </section>
@@ -327,6 +337,11 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
           <strong class="side-degree">{{name}}</strong>
           {{#issuer}}<div class="side-inst">{{issuer}}</div>{{/issuer}}
           <span class="side-dates">{{date}}</span>
+          {{#bullets}}
+          <ul class="main-bullets">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+          {{/bullets}}
         </div>
         {{/items}}
       </div>
@@ -433,10 +448,9 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
       {{#items}}
       <article class="navy-block">
         <div class="navy-row">
-          <strong>{{role}}</strong>
+          <strong>{{company}}{{#role}} - {{role}}{{/role}}</strong>
           <span>{{startDate}} - {{endDate}}</span>
         </div>
-        <div class="navy-company">{{company}}</div>
         <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
       </article>
       {{/items}}
@@ -486,8 +500,23 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
     {{#isCertifications}}
     <section class="section certifications">
       <h2>{{title}}</h2>
-      <ul class="navy-list">
-        {{#items}}<li><strong>{{name}}</strong> {{#issuer}}- {{issuer}}{{/issuer}} <span class="navy-muted">{{date}}</span></li>{{/items}}
+      <ul class="navy-cert-list">
+        {{#items}}
+        <li class="navy-cert-item">
+          <div class="navy-cert-row">
+            <span class="navy-cert-left">
+              <strong>{{name}}</strong>
+              {{#issuer}}<span class="navy-cert-issuer">{{issuer}}</span>{{/issuer}}
+            </span>
+            {{#date}}<span class="navy-muted">{{date}}</span>{{/date}}
+          </div>
+          {{#bullets}}
+          <ul class="navy-block">
+            {{#bullets}}<li>{{text}}</li>{{/bullets}}
+          </ul>
+          {{/bullets}}
+        </li>
+        {{/items}}
       </ul>
     </section>
     {{/isCertifications}}
@@ -514,7 +543,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
   {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{width:100%;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 20px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:2.6em;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:0.85em;color:#cbd5e1}.section{padding:0 20px;margin-bottom:22px}.section h2{margin:0 0 12px;font-size:0.9em;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-muted{color:#64748b;font-size:0.85em}.navy-list{margin:0;padding-left:18px}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#111;font-family:Inter,Arial,sans-serif}.navy-resume{width:100%;margin:0 auto;padding:0 0 36px}.navy-header{background:linear-gradient(135deg,color-mix(in srgb,var(--primary,#0f172a) 26%, #0f172a),#0f172a);color:#fff;text-align:center;padding:36px 20px 28px;margin-bottom:24px}.navy-name{margin:0 0 8px;font-size:2.6em;letter-spacing:.08em;text-transform:uppercase}.navy-contact{font-size:0.85em;color:#cbd5e1}.section{padding:0 20px;margin-bottom:22px}.section h2{margin:0 0 12px;font-size:0.9em;color:var(--primary,#0891b2);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dbe4ee;padding-bottom:5px}.navy-block{margin-bottom:14px}.navy-row{display:flex;justify-content:space-between;gap:12px}.navy-company{margin:3px 0 6px;color:var(--primary,#0891b2);font-weight:600}.navy-block ul{margin:6px 0 0;padding-left:18px}.navy-muted{color:#64748b;font-size:0.85em;white-space:nowrap}.navy-list{margin:0;padding-left:18px}.navy-cert-list{list-style:none;margin:0;padding-left:0}.navy-cert-item{margin-bottom:6px}.navy-cert-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.navy-cert-left{display:flex;flex-wrap:wrap;gap:6px;min-width:0}.navy-cert-issuer{color:var(--primary,#0891b2);font-weight:500}`
   },
   {
     templateId: 5,
@@ -608,6 +637,9 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
         <div class="timeline-right">
           <strong>{{name}}</strong>
           {{#issuer}}<div>{{issuer}}</div>{{/issuer}}
+          {{#bullets}}
+          <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+          {{/bullets}}
         </div>
       </article>
       {{/items}}
@@ -758,7 +790,16 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
         {{#isCertifications}}
         <section class="section additional">
           <h2>{{title}}</h2>
-          <ul>{{#items}}<li><strong>{{name}}</strong> {{#issuer}}({{issuer}}){{/issuer}} {{date}}</li>{{/items}}</ul>
+          <ul>
+            {{#items}}
+            <li>
+              <strong>{{name}}</strong> {{#issuer}}({{issuer}}){{/issuer}} {{date}}
+              {{#bullets}}
+              <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+              {{/bullets}}
+            </li>
+            {{/items}}
+          </ul>
         </section>
         {{/isCertifications}}
       </div>
@@ -851,6 +892,9 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
           <strong>{{name}} {{#issuer}}({{issuer}}){{/issuer}}</strong>
           <span>{{date}}</span>
         </div>
+        {{#bullets}}
+        <ul>{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+        {{/bullets}}
       </article>
       {{/items}}
     </section>
@@ -878,7 +922,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
   {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fdfaf0;color:#333;font-family:Lora,serif}.ivory-resume{width:100%;margin:0 auto;padding:40px 20px;background:#fdfaf0}.ivory-header{text-align:center;margin-bottom:30px}.ivory-header h1{margin:0;font-size:2.3em;color:#000}.ivory-header p{margin:5px 0;font-size:1em;color:#666;text-transform:uppercase;letter-spacing:.1em}.ivory-contact{font-size:0.9em;color:#888}.section{margin-bottom:24px}.section h2{font-size:0.95em;text-transform:uppercase;letter-spacing:.12em;color:#000;padding-bottom:6px;margin-bottom:12px}.ivory-block{margin-bottom:14px}.ivory-row{display:flex;justify-content:space-between;margin-bottom:4px}.ivory-row strong{font-size:1.05em;color:#111}.ivory-row span{font-size:0.9em;color:#999}.ivory-block ul{padding-left:18px;margin-top:6px}.ivory-block li{margin-bottom:4px;font-size:0.95em}.ivory-skills{display:flex;flex-wrap:wrap;gap:12px}.ivory-skills span{font-size:0.95em}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fdfaf0;color:#333;font-family:Lora,serif}.ivory-resume{width:100%;margin:0 auto;padding:40px 20px;background:#fdfaf0}.ivory-header{text-align:center;margin-bottom:30px}.ivory-header h1{margin:0;font-size:2.3em;color:#000}.ivory-header p{margin:5px 0;font-size:1em;color:#666;text-transform:uppercase;letter-spacing:.1em}.ivory-contact{font-size:0.9em;color:#888}.section{margin-bottom:24px}.section h2{font-size:0.95em;text-transform:uppercase;letter-spacing:.12em;color:var(--primary,#0f766e);padding-bottom:6px;margin-bottom:12px;border-bottom:1px solid color-mix(in srgb,var(--primary,#0f766e) 35%, #d6d3d1)}.ivory-block{margin-bottom:14px}.ivory-row{display:flex;justify-content:space-between;margin-bottom:4px}.ivory-row strong{font-size:1.05em;color:#111}.ivory-row span{font-size:0.9em;color:#999}.ivory-block ul{padding-left:18px;margin-top:6px}.ivory-block li{margin-bottom:4px;font-size:0.95em}.ivory-skills{display:flex;flex-wrap:wrap;gap:12px}.ivory-skills span{font-size:0.95em;color:var(--primary,#0f766e)}`
   },
   {
     templateId: 8,
@@ -942,7 +986,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
   {{/sections}}
 </div>`,
-    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#000;font-family:"Courier New",monospace}.mono-resume{width:100%;padding:40px 20px}.mono-header{margin-bottom:30px;border-bottom:1px dashed #000;padding-bottom:20px}.mono-header h1{font-size:2.2em;margin:0}.mono-header p{font-size:1.1em;margin:8px 0}.mono-contact{font-size:0.85em;color:#666}.mono-section{margin-bottom:25px}.mono-section h2{font-size:1em;text-transform:uppercase;color:#000;margin-bottom:12px}.mono-item{margin-bottom:15px}.mono-top{display:flex;justify-content:space-between;margin-bottom:5px}.mono-tags{display:flex;flex-wrap:wrap;gap:12px}ul{padding-left:20px;margin-top:5px}li{margin-bottom:4px;font-size:0.9em}`
+    cssStyles: `*{box-sizing:border-box}body{margin:0;padding:0;min-height:100vh;background:#fff;color:#000;font-family:"Courier New",monospace}.mono-resume{width:100%;padding:40px 20px}.mono-header{margin-bottom:30px;border-bottom:1px dashed var(--primary,#0f766e);padding-bottom:20px}.mono-header h1{font-size:2.2em;margin:0}.mono-header p{font-size:1.1em;margin:8px 0}.mono-contact{font-size:0.85em;color:#666}.mono-section{margin-bottom:25px}.mono-section h2{font-size:1em;text-transform:uppercase;color:var(--primary,#0f766e);margin-bottom:12px}.mono-item{margin-bottom:15px}.mono-top{display:flex;justify-content:space-between;margin-bottom:5px}.mono-tags{display:flex;flex-wrap:wrap;gap:12px}ul{padding-left:20px;margin-top:5px}li{margin-bottom:4px;font-size:0.9em}`
   },
   {
     templateId: 10,
@@ -1032,6 +1076,9 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
               <span>{{name}} {{#issuer}}({{issuer}}){{/issuer}}</span>
               <span class="ankesh-entry-date">{{date}}</span>
             </div>
+            {{#bullets}}
+            <ul class="ankesh-bullets">{{#bullets}}<li>{{text}}</li>{{/bullets}}</ul>
+            {{/bullets}}
           </li>
           {{/items}}
         </ul>
@@ -1055,7 +1102,7 @@ const TEMPLATE_FALLBACKS: TemplateFallback[] = [
   </div>
   {{/sections}}
 </div>`,
-    cssStyles: `.ankesh-resume{width:100%;padding:30px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#000;line-height:1.4}.ankesh-header{text-align:center;margin-bottom:20px}.ankesh-name{font-size:28pt;font-weight:800;text-transform:uppercase;margin-bottom:10px;letter-spacing:1px}.ankesh-contact-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;font-size:9pt;border-bottom:2px solid #000;padding-bottom:10px}.ankesh-contact-item a{color:#000;text-decoration:underline}.ankesh-section{margin-bottom:15px}.ankesh-section-title{font-size:14pt;font-weight:800;text-transform:uppercase;border-bottom:1.5px solid #000;padding-bottom:2px;margin-bottom:8px}.ankesh-text{font-size:10.5pt;text-align:justify}.ankesh-entry{margin-bottom:10px}.ankesh-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11pt}.ankesh-entry-title{font-size:11pt}.ankesh-entry-sub{font-size:10.5pt}.ankesh-entry-date,.ankesh-entry-meta{font-size:10pt;color:#333}.ankesh-bullets{margin:5px 0;padding-left:20px;list-style-type:disc}.ankesh-bullets li{font-size:10.5pt;margin-bottom:3px}.ankesh-skills-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;list-style:none;padding-left:0}`
+    cssStyles: `.ankesh-resume{width:100%;padding:30px;background:#fff;font-family:'Segoe UI',Arial,sans-serif;color:#000;line-height:1.4}.ankesh-header{text-align:center;margin-bottom:20px}.ankesh-name{font-size:28pt;font-weight:800;text-transform:uppercase;margin-bottom:10px;letter-spacing:1px}.ankesh-contact-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;font-size:9pt;border-bottom:2px solid var(--primary,#0f766e);padding-bottom:10px}.ankesh-contact-item a{color:var(--primary,#0f766e);text-decoration:underline}.ankesh-section{margin-bottom:15px}.ankesh-section-title{font-size:14pt;font-weight:800;text-transform:uppercase;border-bottom:1.5px solid var(--primary,#0f766e);color:var(--primary,#0f766e);padding-bottom:2px;margin-bottom:8px}.ankesh-text{font-size:10.5pt;text-align:justify}.ankesh-entry{margin-bottom:10px}.ankesh-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11pt}.ankesh-entry-title{font-size:11pt}.ankesh-entry-sub{font-size:10.5pt}.ankesh-entry-date,.ankesh-entry-meta{font-size:10pt;color:#333}.ankesh-bullets{margin:5px 0;padding-left:20px;list-style-type:disc}.ankesh-bullets li{font-size:10.5pt;margin-bottom:3px}.ankesh-skills-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;list-style:none;padding-left:0}`
   }
 ];
 

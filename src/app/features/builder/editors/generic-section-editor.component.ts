@@ -44,6 +44,14 @@ type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
         </label>
         <input type="range" min="8" max="24" [formControl]="fontSizeControl" class="style-slider">
         <span class="style-val">{{ fontSizeControl.value }}px</span>
+        <div class="align-toggle">
+          <button type="button" class="align-btn" [class.active]="textAlignControl.value === 'left'" (click)="textAlignControl.setValue('left')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="15" y2="12" /><line x1="3" y1="18" x2="18" y2="18" /></svg>
+          </button>
+          <button type="button" class="align-btn" [class.active]="textAlignControl.value === 'center'" (click)="textAlignControl.setValue('center')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+          </button>
+        </div>
       </div>
 
       <!-- ── DESCRIPTION MODE (Markdown) ── -->
@@ -52,6 +60,8 @@ type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
           <div class="toolbar-row">
             <button type="button" class="fmt-btn" title="Bold"      (click)="wrap('**','**')"><b>B</b></button>
             <button type="button" class="fmt-btn" title="Italic"    (click)="wrap('*','*')"><i>I</i></button>
+            <button type="button" class="fmt-btn" title="Underline" (click)="wrap('++','++')"><u>U</u></button>
+            <button type="button" class="fmt-btn" title="Strikethrough" (click)="wrap('~~','~~')"><s>S</s></button>
             <button type="button" class="fmt-btn" title="Bullet"    (click)="insertBullet()">• List</button>
             <button type="button" class="fmt-btn" title="Heading"   (click)="wrap('### ','')">H3</button>
             <span class="char-count" [class.over]="textControl.value.length > 2000">
@@ -67,7 +77,7 @@ type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
             rows="12"></textarea>
 
           <p class="format-hint">
-            Supports Markdown: **bold**, *italic*, bullet points with <code>-</code>, headings with <code>###</code>.
+            Supports Markdown: **bold**, *italic*, ++underline++, ~~strike~~, bullet points with <code>-</code>, headings with <code>###</code>.
           </p>
         </div>
       }
@@ -122,13 +132,13 @@ type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
 
                   <div class="entry-bullets">
                     <div class="bullets-head">
-                      <label class="field-label">Details / Highlights</label>
-                      <button type="button" class="add-bullet-btn" (click)="addBullet(asFormGroup(entryCtrl))">+ Add Bullet</button>
+                      <label class="field-label">{{ getBulletLabel() }}</label>
+                      <button type="button" class="add-bullet-btn" (click)="addBullet(asFormGroup(entryCtrl))">{{ getAddBulletLabel() }}</button>
                     </div>
                     @for (bulletCtrl of getBullets(asFormGroup(entryCtrl)).controls; track bi; let bi = $index) {
                       <div class="bullet-row">
                         <span class="bullet-dot">•</span>
-                        <input class="field-input bullet-input" [formControl]="$any(bulletCtrl)" placeholder="Describe a task or achievement..." />
+                        <input class="field-input bullet-input" [formControl]="$any(bulletCtrl)" [placeholder]="getBulletPlaceholder()" />
                         <button type="button" class="bullet-remove"
                                 (click)="removeBullet(asFormGroup(entryCtrl), bi)"
                                 [disabled]="getBullets(asFormGroup(entryCtrl)).length <= 1">✕</button>
@@ -240,6 +250,19 @@ type EditorMode = 'STRUCTURED' | 'DESCRIPTION';
       box-shadow: 0 0 10px rgba(0,212,180,0.4);
     }
     .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+    .align-toggle {
+      display: flex; align-items: center; gap: 4px; margin-left: auto; padding-left: 8px;
+    }
+    .align-btn {
+      width: 28px; height: 28px; display: grid; place-items: center;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--text-secondary); cursor: pointer;
+    }
+    .align-btn.active {
+      border-color: rgba(0,212,180,0.35);
+      background: rgba(0,212,180,0.14);
+      color: var(--teal);
+    }
 
     /* Structured Mode Styles */
     .structured-editor { display: flex; flex-direction: column; gap: 14px; }
@@ -315,6 +338,7 @@ export class GenericSectionEditorComponent implements OnChanges {
   mode: EditorMode = 'DESCRIPTION';
   textControl = new FormControl('', { nonNullable: true });
   fontSizeControl = new FormControl(12, { nonNullable: true });
+  textAlignControl = new FormControl<'left' | 'center'>('left', { nonNullable: true });
   structuredForm = new FormArray<any>([]);
   saving    = false;
   saveError = '';
@@ -341,7 +365,9 @@ export class GenericSectionEditorComponent implements OnChanges {
     try { parsed = JSON.parse(content); } catch { parsed = content; }
 
     const fs = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? (parsed.fontSize || 12) : 12;
+    const textAlign = (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.textAlign === 'center') ? 'center' : 'left';
     this.fontSizeControl.setValue(fs, { emitEvent: false });
+    this.textAlignControl.setValue(textAlign, { emitEvent: false });
 
     // Detect mode based on content structure
     if (Array.isArray(parsed) || (parsed && parsed.items)) {
@@ -361,13 +387,14 @@ export class GenericSectionEditorComponent implements OnChanges {
     this.textControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
     this.structuredForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
     this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.textAlignControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
 
     update$.pipe(
       debounceTime(800),
       switchMap(() => {
         const data = this.mode === 'DESCRIPTION'
-          ? { text: this.textControl.value, fontSize: this.fontSizeControl.value }
-          : { items: this.structuredForm.value, fontSize: this.fontSizeControl.value };
+          ? { text: this.textControl.value, fontSize: this.fontSizeControl.value, textAlign: this.textAlignControl.value }
+          : { items: this.structuredForm.value, fontSize: this.fontSizeControl.value, textAlign: this.textAlignControl.value };
         return this.save(data);
       }),
       takeUntil(this.destroy$)
@@ -439,6 +466,13 @@ export class GenericSectionEditorComponent implements OnChanges {
         endDate: 'Expiry Date',
         isCurrent: 'Does not expire'
       },
+      VOLUNTEER: {
+        title: 'Role / Achievement',
+        subtitle: 'Organization',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        isCurrent: 'Currently active'
+      },
       DEFAULT: {
         title: 'Title',
         subtitle: 'Subtitle / Location',
@@ -454,19 +488,59 @@ export class GenericSectionEditorComponent implements OnChanges {
     const type = this.section.sectionType;
     if (type === 'PROJECTS' && field === 'title') return 'e.g. AI Resume Builder';
     if (type === 'CERTIFICATIONS' && field === 'title') return 'e.g. AWS Solutions Architect';
+    if (type === 'VOLUNTEER' && field === 'subtitle') return 'e.g. Tech Wizard Club';
     return '';
   }
 
   // ── Internal Helpers ────────────────────────────────────────────────────
 
+  getBulletLabel(): string {
+    switch (this.section.sectionType) {
+      case 'PROJECTS':
+        return 'Features';
+      case 'VOLUNTEER':
+        return 'Responsibilities / Impact';
+      default:
+        return 'Details / Highlights';
+    }
+  }
+
+  getAddBulletLabel(): string {
+    switch (this.section.sectionType) {
+      case 'PROJECTS':
+        return '+ Add Feature';
+      default:
+        return '+ Add Bullet';
+    }
+  }
+
+  getBulletPlaceholder(): string {
+    switch (this.section.sectionType) {
+      case 'PROJECTS':
+        return 'Describe a feature, result, or tech used...';
+      case 'CERTIFICATIONS':
+        return 'Add any relevant detail or achievement...';
+      case 'VOLUNTEER':
+        return 'Describe your contribution or impact...';
+      default:
+        return 'Describe a task or achievement...';
+    }
+  }
+
   private buildEntry(e: any): FormGroup {
+    const normalizedBullets = Array.isArray(e?.bullets)
+      ? e.bullets.map((b: string) => (b || '').trim()).filter(Boolean)
+      : [];
+
+    const bulletValues = normalizedBullets.length > 0 ? normalizedBullets : [''];
+
     return new FormGroup({
       title:     new FormControl(e.title     || '', { nonNullable: true, validators: [Validators.required] }),
       subtitle:  new FormControl(e.subtitle  || '', { nonNullable: true }),
       startDate: new FormControl(e.startDate || '', { nonNullable: true }),
       endDate:   new FormControl(e.endDate   || '', { nonNullable: true }),
       isCurrent: new FormControl(e.isCurrent || false, { nonNullable: true }),
-      bullets:   new FormArray((e.bullets || ['']).map((b: string) => new FormControl(b, { nonNullable: true })))
+      bullets:   new FormArray(bulletValues.map((b: string) => new FormControl(b, { nonNullable: true })))
     });
   }
 

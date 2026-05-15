@@ -166,7 +166,7 @@ export class LivePreviewService implements OnDestroy {
   }
 
   private buildDefaultLayout(sections: ResumeSection[]): string {
-    const visible = sections.filter((section) => section.isVisible);
+    const visible = sections.filter((section) => section.isVisible !== false);
     const content = visible.map((section) => this.renderSection(section)).join('');
     return `<div class="resume-preview">${content}</div>`;
   }
@@ -207,25 +207,39 @@ export class LivePreviewService implements OnDestroy {
         return `<div class="section summary"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
 
       case 'EXPERIENCE':
-      case 'PROJECTS':
-      case 'CERTIFICATIONS': {
-        const entries: any[] = Array.isArray(parsed) ? parsed : [];
+      case 'PROJECTS': {
+        const entries = this.resolvePreviewEntries(section.sectionType, parsed);
         if (entries.length === 0 && !Array.isArray(parsed)) {
           // Fallback to rich text if not an array (legacy or markdown mode)
           return `<div class="section generic"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
         }
         const items = entries.map((entry) => `
           <div class="exp-entry">
-            <div class="exp-header">${entry.title || entry.role || ''}</div>
-            <div class="exp-company">${entry.subtitle || entry.company || ''}</div>
+            <div class="exp-header">${entry.title || entry.role || entry.name || ''}</div>
+            <div class="exp-company">${entry.subtitle || entry.company || entry.issuer || ''}</div>
             <div class="exp-dates">${entry.startDate || ''}${entry.startDate && (entry.isCurrent || entry.endDate) ? ' — ' : ''}${entry.isCurrent ? 'Present' : (entry.endDate || '')}</div>
             <ul>${(entry.bullets || []).filter((b: any) => !!b).map((bullet: any) => `<li>${typeof bullet === 'string' ? bullet : bullet.text || ''}</li>`).join('')}</ul>
           </div>`).join('');
         return `<div class="section experience"><h2>${section.title}</h2>${items}</div>`;
       }
 
+      case 'CERTIFICATIONS': {
+        const entries = this.resolvePreviewEntries(section.sectionType, parsed);
+        if (entries.length === 0 && !Array.isArray(parsed)) {
+          return `<div class="section generic"><h2>${section.title}</h2><div class="rich-text">${this.renderRichText(this.extractTextValue(parsed))}</div></div>`;
+        }
+        const items = entries.map((entry) => `
+          <div class="exp-entry">
+            <div class="exp-header">${entry.title || entry.role || entry.name || ''}</div>
+            <div class="exp-company">${entry.subtitle || entry.company || entry.issuer || ''}</div>
+            <div class="exp-dates">${this.buildCertificationDate(entry)}</div>
+            <ul>${(entry.bullets || []).filter((b: any) => !!b).map((bullet: any) => `<li>${typeof bullet === 'string' ? bullet : bullet.text || ''}</li>`).join('')}</ul>
+          </div>`).join('');
+        return `<div class="section experience"><h2>${section.title}</h2>${items}</div>`;
+      }
+
       case 'EDUCATION': {
-        const entries: any[] = Array.isArray(parsed) ? parsed : [];
+        const entries = this.resolveObjectItems(parsed);
         const items = entries.map((entry) => `
           <div class="edu-entry">
             <div>
@@ -280,13 +294,179 @@ export class LivePreviewService implements OnDestroy {
     return '';
   }
 
+  private resolveObjectItems(value: unknown): any[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+      if (Array.isArray(record['items'])) {
+        return record['items'] as any[];
+      }
+    }
+    return [];
+  }
+
+  private resolvePreviewEntries(sectionType: string, value: unknown): any[] {
+    const items = this.resolveObjectItems(value);
+    if (items.length > 0) {
+      return items;
+    }
+
+    const text = this.extractTextValue(value).trim();
+    if (!text) {
+      return [];
+    }
+
+    switch (sectionType) {
+      case 'PROJECTS':
+        return this.parseProjectText(text);
+      case 'CERTIFICATIONS':
+        return this.parseCertificationText(text);
+      case 'EXPERIENCE':
+        return [{ role: 'Selected Experience', company: '', startDate: '', endDate: '', bullets: [{ text }] }];
+      default:
+        return [];
+    }
+  }
+
+  private parseProjectText(value: string): Array<{ title: string; dates: string; bullets: Array<{ text: string }> }> {
+    const lines = value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (lines.length === 0) {
+      return [];
+    }
+
+    const projects: Array<{ title: string; dates: string; bullets: Array<{ text: string }> }> = [];
+    let current: { title: string; dates: string; bullets: Array<{ text: string }> } | null = null;
+
+    const ensureCurrent = () => {
+      if (!current) {
+        current = { title: '', dates: '', bullets: [] };
+      }
+      return current;
+    };
+
+    const commitCurrent = () => {
+      if (!current) return;
+      projects.push(current);
+      current = null;
+    };
+
+    lines.forEach((line) => {
+      const headingMatch = line.match(/^#{1,6}\s+(.+)$/);
+      if (headingMatch) {
+        commitCurrent();
+        current = { title: headingMatch[1].trim(), dates: '', bullets: [] };
+        return;
+      }
+
+      const bulletMatch = line.match(/^[-*•]\s*(.+)$/);
+      if (bulletMatch) {
+        ensureCurrent().bullets.push({ text: bulletMatch[1].trim() });
+        return;
+      }
+
+      const entry = ensureCurrent();
+      if (!entry.title && entry.bullets.length === 0) {
+        entry.title = line;
+        return;
+      }
+      entry.bullets.push({ text: line });
+    });
+
+    commitCurrent();
+    return projects;
+  }
+
+  private parseCertificationText(value: string): Array<{ name: string; issuer: string; date: string; startDate: string; bullets: [] }> {
+    const lines = value
+      .split(/\r?\n/)
+      .map((line) => line.replace(/^[-*•]\s*/, '').trim())
+      .filter(Boolean);
+
+    return lines.map((line) => {
+      const parts = line.split(/\s+-\s+/).map((part) => part.trim()).filter(Boolean);
+      if (parts.length >= 3) {
+        const date = parts.slice(2).join(' - ');
+        return { name: parts[0], issuer: parts[1], date, startDate: date, bullets: [] };
+      }
+      if (parts.length === 2) {
+        return { name: parts[0], issuer: parts[1], date: '', startDate: '', bullets: [] };
+      }
+      return { name: line, issuer: '', date: '', startDate: '', bullets: [] };
+    });
+  }
+
+  private buildCertificationDate(entry: any): string {
+    const startDate = entry?.startDate || entry?.date || '';
+    const endDate = entry?.isCurrent ? '' : (entry?.endDate || '');
+
+    if (startDate && endDate) {
+      return `${startDate} — ${endDate}`;
+    }
+
+    return startDate || endDate || '';
+  }
+
   private renderRichText(value: string): string {
+    const lines = value.split(/\r?\n/);
+    const output: string[] = [];
+    let inList = false;
+
+    const closeList = () => {
+      if (inList) {
+        output.push('</ul>');
+        inList = false;
+      }
+    };
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trimEnd();
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        closeList();
+        output.push('<br>');
+        return;
+      }
+
+      const headingMatch = trimmed.match(/^###\s+(.+)$/);
+      if (headingMatch) {
+        closeList();
+        output.push(`<h3 class="md-h3">${this.renderInlineMarkdown(headingMatch[1])}</h3>`);
+        return;
+      }
+
+      const bulletMatch = trimmed.match(/^-\s+(.+)$/);
+      if (bulletMatch) {
+        if (!inList) {
+          output.push('<ul class="md-list">');
+          inList = true;
+        }
+        output.push(`<li>${this.renderInlineMarkdown(bulletMatch[1])}</li>`);
+        return;
+      }
+
+      closeList();
+      output.push(this.renderInlineMarkdown(line));
+    });
+
+    closeList();
+    return output.join('');
+  }
+
+  private renderInlineMarkdown(value: string): string {
     return this.escapeHtml(value)
       .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/gs, '<em>$1</em>')
       .replace(/\+\+(.+?)\+\+/gs, '<u>$1</u>')
       .replace(/~~(.+?)~~/gs, '<s>$1</s>')
-      .replace(/\r?\n/g, '<br>');
+      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+      .replace(/ {2,}/g, (match) => '&nbsp;'.repeat(match.length - 1) + ' ');
   }
 
   private escapeHtml(value: string): string {
@@ -385,6 +565,19 @@ export class LivePreviewService implements OnDestroy {
       .rich-text em { font-style: italic; }
       .rich-text u { text-decoration: underline; }
       .rich-text s { text-decoration: line-through; }
+      .rich-text .md-h3 {
+        font-size: 1.08em;
+        font-weight: 700;
+        margin: 8px 0 4px;
+        line-height: 1.35;
+      }
+      .rich-text .md-list {
+        margin: 6px 0;
+        padding-left: 18px;
+      }
+      .rich-text .md-list li {
+        margin-bottom: 4px;
+      }
 
       .exp-entry {
         margin-bottom: 14px;

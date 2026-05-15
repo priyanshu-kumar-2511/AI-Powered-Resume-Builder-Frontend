@@ -37,6 +37,9 @@ type PreviewCertification = {
   name: string;
   issuer: string;
   date: string;
+  startDate: string;
+  endDate: string;
+  bullets: PreviewBullet[];
 };
 type PreviewKeyValue = {
   label: string;
@@ -92,6 +95,17 @@ type TemplateViewData = {
 
 @Injectable({ providedIn: 'root' })
 export class TemplateRenderService {
+  private readonly templateRootSelectors = [
+    '.resume',
+    '.creative-resume',
+    '.navy-resume',
+    '.timeline-resume',
+    '.teal-resume',
+    '.ivory-resume',
+    '.mono-resume',
+    '.ankesh-resume'
+  ];
+
   private readonly demoData: TemplateViewData = {
     fullName: 'Lorna Alvarado', jobTitle: 'Senior Marketing Manager', email: 'hello@reallygreatsite.com',
     phone: '+1 234 567 890', location: 'London, United Kingdom', linkedin: 'linkedin.com/in/lornaalvarado',
@@ -147,7 +161,7 @@ export class TemplateRenderService {
       }
     ], 
     hasProjects: true,
-    certifications: [{ name: 'Google Ads Certification', issuer: 'Google', date: '2023' }], 
+    certifications: [{ name: 'Google Ads Certification', issuer: 'Google', date: '2023', startDate: '2023', endDate: '', bullets: [] }], 
     hasCertifications: true, 
     achievements: [], hasAchievements: false,
     additionalInfo: [], hasAdditionalInfo: false, references: [], hasReferences: false,
@@ -171,13 +185,23 @@ export class TemplateRenderService {
 
     try {
       const renderedBody = Mustache.render(layout, viewData);
-      const fontCss = options?.font ? `
-        body { 
-          font-family: '${options.font.fontFamily}' !important; 
-          font-size: ${options.font.fontSize}px !important;
-        }
-      ` : '';
+      const fontCss = options?.font ? this.buildGlobalFontCss(options.font.fontFamily, options.font.fontSize) : '';
       
+      const markdownCss = `
+        .md-h3 {
+          font-size: 1.08em;
+          font-weight: 700;
+          margin: 8px 0 4px;
+          line-height: 1.35;
+        }
+        .md-list {
+          margin: 6px 0;
+          padding-left: 18px;
+        }
+        .md-list li {
+          margin-bottom: 4px;
+        }
+      `;
       const headerFontSize = options?.font?.contactFontSize || options?.contactFontSize || 24;
       const subHeaderFontSize = Math.max(10, Math.floor(headerFontSize * 0.5));
       const contactCss = `
@@ -210,7 +234,7 @@ export class TemplateRenderService {
       `;
 
       const bodyAttrs = options?.primaryColor ? ` style="--primary: ${options.primaryColor}; --accent: ${options.primaryColor};"` : '';
-      return `<!DOCTYPE html><html><head><style>${styles}${fontCss}${contactCss}</style></head><body${bodyAttrs}>${renderedBody}</body></html>`;
+      return `<!DOCTYPE html><html><head><style>${styles}${fontCss}${contactCss}${markdownCss}</style></head><body${bodyAttrs}>${renderedBody}</body></html>`;
     } catch (e) {
       console.error(e);
       return null;
@@ -268,18 +292,21 @@ export class TemplateRenderService {
     const additionalInfoMap = new Map<string, string>();
 
     finalSections.forEach(s => {
-      if (!s.isVisible) return;
+      if (s.isVisible === false) return;
       let parsed = this.parseContent(s.content);
       
       let sectionFontSize = 12;
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         if (parsed.fontSize) sectionFontSize = parsed.fontSize;
       }
+      const textAlign = parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.textAlign === 'center'
+        ? 'center'
+        : 'left';
 
       let sectionData: any = { 
         title: s.title, 
         fontSize: sectionFontSize,
-        computedStyle: `font-size: ${sectionFontSize}px !important;`,
+        computedStyle: `font-size: ${sectionFontSize}px !important; text-align: ${textAlign};`,
         isExperience: s.sectionType === 'EXPERIENCE',
         isEducation: s.sectionType === 'EDUCATION',
         isProjects: s.sectionType === 'PROJECTS',
@@ -289,7 +316,7 @@ export class TemplateRenderService {
         isCustom: s.sectionType === 'CUSTOM' || s.sectionType === 'VOLUNTEER' || s.sectionType === 'LANGUAGES'
       };
 
-      const dataToExtract = (parsed && parsed.items) ? parsed.items : parsed;
+      const dataToExtract = this.resolveSectionPayload(parsed);
 
       switch (s.sectionType) {
         case 'SUMMARY':
@@ -379,6 +406,50 @@ export class TemplateRenderService {
     if (fallback) return fallback.cssStyles;
     return t?.css_styles || t?.cssStyles;
   }
+  private buildGlobalFontCss(fontFamily: string, fontSize: number): string {
+    const resolvedFontStack = this.resolveFontStack(fontFamily);
+    const normalizedSize = Math.max(8, Number(fontSize) || 11);
+    const scale = Math.max(0.7, normalizedSize / 11);
+    const rootSelectors = this.templateRootSelectors.join(',\n        ');
+
+    return `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap');
+        :root {
+          --resume-global-font: ${resolvedFontStack};
+          --resume-global-size: ${normalizedSize}px;
+          --resume-global-scale: ${scale};
+        }
+        body {
+          font-size: var(--resume-global-size) !important;
+        }
+        body,
+        body * {
+          font-family: var(--resume-global-font) !important;
+        }
+        ${rootSelectors} {
+          font-size: var(--resume-global-size) !important;
+          zoom: var(--resume-global-scale);
+        }
+      `;
+  }
+
+  private resolveFontStack(fontFamily: string): string {
+    const normalized = (fontFamily || '').toLowerCase();
+    switch (normalized) {
+      case 'inter':
+        return `'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif`;
+      case 'georgia':
+        return `Georgia, 'Times New Roman', Times, serif`;
+      case 'arial':
+        return `Arial, 'Helvetica Neue', Helvetica, sans-serif`;
+      case 'roboto':
+        return `'Roboto', 'Trebuchet MS', Verdana, sans-serif`;
+      case 'times new roman':
+        return `'Times New Roman', Times, serif`;
+      default:
+        return `Arial, sans-serif`;
+    }
+  }
   private cloneDemoData(): TemplateViewData { return JSON.parse(JSON.stringify(this.demoData)); }
   private createEmptyViewData(): TemplateViewData {
     return {
@@ -394,37 +465,111 @@ export class TemplateRenderService {
   }
   private parseContent(c: any) { try { return typeof c === 'string' ? JSON.parse(c) : c; } catch { return c; } }
   private extractTextValue(v: any) { return v?.text || v?.html || (typeof v === 'string' ? v : ''); }
+  private resolveSectionPayload(v: any) {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) {
+      return v;
+    }
+
+    if (Array.isArray(v.items)) {
+      return v.items;
+    }
+
+    const textValue = this.extractTextValue(v);
+    return textValue || v;
+  }
   
   private renderRichText(v: string) { 
     if (!v) return '';
-    // 1. Escape HTML for XSS protection
-    let escaped = v.replace(/&/g, '&amp;')
-                   .replace(/</g, '&lt;')
-                   .replace(/>/g, '&gt;')
-                   .replace(/"/g, '&quot;')
-                   .replace(/'/g, '&#039;');
-    
-    // 2. Simple Markdown parsing
+
+    const lines = v.split(/\r?\n/);
+    const output: string[] = [];
+    let inList = false;
+
+    const closeList = () => {
+      if (inList) {
+        output.push('</ul>');
+        inList = false;
+      }
+    };
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trimEnd();
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        closeList();
+        output.push('<br/>');
+        return;
+      }
+
+      const headingMatch = trimmed.match(/^###\s+(.+)$/);
+      if (headingMatch) {
+        closeList();
+        output.push(`<h3 class="md-h3">${this.renderInlineMarkdown(headingMatch[1])}</h3>`);
+        return;
+      }
+
+      const bulletMatch = trimmed.match(/^-\s+(.+)$/);
+      if (bulletMatch) {
+        if (!inList) {
+          output.push('<ul class="md-list">');
+          inList = true;
+        }
+        output.push(`<li>${this.renderInlineMarkdown(bulletMatch[1])}</li>`);
+        return;
+      }
+
+      closeList();
+      output.push(this.renderInlineMarkdown(line));
+    });
+
+    closeList();
+    return output.join('');
+  }
+
+  private renderInlineMarkdown(value: string): string {
+    const escaped = value.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
     return escaped
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/\+\+(.*?)\+\+/g, '<u>$1</u>')
       .replace(/~~(.*?)~~/g, '<s>$1</s>')
-      .replace(/\n/g, '<br/>');
+      .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+      .replace(/ {2,}/g, (match) => '&nbsp;'.repeat(match.length - 1) + ' ');
   }
 
   private extractExperience(v: any): PreviewExperience[] {
     if (!v) return [];
     const items = Array.isArray(v) ? v : [v];
     return items.map(e => {
-      if (typeof e === 'string') return { role: 'Selected Experience', company: '', startDate: '', endDate: '', description: e, bullets: [{ text: e }] };
+      const bulletTexts = (e?.bullets || [])
+        .map((b: any) => typeof b === 'string' ? b : (b?.text || ''))
+        .map((text: string) => text.trim())
+        .filter(Boolean);
+
+      if (typeof e === 'string') {
+        const normalized = this.preserveInlineSpacing(e.trim());
+        return {
+          role: 'Selected Experience',
+          company: '',
+          startDate: '',
+          endDate: '',
+          description: normalized,
+          bullets: [{ text: normalized }]
+        };
+      }
       return {
-        role: e.role || e.title || '',
-        company: e.company || e.subtitle || e.organization || '',
+        role: this.preserveInlineSpacing(e.role || e.title || ''),
+        company: this.preserveInlineSpacing(e.company || e.subtitle || e.organization || ''),
         startDate: e.startDate || '',
         endDate: e.isCurrent ? 'Present' : (e.endDate || ''),
-        description: e.description || (e.bullets || []).map((b: any) => typeof b === 'string' ? b : (b.text || '')).join(' '),
-        bullets: (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') }))
+        description: this.preserveInlineSpacing(e.description || bulletTexts.join(' ')),
+        bullets: bulletTexts.map((text: string) => ({ text: this.preserveInlineSpacing(text) }))
       };
     });
   }
@@ -434,43 +579,245 @@ export class TemplateRenderService {
     const items = Array.isArray(v) ? v : [v];
     return items.map((e: any) => {
       const description = e.description || e.fieldOfStudy || e.grade || '';
+      const highlightTexts = (e.bullets || [])
+        .map((b: any) => typeof b === 'string' ? b : (b?.text || ''))
+        .map((text: string) => text.trim())
+        .filter(Boolean);
       return {
-        degree: e.degree || e.title || '',
-        institution: e.institution || e.subtitle || '',
+        degree: this.preserveInlineSpacing(e.degree || e.title || ''),
+        institution: this.preserveInlineSpacing(e.institution || e.subtitle || ''),
         fieldOfStudy: e.fieldOfStudy || '',
         startYear: e.startYear || e.startDate || '',
         endYear: e.isCurrent ? 'Present' : (e.endYear || e.endDate || ''),
         grade: e.grade || '',
-        description: description,
-        highlights: (e.bullets || []).length > 0 ? 
-           (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') })) :
-           (description ? [{ text: description }] : [])
+        description: this.preserveInlineSpacing(description),
+        highlights: highlightTexts.length > 0 ?
+           highlightTexts.map((text: string) => ({ text: this.preserveInlineSpacing(text) })) :
+           (description ? [{ text: this.preserveInlineSpacing(description) }] : [])
       };
     });
   }
 
   private extractProjects(v: any): PreviewProject[] {
     if (!v) return [];
+    if (typeof v === 'string') {
+      return this.parseProjectText(v);
+    }
+
     const items = Array.isArray(v) ? v : [v];
     return items.map(e => {
-      if (typeof e === 'string') return { title: 'Selected Project', dates: '', bullets: [{ text: e }] };
+      const bulletTexts = (e?.bullets || [])
+        .map((b: any) => typeof b === 'string' ? b : (b?.text || ''))
+        .map((text: string) => text.trim())
+        .filter(Boolean);
+
+      if (typeof e === 'string') {
+        const normalized = this.preserveInlineSpacing(e.trim());
+        return { title: 'Selected Project', dates: '', bullets: [{ text: normalized }] };
+      }
       return {
-        title: e.name || e.title || '',
+        title: this.preserveInlineSpacing(e.name || e.title || ''),
         dates: `${e.startDate || ''}${e.startDate && e.endDate ? ' - ' : ''}${e.isCurrent ? 'Present' : (e.endDate || '')}`,
-        bullets: (e.bullets || []).map((b: any) => ({ text: typeof b === 'string' ? b : (b.text || '') }))
+        bullets: bulletTexts.map((text: string) => ({ text: this.preserveInlineSpacing(text) }))
       };
     });
   }
 
   private extractCertifications(v: any): PreviewCertification[] {
     if (!v) return [];
-    if (typeof v === 'string') return v.split(',').map(s => ({ name: s.trim(), issuer: '', date: '' }));
+    if (typeof v === 'string') {
+      const lines = v
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      const normalizedLines = lines.length > 1
+        ? lines
+        : v.split(',').map((part) => part.trim()).filter(Boolean);
+
+      return normalizedLines.map((line) => this.parseCertificationLine(line));
+    }
     const items = Array.isArray(v) ? v : [v];
-    return items.map(e => ({
-      name: e.title || e.name || '',
-      issuer: e.subtitle || e.issuer || e.organization || '',
-      date: e.date || e.year || e.issuedAt || e.startDate || ''
-    }));
+    return items.map((e) => {
+      const issuedDate = e.startDate || e.dateObtained || e.date || e.year || e.issuedAt || '';
+      const expiryDate = e.isCurrent ? '' : (e.endDate || e.expiryDate || e.validUntil || '');
+      const explicitIssuer = e.subtitle || e.issuer || e.organization || '';
+      const parsed = issuedDate || expiryDate
+        ? {
+            issuer: explicitIssuer,
+            date: this.formatCertificationDate(issuedDate, expiryDate),
+            startDate: issuedDate,
+            endDate: expiryDate
+          }
+        : (() => {
+            const fallback = this.splitIssuerAndDate(explicitIssuer);
+            return {
+              issuer: fallback.issuer,
+              date: fallback.date,
+              startDate: fallback.date,
+              endDate: ''
+            };
+          })();
+      const bulletTexts = (e?.bullets || [])
+        .map((b: any) => typeof b === 'string' ? b : (b?.text || ''))
+        .map((text: string) => text.trim())
+        .filter(Boolean);
+
+      return {
+        name: this.preserveInlineSpacing(e.title || e.name || ''),
+        issuer: this.preserveInlineSpacing(parsed.issuer),
+        date: this.preserveInlineSpacing(parsed.date),
+        startDate: this.preserveInlineSpacing(parsed.startDate),
+        endDate: this.preserveInlineSpacing(parsed.endDate),
+        bullets: bulletTexts.map((text: string) => ({ text: this.preserveInlineSpacing(text) }))
+      };
+    });
+  }
+
+  private parseCertificationLine(line: string): PreviewCertification {
+    const cleaned = line.replace(/^[-*•]\s*/, '').trim();
+    if (!cleaned) {
+      return { name: '', issuer: '', date: '', startDate: '', endDate: '', bullets: [] };
+    }
+
+    const parts = cleaned.split(/\s+[|–—-]\s+/).map((part) => part.trim()).filter(Boolean);
+    if (parts.length >= 3) {
+      const date = this.preserveInlineSpacing(parts.slice(2).join(' '));
+      return {
+        name: this.preserveInlineSpacing(parts[0]),
+        issuer: this.preserveInlineSpacing(parts[1]),
+        date,
+        startDate: date,
+        endDate: '',
+        bullets: []
+      };
+    }
+
+    if (parts.length === 2) {
+      const meta = this.splitIssuerAndDate(parts[1]);
+      const date = this.preserveInlineSpacing(meta.date);
+      return {
+        name: this.preserveInlineSpacing(parts[0]),
+        issuer: this.preserveInlineSpacing(meta.issuer),
+        date,
+        startDate: date,
+        endDate: '',
+        bullets: []
+      };
+    }
+
+    return {
+      name: this.preserveInlineSpacing(cleaned),
+      issuer: '',
+      date: '',
+      startDate: '',
+      endDate: '',
+      bullets: []
+    };
+  }
+
+  private splitIssuerAndDate(value: string): { issuer: string; date: string } {
+    const cleaned = (value || '').trim();
+    if (!cleaned) {
+      return { issuer: '', date: '' };
+    }
+
+    const monthYearPattern = new RegExp(
+      '^(.*?)(?:\\s+)' +
+      '((?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\s+\\d{4})$',
+      'i'
+    );
+    const yearPattern = /(.*?)(?:\s+)(\d{4})$/;
+
+    const monthYearMatch = cleaned.match(monthYearPattern);
+    if (monthYearMatch) {
+      return {
+        issuer: monthYearMatch[1].trim(),
+        date: monthYearMatch[2].trim()
+      };
+    }
+
+    const yearMatch = cleaned.match(yearPattern);
+    if (yearMatch) {
+      return {
+        issuer: yearMatch[1].trim(),
+        date: yearMatch[2].trim()
+      };
+    }
+
+    return { issuer: cleaned, date: '' };
+  }
+
+  private formatCertificationDate(startDate: string, endDate: string): string {
+    if (startDate && endDate) {
+      return `${startDate} - ${endDate}`;
+    }
+
+    return startDate || endDate || '';
+  }
+
+  private parseProjectText(value: string): PreviewProject[] {
+    const lines = value
+      .split(/\r?\n/)
+      .map((line) => line.trimRight())
+      .filter((line) => line.trim().length > 0);
+
+    if (lines.length === 0) {
+      return [];
+    }
+
+    const projects: PreviewProject[] = [];
+    let current: PreviewProject | null = null;
+
+    const ensureCurrent = () => {
+      if (!current) {
+        current = { title: '', dates: '', bullets: [] };
+      }
+      return current;
+    };
+
+    const commitCurrent = () => {
+      if (!current) return;
+      if (!current.title && current.bullets.length === 0) return;
+      projects.push(current);
+      current = null;
+    };
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trim();
+      const headingMatch = line.match(/^#{1,6}\s+(.+)$/);
+      if (headingMatch) {
+        commitCurrent();
+        current = {
+          title: this.preserveInlineSpacing(headingMatch[1].trim()),
+          dates: '',
+          bullets: []
+        };
+        return;
+      }
+
+      const bulletMatch = line.match(/^[-*•]\s*(.+)$/);
+      if (bulletMatch) {
+        ensureCurrent().bullets.push({ text: this.preserveInlineSpacing(bulletMatch[1].trim()) });
+        return;
+      }
+
+      const entry = ensureCurrent();
+      if (!entry.title && entry.bullets.length === 0) {
+        entry.title = this.preserveInlineSpacing(line);
+        return;
+      }
+      entry.bullets.push({ text: this.preserveInlineSpacing(line) });
+    });
+
+    commitCurrent();
+    return projects;
+  }
+
+  private preserveInlineSpacing(value: string): string {
+    return (value || '')
+      .replace(/\t/g, '\u00A0\u00A0\u00A0\u00A0')
+      .replace(/ {2,}/g, (match) => '\u00A0'.repeat(match.length - 1) + ' ');
   }
 
   private extractSkills(v: any) {

@@ -19,9 +19,33 @@ import { ResumeSection } from '../../../shared/models/models';
         </label>
         <input type="range" min="8" max="24" [formControl]="fontSizeControl" class="style-slider">
         <span class="style-val">{{ fontSizeControl.value }}px</span>
+        <div class="align-toggle">
+          <button type="button" class="align-btn" [class.active]="textAlignControl.value === 'left'" (click)="textAlignControl.setValue('left')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="15" y2="12" />
+              <line x1="3" y1="18" x2="18" y2="18" />
+            </svg>
+          </button>
+          <button type="button" class="align-btn" [class.active]="textAlignControl.value === 'center'" (click)="textAlignControl.setValue('center')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="7" y1="12" x2="17" y2="12" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <label class="field-label">Professional Summary</label>
+      <div class="toolbar-row">
+        <button type="button" class="fmt-btn" title="Bold" (click)="wrap('**','**')"><b>B</b></button>
+        <button type="button" class="fmt-btn" title="Italic" (click)="wrap('*','*')"><i>I</i></button>
+        <button type="button" class="fmt-btn" title="Underline" (click)="wrap('++','++')"><u>U</u></button>
+        <button type="button" class="fmt-btn" title="Strikethrough" (click)="wrap('~~','~~')"><s>S</s></button>
+        <button type="button" class="fmt-btn" title="Bullet" (click)="insertBullet()">• List</button>
+        <button type="button" class="fmt-btn" title="Heading" (click)="wrap('### ','')">H3</button>
+      </div>
       <textarea
         class="summary-textarea"
         [formControl]="textControl"
@@ -67,10 +91,34 @@ import { ResumeSection } from '../../../shared/models/models';
       box-shadow: 0 0 10px rgba(0,212,180,0.4);
     }
     .style-val { font-size: 0.75rem; font-weight: 700; color: var(--teal); min-width: 35px; }
+    .align-toggle {
+      display: flex; align-items: center; gap: 4px; margin-left: auto;
+      padding-left: 8px;
+    }
+    .align-btn {
+      width: 28px; height: 28px; display: grid; place-items: center;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--text-secondary); cursor: pointer;
+    }
+    .align-btn.active {
+      border-color: rgba(0,212,180,0.35);
+      background: rgba(0,212,180,0.14);
+      color: var(--teal);
+    }
 
     .field-label { font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); }
+    .toolbar-row {
+      display: flex; gap: 6px; padding: 6px 12px; background: #1a1f2e;
+      border: 1px solid var(--border); border-radius: 10px 10px 0 0; align-items: center;
+    }
+    .fmt-btn {
+      background: none; border: 1px solid transparent; border-radius: 5px;
+      padding: 4px 10px; cursor: pointer; color: var(--text-secondary);
+      font-size: 0.82rem; transition: background 0.1s;
+    }
+    .fmt-btn:hover { background: rgba(255,255,255,0.06); border-color: var(--border); }
     .summary-textarea {
-      width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+      width: 100%; padding: 12px; border-radius: 0 0 8px 8px; border: 1px solid var(--border); border-top: none;
       background: var(--bg-surface); color: var(--text-primary); font-size: 0.9rem;
       resize: vertical; line-height: 1.6; box-sizing: border-box; font-family: inherit;
     }
@@ -93,6 +141,7 @@ export class SummaryEditorComponent implements OnChanges {
 
   textControl = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(600)] });
   fontSizeControl = new FormControl(12, { nonNullable: true });
+  textAlignControl = new FormControl<'left' | 'center'>('left', { nonNullable: true });
   saving    = false;
   saveError = '';
 
@@ -109,11 +158,13 @@ export class SummaryEditorComponent implements OnChanges {
     try { parsed = JSON.parse(this.section.content || '{}'); } catch { parsed = {}; }
     this.textControl.setValue(parsed.text || '', { emitEvent: false });
     this.fontSizeControl.setValue(parsed.fontSize || 12, { emitEvent: false });
+    this.textAlignControl.setValue(parsed.textAlign === 'center' ? 'center' : 'left', { emitEvent: false });
     this.saveError = '';
 
     const update$ = new Subject<void>();
     this.textControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
     this.fontSizeControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
+    this.textAlignControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => update$.next());
 
     update$.pipe(
       debounceTime(800),
@@ -122,7 +173,8 @@ export class SummaryEditorComponent implements OnChanges {
         this.saveError = '';
         const content = JSON.stringify({ 
           text: this.textControl.value, 
-          fontSize: this.fontSizeControl.value 
+          fontSize: this.fontSizeControl.value,
+          textAlign: this.textAlignControl.value
         });
         return this.sectionApi.updateSection(this.section.sectionId, { content }).pipe(
           catchError(() => { this.saving = false; this.saveError = 'Save failed.'; return EMPTY; })
@@ -133,5 +185,31 @@ export class SummaryEditorComponent implements OnChanges {
       this.saving = false;
       this.saved.emit(updated);
     });
+  }
+
+  wrap(prefix: string, suffix: string): void {
+    const el = document.querySelector('.summary-textarea') as HTMLTextAreaElement;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = el.value.substring(start, end) || 'text';
+    const newVal = el.value.substring(0, start) + prefix + selected + suffix + el.value.substring(end);
+    this.textControl.setValue(newVal);
+    el.focus();
+    el.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+  }
+
+  insertBullet(): void {
+    const el = document.querySelector('.summary-textarea') as HTMLTextAreaElement;
+    if (!el) return;
+    const pos = el.selectionStart;
+    const before = el.value.substring(0, pos);
+    const after = el.value.substring(pos);
+    const nl = before.length && !before.endsWith('\n') ? '\n' : '';
+    const newVal = before + nl + '- ' + after;
+    this.textControl.setValue(newVal);
+    el.focus();
+    const newPos = pos + nl.length + 2;
+    el.setSelectionRange(newPos, newPos);
   }
 }

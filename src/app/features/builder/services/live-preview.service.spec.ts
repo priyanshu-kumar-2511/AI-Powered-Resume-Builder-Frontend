@@ -93,16 +93,6 @@ describe('LivePreviewService', () => {
     expect(html).toContain('JS');
   });
 
-  it('should render rich text correctly', () => {
-    const text = '**Bold** *Italic* ++Underline++ ~~Strike~~ \n Newline';
-    const rendered = (service as any).renderRichText(text);
-    expect(rendered).toContain('<strong>Bold</strong>');
-    expect(rendered).toContain('<em>Italic</em>');
-    expect(rendered).toContain('<u>Underline</u>');
-    expect(rendered).toContain('<s>Strike</s>');
-    expect(rendered).toContain('<br>');
-  });
-
   it('should escape HTML to prevent XSS in fallback', () => {
     const dangerous = '<script>alert(1)</script>';
     const rendered = (service as any).renderRichText(dangerous);
