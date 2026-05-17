@@ -554,7 +554,7 @@ export class LivePreviewService implements OnDestroy {
         background: var(--primary, #00d4b4);
       }
 
-      .summary p {
+      .summary p,
       .summary .rich-text {
         font-size: 11px;
         color: #374151;
