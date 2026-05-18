@@ -56,7 +56,7 @@ describe('AuthService', () => {
     const mockProfile = { userId: 1, fullName: 'Test', subscriptionPlan: 'PREMIUM', roles: ['ADMIN'] };
     service.getProfile().subscribe();
     
-    const req = httpMock.expectOne(`${AUTH_API}/profile`);
+    const req = httpMock.expectOne(request => request.url.startsWith(`${AUTH_API}/profile`));
     req.flush(mockProfile);
 
     expect(service.currentUser()).toEqual(mockProfile as any);
@@ -98,7 +98,7 @@ describe('AuthService', () => {
     });
     
     // Should call getProfile
-    const req = httpMock.expectOne(`${AUTH_API}/profile`);
+    const req = httpMock.expectOne(request => request.url.startsWith(`${AUTH_API}/profile`));
     req.flush({ subscriptionPlan: 'PREMIUM' });
     
     expect(service.getToken()).toBe(newToken);
@@ -208,7 +208,7 @@ describe('AuthService', () => {
     const refreshReq = httpMock.expectOne(`${AUTH_API}/refresh`);
     refreshReq.flush({ token: 'refreshed.token.str' });
     
-    const profileReq = httpMock.expectOne(`${AUTH_API}/profile`);
+    const profileReq = httpMock.expectOne(request => request.url.startsWith(`${AUTH_API}/profile`));
     profileReq.flush({ userId: 1 });
   });
 
@@ -218,7 +218,7 @@ describe('AuthService', () => {
       expect(res?.userId).toBe(99);
     });
     
-    const req = httpMock.expectOne(`${AUTH_API}/profile`);
+    const req = httpMock.expectOne(request => request.url.startsWith(`${AUTH_API}/profile`));
     req.error(new ErrorEvent('Network error'));
   });
 

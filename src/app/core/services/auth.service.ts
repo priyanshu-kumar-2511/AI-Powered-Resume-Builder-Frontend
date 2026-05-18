@@ -177,8 +177,9 @@ export class AuthService {
    * If claims (roles/plan) in the token differ from the profile, it triggers an auto-refresh.
    */
   getProfile(): Observable<UserProfileResponse> {
+    const timestamp = new Date().getTime();
     return this.http
-      .get<UserProfileResponse>(`${AUTH_API}/profile`)
+      .get<UserProfileResponse>(`${AUTH_API}/profile?_=${timestamp}`)
       .pipe(tap((u) => {
         this.currentUser.set(u);
         this.refreshTokenIfClaimsMismatch(u);
